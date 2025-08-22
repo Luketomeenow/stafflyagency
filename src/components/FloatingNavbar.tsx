@@ -1,7 +1,7 @@
 import { useState, useEffect } from 'react';
 import { Link, useLocation } from 'react-router-dom';
 import { motion, AnimatePresence } from 'framer-motion';
-import { Home, Users, Briefcase, Rocket, Menu, X, Phone, Settings, BookOpen } from 'lucide-react';
+import { Home, Users, Briefcase, Rocket, Menu, X, Phone, Settings, BookOpen, ArrowRight } from 'lucide-react';
 
 const FloatingNavbar = () => {
   const [isVisible, setIsVisible] = useState(true);
@@ -53,13 +53,11 @@ const FloatingNavbar = () => {
         <div className="flex items-center space-x-4 sm:space-x-6 lg:space-x-8">
           {/* Logo */}
           <Link to="/" className="flex items-center space-x-2 sm:space-x-3">
-            <div className="w-8 h-8 bg-gradient-to-r from-purple-500 to-purple-700 rounded-full flex items-center justify-center">
-              <span className="text-white font-bold text-sm">M</span>
+            <div className="w-8 h-8 bg-gradient-to-r from-blue-500 to-blue-700 rounded-full flex items-center justify-center">
+              <span className="text-white font-bold text-sm">S</span>
             </div>
             <div className="hidden sm:block">
               <span className="font-bold text-gray-800 text-sm leading-tight">Staffly</span>
-              <br />
-              <span className="font-bold text-gray-800 text-sm leading-tight">Agency</span>
             </div>
           </Link>
 
@@ -71,8 +69,8 @@ const FloatingNavbar = () => {
                 to={item.path}
                 className={`flex flex-col items-center justify-center space-y-1 px-3 py-2 rounded-full transition-all duration-300 min-w-[60px] ${
                   isActive(item.path)
-                    ? 'bg-purple-500 text-white shadow-lg'
-                    : 'text-gray-600 hover:text-purple-500 hover:bg-purple-50'
+                    ? 'bg-blue-500 text-white shadow-lg'
+                    : 'text-gray-600 hover:text-blue-500 hover:bg-blue-50'
                 }`}
               >
                 <item.icon size={16} className="flex-shrink-0" />
@@ -89,8 +87,8 @@ const FloatingNavbar = () => {
                 to={item.path}
                 className={`flex items-center justify-center p-2 rounded-full transition-all duration-300 ${
                   isActive(item.path)
-                    ? 'bg-purple-500 text-white shadow-lg'
-                    : 'text-gray-600 hover:text-purple-500 hover:bg-purple-50'
+                    ? 'bg-blue-500 text-white shadow-lg'
+                    : 'text-gray-600 hover:text-blue-500 hover:bg-blue-50'
                 }`}
                 title={item.label}
               >
@@ -99,10 +97,20 @@ const FloatingNavbar = () => {
             ))}
           </div>
 
+          {/* Start Scaling Button */}
+          <div className="hidden md:block">
+            <Link to="/hire">
+              <button className="bg-gradient-to-r from-blue-500 to-blue-700 text-white font-semibold py-2 px-4 rounded-full hover:shadow-lg transition-all duration-300 flex items-center space-x-2">
+                <span className="text-sm">Start Scaling</span>
+                <ArrowRight className="w-4 h-4" />
+              </button>
+            </Link>
+          </div>
+
           {/* Mobile Menu Button */}
           <button
             onClick={() => setIsMobileMenuOpen(!isMobileMenuOpen)}
-            className="md:hidden p-2 rounded-full hover:bg-purple-50 transition-colors focus:outline-none focus:ring-2 focus:ring-purple-500 focus:ring-offset-2"
+            className="md:hidden p-2 rounded-full hover:bg-blue-50 transition-colors focus:outline-none focus:ring-2 focus:ring-blue-500 focus:ring-offset-2"
           >
             {isMobileMenuOpen ? <X size={20} /> : <Menu size={20} />}
           </button>
@@ -128,14 +136,21 @@ const FloatingNavbar = () => {
                   onClick={() => setIsMobileMenuOpen(false)}
                   className={`flex items-center space-x-3 px-4 py-3 rounded-xl transition-all duration-300 ${
                     isActive(item.path)
-                      ? 'bg-purple-500 text-white shadow-lg'
-                      : 'text-gray-600 hover:text-purple-500 hover:bg-purple-50'
+                      ? 'bg-blue-500 text-white shadow-lg'
+                      : 'text-gray-600 hover:text-blue-500 hover:bg-blue-50'
                   }`}
                 >
                   <item.icon size={18} className="flex-shrink-0" />
                   <span className="font-medium text-sm">{item.label}</span>
                 </Link>
               ))}
+              {/* Start Scaling Button in Mobile Menu */}
+              <Link to="/hire" onClick={() => setIsMobileMenuOpen(false)}>
+                <button className="w-full bg-gradient-to-r from-blue-500 to-blue-700 text-white font-semibold py-3 px-4 rounded-xl hover:shadow-lg transition-all duration-300 flex items-center justify-center space-x-2">
+                  <span>Start Scaling</span>
+                  <ArrowRight className="w-4 h-4" />
+                </button>
+              </Link>
             </div>
           </motion.div>
         )}

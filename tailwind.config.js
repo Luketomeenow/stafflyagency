@@ -35,6 +35,15 @@ export default {
           400: '#fb923c',
           500: '#f97316',
           600: '#ea580c',
+        },
+        // New custom colors for the faded violet/blue/white theme
+        faded: {
+          violet: '#e9d5ff',
+          blue: '#dbeafe',
+          'violet-light': '#f3e8ff',
+          'blue-light': '#eff6ff',
+          'violet-faded': '#f8f7ff',
+          'blue-faded': '#f8fafc',
         }
       },
       fontFamily: {
