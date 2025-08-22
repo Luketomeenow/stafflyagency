@@ -143,12 +143,27 @@ const LandingPage = () => {
 
       <div className="relative">
         {/* Hero Section with Chatbot and Gradient Background */}
-        <section className="pt-32 pb-16 px-4 sm:px-6 lg:px-8 bg-gradient-to-br from-blue-400 via-blue-500 to-blue-600 relative overflow-hidden">
-          {/* Background Pattern */}
-          <div className="absolute inset-0 opacity-10">
-            <div className="absolute top-0 left-0 w-72 h-72 bg-white rounded-full mix-blend-multiply filter blur-xl animate-pulse"></div>
-            <div className="absolute top-0 right-0 w-72 h-72 bg-blue-300 rounded-full mix-blend-multiply filter blur-xl animate-pulse animation-delay-2000"></div>
-            <div className="absolute -bottom-8 left-20 w-72 h-72 bg-blue-200 rounded-full mix-blend-multiply filter blur-xl animate-pulse animation-delay-4000"></div>
+        <section className="pt-32 pb-16 px-4 sm:px-6 lg:px-8 bg-gradient-to-br from-white via-violet-50 to-violet-100 relative overflow-hidden">
+          {/* Enhanced Background Pattern */}
+          <div className="absolute inset-0">
+            {/* Floating Geometric Shapes */}
+            <div className="absolute top-20 left-10 w-20 h-20 bg-violet-200/30 rounded-full blur-xl animate-pulse"></div>
+            <div className="absolute top-40 right-20 w-16 h-16 bg-blue-300/20 rounded-full blur-lg animate-pulse animation-delay-2000"></div>
+            <div className="absolute bottom-20 left-1/4 w-24 h-24 bg-violet-200/25 rounded-full blur-xl animate-pulse animation-delay-4000"></div>
+            <div className="absolute top-1/2 right-1/3 w-12 h-12 bg-blue-200/25 rounded-full blur-md animate-pulse animation-delay-1000"></div>
+            
+            {/* Animated Grid Pattern */}
+            <div className="absolute inset-0 opacity-5">
+              <div className="absolute inset-0" style={{
+                backgroundImage: `radial-gradient(circle at 1px 1px, violet 1px, transparent 0)`,
+                backgroundSize: '50px 50px'
+              }}></div>
+            </div>
+            
+            {/* Gradient Orbs */}
+            <div className="absolute top-0 left-0 w-96 h-96 bg-gradient-to-br from-violet-200/20 to-transparent rounded-full mix-blend-multiply filter blur-3xl animate-pulse"></div>
+            <div className="absolute top-0 right-0 w-80 h-80 bg-gradient-to-bl from-blue-300/20 to-transparent rounded-full mix-blend-multiply filter blur-3xl animate-pulse animation-delay-2000"></div>
+            <div className="absolute -bottom-20 left-1/3 w-72 h-72 bg-gradient-to-tr from-violet-200/20 to-transparent rounded-full mix-blend-multiply filter blur-3xl animate-pulse animation-delay-4000"></div>
           </div>
           
           <div className="max-w-7xl mx-auto relative z-10">
@@ -158,119 +173,160 @@ const LandingPage = () => {
                 variants={staggerContainer}
                 initial="initial"
                 animate="animate"
-                className="text-center lg:text-left text-white"
+                className="text-center lg:text-left text-gray-800 relative"
               >
+                {/* Floating Badge */}
                 <motion.div
                   variants={fadeInUp}
-                  className="inline-flex items-center px-4 py-2 bg-white/20 backdrop-blur-sm rounded-full text-white text-sm font-medium mb-6 border border-white/30"
+                  className="inline-flex items-center px-6 py-3 bg-violet-100/80 backdrop-blur-md rounded-full text-violet-800 text-sm font-medium mb-8 border border-violet-200 shadow-lg relative overflow-hidden group"
                 >
-                  <Sparkles className="w-4 h-4 mr-2" />
-                  <span>20,000+ Elite Virtual Assistants</span>
+                  <div className="absolute inset-0 bg-gradient-to-r from-transparent via-violet-200/30 to-transparent -translate-x-full group-hover:translate-x-full transition-transform duration-1000"></div>
+                  <Sparkles className="w-5 h-5 mr-3 text-violet-600 animate-pulse" />
+                  <span className="relative z-10 font-semibold">20,000+ Elite Virtual Assistants</span>
                 </motion.div>
 
+                {/* Enhanced Headline */}
                 <motion.h1
                   variants={fadeInUp}
-                  className="text-5xl lg:text-6xl font-bold text-white mb-6 leading-tight"
+                  className="text-5xl lg:text-7xl font-black text-gray-800 mb-8 leading-tight relative"
                 >
-                  Stay Ahead of the{' '}
-                  <span className="text-transparent bg-clip-text bg-gradient-to-r from-yellow-300 to-yellow-100">
-                    90% of Agencies
-                  </span>{' '}
-                  Still Relying on Old-School VAs
+                  <span className="block">Hire A+ Niched</span>
+                  <span className="block bg-gradient-to-r from-violet-600 via-violet-500 to-violet-400 bg-clip-text text-transparent">
+                    Operators
+                  </span>
+                  <span className="block text-4xl lg:text-5xl font-bold text-violet-700 mt-2">
+                    — For 60% Less
+                  </span>
                 </motion.h1>
 
+                {/* Enhanced Subhead */}
                 <motion.p
                   variants={fadeInUp}
-                  className="text-xl text-blue-100 mb-8 max-w-2xl leading-relaxed"
+                  className="text-xl lg:text-2xl text-gray-600 mb-10 max-w-2xl leading-relaxed font-medium"
                 >
-                  Staffly lets you build fully-functional virtual assistant teams in minutes with just your requirements. 
-                  No traditional hiring necessary.
+                  Get qualified <span className="text-violet-600 font-semibold">A+ VA profiles</span> in the palm of your hand by chatting with{' '}
+                  <span className="text-gray-800 font-bold">Staffly AI</span>
                 </motion.p>
 
+                {/* Enhanced CTA Buttons */}
                 <motion.div
                   variants={fadeInUp}
-                  className="flex flex-col sm:flex-row gap-4 justify-center lg:justify-start mb-8"
+                  className="flex flex-col sm:flex-row gap-6 justify-center lg:justify-start mb-10"
                 >
                   <Link to="/hire">
-                    <button className="group bg-white text-blue-600 font-bold py-4 px-8 rounded-full shadow-lg hover:shadow-xl transform hover:scale-105 transition-all duration-300 flex items-center justify-center">
-                      <Briefcase className="mr-3 w-5 h-5" />
-                      Start Scaling
-                      <ArrowRight className="ml-3 w-5 h-5 group-hover:translate-x-1 transition-transform" />
+                    <button className="group bg-gradient-to-r from-blue-500 to-blue-600 text-white font-black py-5 px-10 rounded-full shadow-2xl hover:shadow-blue-500/25 transform hover:scale-105 transition-all duration-300 flex items-center justify-center relative overflow-hidden">
+                      <div className="absolute inset-0 bg-gradient-to-r from-blue-400 to-blue-500 opacity-0 group-hover:opacity-100 transition-opacity duration-300"></div>
+                      <Briefcase className="mr-3 w-6 h-6 relative z-10" />
+                      <span className="relative z-10 text-lg">Start Scaling</span>
+                      <ArrowRight className="ml-3 w-6 h-6 group-hover:translate-x-1 transition-transform relative z-10" />
                     </button>
                   </Link>
                   
                   <Link to="/jobs">
-                    <button className="group border-2 border-white text-white font-bold py-4 px-8 rounded-full hover:bg-white hover:text-blue-600 transition-all duration-300 flex items-center justify-center">
-                      <Users className="mr-3 w-5 h-5" />
-                      Find Jobs
-                      <ArrowRight className="ml-3 w-5 h-5 group-hover:translate-x-1 transition-transform" />
+                    <button className="group border-3 border-blue-500 text-blue-600 font-bold py-5 px-10 rounded-full hover:bg-blue-500 hover:text-white transition-all duration-300 flex items-center justify-center backdrop-blur-sm hover:shadow-2xl transform hover:scale-105">
+                      <Users className="mr-3 w-6 h-6" />
+                      <span className="text-lg">Find Jobs</span>
+                      <ArrowRight className="ml-3 w-6 h-6 group-hover:translate-x-1 transition-transform" />
                     </button>
                   </Link>
                 </motion.div>
 
+                {/* Enhanced Quick Start Section */}
                 <motion.div
                   variants={fadeInUp}
-                  className="text-sm text-blue-200"
+                  className="text-sm text-gray-600 mb-4"
                 >
-                  Not sure where to start? Try one of these:
+                  <span className="inline-flex items-center">
+                    <div className="w-2 h-2 bg-blue-500 rounded-full mr-2 animate-pulse"></div>
+                    Not sure where to start? Try one of these:
+                  </span>
                 </motion.div>
 
                 <motion.div
                   variants={fadeInUp}
-                  className="flex flex-wrap gap-3 mt-4 justify-center lg:justify-start"
+                  className="flex flex-wrap gap-3 justify-center lg:justify-start"
                 >
                   {['Virtual Admin', 'Customer Support', 'Social Media', 'Data Entry', 'Project Management'].map((service, index) => (
-                    <button
+                    <motion.button
                       key={index}
-                      className="px-4 py-2 bg-white/20 backdrop-blur-sm border border-white/30 rounded-full text-sm text-white hover:bg-white/30 hover:border-white/50 transition-all duration-300"
+                      whileHover={{ scale: 1.05, y: -2 }}
+                      whileTap={{ scale: 0.95 }}
+                      className="px-5 py-3 bg-white/80 backdrop-blur-md border border-violet-200 rounded-full text-sm text-gray-700 hover:bg-violet-100 hover:border-violet-300 transition-all duration-300 shadow-lg hover:shadow-xl group"
                     >
-                      {service}
-                    </button>
+                      <span className="group-hover:text-violet-700 transition-colors">{service}</span>
+                    </motion.button>
                   ))}
+                </motion.div>
+
+                {/* Stats Section */}
+                <motion.div
+                  variants={fadeInUp}
+                  className="mt-12 flex items-center justify-center lg:justify-start space-x-8"
+                >
+                  <div className="text-center">
+                    <div className="text-2xl font-bold text-blue-600">500+</div>
+                    <div className="text-sm text-gray-600">Companies Served</div>
+                  </div>
+                  <div className="text-center">
+                    <div className="text-2xl font-bold text-blue-600">98%</div>
+                    <div className="text-sm text-gray-600">Satisfaction Rate</div>
+                  </div>
+                  <div className="text-center">
+                    <div className="text-2xl font-bold text-blue-600">24h</div>
+                    <div className="text-sm text-gray-600">Response Time</div>
+                  </div>
                 </motion.div>
               </motion.div>
 
-              {/* Right Content - Chatbot Interface */}
+              {/* Right Content - Enhanced Chatbot Interface */}
               <div className="relative">
+                {/* Floating Elements Around Chatbot */}
+                <div className="absolute -top-4 -right-4 w-8 h-8 bg-blue-500 rounded-full animate-bounce"></div>
+                <div className="absolute -bottom-4 -left-4 w-6 h-6 bg-violet-400 rounded-full animate-bounce animation-delay-1000"></div>
+                <div className="absolute top-1/2 -right-8 w-4 h-4 bg-violet-300/50 rounded-full animate-pulse"></div>
+                
                 <motion.div
-                  initial={{ opacity: 0, scale: 0.8 }}
-                  animate={{ opacity: 1, scale: 1 }}
-                  transition={{ duration: 0.8, delay: 0.2 }}
-                  className="bg-white/90 backdrop-blur-md rounded-3xl shadow-2xl border border-white/30 p-6 max-w-md mx-auto"
+                  initial={{ opacity: 0, scale: 0.8, rotateY: -15 }}
+                  animate={{ opacity: 1, scale: 1, rotateY: 0 }}
+                  transition={{ duration: 1, delay: 0.2 }}
+                  className="bg-white/95 backdrop-blur-xl rounded-3xl shadow-2xl border border-violet-200/40 p-8 max-w-md mx-auto relative overflow-hidden"
                 >
-                  {/* Chatbot Header */}
-                  <div className="flex items-center space-x-3 mb-4">
-                    <div className="w-10 h-10 bg-gradient-to-r from-blue-500 to-blue-700 rounded-full flex items-center justify-center">
-                      <MessageCircle className="w-5 h-5 text-white" />
+                  {/* Enhanced Chatbot Header */}
+                  <div className="flex items-center space-x-4 mb-6">
+                    <div className="w-12 h-12 bg-gradient-to-r from-blue-500 to-blue-600 rounded-full flex items-center justify-center shadow-lg">
+                      <MessageCircle className="w-6 h-6 text-white" />
                     </div>
                     <div>
-                      <h3 className="font-semibold text-gray-800">Staffly Assistant</h3>
-                      <p className="text-sm text-gray-500">Online • Ready to help</p>
+                      <h3 className="font-bold text-gray-800 text-lg">Staffly AI</h3>
+                      <div className="flex items-center space-x-2">
+                        <div className="w-2 h-2 bg-green-400 rounded-full animate-pulse"></div>
+                        <p className="text-sm text-gray-500">Online • Ready to help</p>
+                      </div>
                     </div>
                   </div>
 
-                  {/* Chat Messages */}
-                  <div className="space-y-3 mb-4">
+                  {/* Enhanced Chat Messages */}
+                  <div className="space-y-4 mb-6">
                     <div className="flex justify-end">
-                      <div className="bg-blue-500 text-white px-4 py-2 rounded-2xl rounded-br-md max-w-xs">
+                      <div className="bg-gradient-to-r from-blue-500 to-blue-600 text-white px-4 py-3 rounded-2xl rounded-br-md max-w-xs shadow-lg">
                         <p className="text-sm">I need a virtual assistant for customer support</p>
                       </div>
                     </div>
                     <div className="flex justify-start">
-                      <div className="bg-gray-100 text-gray-800 px-4 py-2 rounded-2xl rounded-bl-md max-w-xs">
+                      <div className="bg-gray-100 text-gray-800 px-4 py-3 rounded-2xl rounded-bl-md max-w-xs shadow-lg">
                         <p className="text-sm">Great! I can help you find the perfect customer support VA. What's your budget and timeline?</p>
                       </div>
                     </div>
                     <div className="flex justify-end">
-                      <div className="bg-blue-500 text-white px-4 py-2 rounded-2xl rounded-br-md max-w-xs">
+                      <div className="bg-gradient-to-r from-blue-500 to-blue-600 text-white px-4 py-3 rounded-2xl rounded-br-md max-w-xs shadow-lg">
                         <p className="text-sm">Budget is $500/month, need someone ASAP</p>
                       </div>
                     </div>
                   </div>
 
-                  {/* Typing Indicator */}
-                  <div className="flex items-center space-x-2 mb-4">
-                    <div className="bg-gray-100 px-4 py-2 rounded-2xl rounded-bl-md">
+                  {/* Enhanced Typing Indicator */}
+                  <div className="flex items-center space-x-2 mb-6">
+                    <div className="bg-gray-100 px-4 py-3 rounded-2xl rounded-bl-md shadow-lg">
                       <div className="flex space-x-1">
                         <div className="w-2 h-2 bg-gray-400 rounded-full animate-bounce"></div>
                         <div className="w-2 h-2 bg-gray-400 rounded-full animate-bounce" style={{ animationDelay: '0.1s' }}></div>
@@ -279,15 +335,15 @@ const LandingPage = () => {
                     </div>
                   </div>
 
-                  {/* Input Field */}
-                  <div className="flex space-x-2">
+                  {/* Enhanced Input Field */}
+                  <div className="flex space-x-3">
                     <input
                       type="text"
-                      placeholder="What do you want to build?"
-                      className="flex-1 px-4 py-2 border border-blue-200 rounded-full focus:outline-none focus:ring-2 focus:ring-blue-400 focus:border-transparent"
+                      placeholder="What do you want to scale?"
+                      className="flex-1 px-5 py-3 border-2 border-blue-200 rounded-full focus:outline-none focus:ring-2 focus:ring-blue-400 focus:border-transparent shadow-lg text-gray-700 font-medium"
                     />
-                    <button className="w-10 h-10 bg-gradient-to-r from-blue-500 to-blue-700 text-white rounded-full flex items-center justify-center hover:shadow-lg transition-all duration-300">
-                      <ArrowRight className="w-4 h-4" />
+                    <button className="w-12 h-12 bg-gradient-to-r from-blue-500 to-blue-600 text-white rounded-full flex items-center justify-center hover:shadow-lg transition-all duration-300 transform hover:scale-105">
+                      <ArrowRight className="w-5 h-5" />
                     </button>
                   </div>
                 </motion.div>
