@@ -1,9 +1,33 @@
 import { motion } from 'framer-motion';
-import { Link } from 'react-router-dom';
-import { ArrowRight, Users, Briefcase, Rocket, Star, Globe, Shield, Zap, Sparkles, MessageCircle, Play, Check, ChevronDown } from 'lucide-react';
+import { Link, useLocation } from 'react-router-dom';
+import { ArrowRight, Users, Briefcase, Rocket, Star, Globe, Shield, Zap, Sparkles, MessageCircle, Play, Check, ChevronDown, Crown } from 'lucide-react';
 import FloatingNavbar from '../components/FloatingNavbar';
+import FullScreenChatbot from '../components/FullScreenChatbot';
+import ScrollStack, { ScrollStackItem } from '../components/ScrollStack';
+import DarkVeil from '../components/DarkVeil';
+import SplitTextAnimation from '../components/SplitTextAnimation';
+import MagicBento from '../components/MagicBento';
+import CardSwap from '../components/CardSwap';
+import { useEffect } from 'react';
 
 const LandingPage = () => {
+  const location = useLocation();
+
+  useEffect(() => {
+    // Handle anchor links for smooth scrolling
+    if (location.hash) {
+      const element = document.querySelector(location.hash);
+      if (element) {
+        setTimeout(() => {
+          element.scrollIntoView({ 
+            behavior: 'smooth',
+            block: 'start'
+          });
+        }, 100);
+      }
+    }
+  }, [location]);
+
   const fadeInUp = {
     initial: { opacity: 0, y: 60 },
     animate: { opacity: 1, y: 0 },
@@ -142,258 +166,500 @@ const LandingPage = () => {
       <FloatingNavbar />
 
       <div className="relative">
-        {/* Hero Section with Chatbot and Gradient Background */}
-        <section className="pt-32 pb-16 px-4 sm:px-6 lg:px-8 bg-gradient-to-br from-white via-violet-50 to-violet-100 relative overflow-hidden">
-          {/* Enhanced Background Pattern */}
+                {/* Hero Section - Professional Design with White Background */}
+        <section className="relative min-h-screen flex items-center justify-center overflow-hidden bg-gradient-to-br from-white via-blue-50 to-indigo-50">
+          {/* Subtle Background Elements */}
           <div className="absolute inset-0">
-            {/* Floating Geometric Shapes */}
-            <div className="absolute top-20 left-10 w-20 h-20 bg-violet-200/30 rounded-full blur-xl animate-pulse"></div>
-            <div className="absolute top-40 right-20 w-16 h-16 bg-blue-300/20 rounded-full blur-lg animate-pulse animation-delay-2000"></div>
-            <div className="absolute bottom-20 left-1/4 w-24 h-24 bg-violet-200/25 rounded-full blur-xl animate-pulse animation-delay-4000"></div>
-            <div className="absolute top-1/2 right-1/3 w-12 h-12 bg-blue-200/25 rounded-full blur-md animate-pulse animation-delay-1000"></div>
-            
-            {/* Animated Grid Pattern */}
-            <div className="absolute inset-0 opacity-5">
-              <div className="absolute inset-0" style={{
-                backgroundImage: `radial-gradient(circle at 1px 1px, violet 1px, transparent 0)`,
-                backgroundSize: '50px 50px'
-              }}></div>
-            </div>
-            
-            {/* Gradient Orbs */}
-            <div className="absolute top-0 left-0 w-96 h-96 bg-gradient-to-br from-violet-200/20 to-transparent rounded-full mix-blend-multiply filter blur-3xl animate-pulse"></div>
-            <div className="absolute top-0 right-0 w-80 h-80 bg-gradient-to-bl from-blue-300/20 to-transparent rounded-full mix-blend-multiply filter blur-3xl animate-pulse animation-delay-2000"></div>
-            <div className="absolute -bottom-20 left-1/3 w-72 h-72 bg-gradient-to-tr from-violet-200/20 to-transparent rounded-full mix-blend-multiply filter blur-3xl animate-pulse animation-delay-4000"></div>
+            <div className="absolute top-0 left-0 w-full h-full bg-[radial-gradient(ellipse_at_top,_var(--tw-gradient-stops))] from-blue-100/30 via-transparent to-transparent"></div>
+            <div className="absolute bottom-0 right-0 w-96 h-96 bg-gradient-to-tl from-purple-100/20 to-transparent rounded-full blur-3xl"></div>
           </div>
-          
-          <div className="max-w-7xl mx-auto relative z-10">
-            <div className="grid lg:grid-cols-2 gap-12 items-center">
-              {/* Left Content */}
+
+          <div className="container-wide relative z-15 pt-[1500px] pb-10">
+            <div className="max-w-10xl mx-auto text-center">
+              {/* Main Content */}
+              {/* Hero Text */}
               <motion.div
                 variants={staggerContainer}
                 initial="initial"
                 animate="animate"
-                className="text-center lg:text-left text-gray-800 relative"
+                className="text-center mt-40"
               >
-                {/* Floating Badge */}
-                <motion.div
-                  variants={fadeInUp}
-                  className="inline-flex items-center px-6 py-3 bg-violet-100/80 backdrop-blur-md rounded-full text-violet-800 text-sm font-medium mb-8 border border-violet-200 shadow-lg relative overflow-hidden group"
-                >
-                  <div className="absolute inset-0 bg-gradient-to-r from-transparent via-violet-200/30 to-transparent -translate-x-full group-hover:translate-x-full transition-transform duration-1000"></div>
-                  <Sparkles className="w-5 h-5 mr-3 text-violet-600 animate-pulse" />
-                  <span className="relative z-10 font-semibold">20,000+ Elite Virtual Assistants</span>
-                </motion.div>
+                {/* Main Headline */}
+                <div className="mb-8">
+                  <div className="text-6xl lg:text-7xl font-black text-slate-900 leading-tight">
+                    <SplitTextAnimation
+                      text="Hire A+"
+                      className="inline-block"
+                      delay={0.2}
+                      stagger={0.1}
+                    />
+                    <span className="inline-block mr-2"> </span>
+                    <SplitTextAnimation
+                      text="Operators"
+                      className="inline-block"
+                      delay={0.6}
+                      stagger={0.1}
+                      gradient={true}
+                      gradientColors="from-blue-600 to-purple-600"
+                    />
+                  </div>
+                  <SplitTextAnimation
+                    text="— For 60% Less"
+                    className="text-4xl lg:text-5xl font-bold text-slate-700 mt-4"
+                    delay={0.8}
+                    stagger={0.05}
+                  />
+                </div>
 
-                {/* Enhanced Headline */}
-                <motion.h1
-                  variants={fadeInUp}
-                  className="text-5xl lg:text-7xl font-black text-gray-800 mb-8 leading-tight relative"
-                >
-                  <span className="block">Hire A+ Niched</span>
-                  <span className="block bg-gradient-to-r from-violet-600 via-violet-500 to-violet-400 bg-clip-text text-transparent">
-                    Operators
-                  </span>
-                  <span className="block text-4xl lg:text-5xl font-bold text-violet-700 mt-2">
-                    — For 60% Less
-                  </span>
-                </motion.h1>
-
-                {/* Enhanced Subhead */}
+                {/* Subheadline */}
                 <motion.p
                   variants={fadeInUp}
-                  className="text-xl lg:text-2xl text-gray-600 mb-10 max-w-2xl leading-relaxed font-medium"
+                  className="text-xl lg:text-2xl text-slate-600 mb-12 max-w-3xl mx-auto leading-relaxed font-medium"
                 >
-                  Get qualified <span className="text-violet-600 font-semibold">A+ VA profiles</span> in the palm of your hand by chatting with{' '}
-                  <span className="text-gray-800 font-bold">Staffly AI</span>
+                  Get qualified <span className="text-slate-800 font-semibold">A+ VA profiles</span> in the palm of your hand by chatting with{' '}
+                  <span className="bg-gradient-to-r from-blue-600 to-purple-600 bg-clip-text text-transparent font-bold">Staffly AI</span>
                 </motion.p>
 
-                {/* Enhanced CTA Buttons */}
+                {/* AI Chatbot - Centered Input Field */}
                 <motion.div
                   variants={fadeInUp}
-                  className="flex flex-col sm:flex-row gap-6 justify-center lg:justify-start mb-10"
+                  className="mb-12"
                 >
-                  <Link to="/hire">
-                    <button className="group bg-gradient-to-r from-blue-500 to-blue-600 text-white font-black py-5 px-10 rounded-full shadow-2xl hover:shadow-blue-500/25 transform hover:scale-105 transition-all duration-300 flex items-center justify-center relative overflow-hidden">
-                      <div className="absolute inset-0 bg-gradient-to-r from-blue-400 to-blue-500 opacity-0 group-hover:opacity-100 transition-opacity duration-300"></div>
-                      <Briefcase className="mr-3 w-6 h-6 relative z-10" />
-                      <span className="relative z-10 text-lg">Start Scaling</span>
-                      <ArrowRight className="ml-3 w-6 h-6 group-hover:translate-x-1 transition-transform relative z-10" />
-                    </button>
-                  </Link>
-                  
-                  <Link to="/jobs">
-                    <button className="group border-3 border-blue-500 text-blue-600 font-bold py-5 px-10 rounded-full hover:bg-blue-500 hover:text-white transition-all duration-300 flex items-center justify-center backdrop-blur-sm hover:shadow-2xl transform hover:scale-105">
-                      <Users className="mr-3 w-6 h-6" />
-                      <span className="text-lg">Find Jobs</span>
-                      <ArrowRight className="ml-3 w-6 h-6 group-hover:translate-x-1 transition-transform" />
-                    </button>
-                  </Link>
-                </motion.div>
-
-                {/* Enhanced Quick Start Section */}
-                <motion.div
-                  variants={fadeInUp}
-                  className="text-sm text-gray-600 mb-4"
-                >
-                  <span className="inline-flex items-center">
-                    <div className="w-2 h-2 bg-blue-500 rounded-full mr-2 animate-pulse"></div>
-                    Not sure where to start? Try one of these:
-                  </span>
-                </motion.div>
-
-                <motion.div
-                  variants={fadeInUp}
-                  className="flex flex-wrap gap-3 justify-center lg:justify-start"
-                >
-                  {['Virtual Admin', 'Customer Support', 'Social Media', 'Data Entry', 'Project Management'].map((service, index) => (
-                    <motion.button
-                      key={index}
-                      whileHover={{ scale: 1.05, y: -2 }}
-                      whileTap={{ scale: 0.95 }}
-                      className="px-5 py-3 bg-white/80 backdrop-blur-md border border-violet-200 rounded-full text-sm text-gray-700 hover:bg-violet-100 hover:border-violet-300 transition-all duration-300 shadow-lg hover:shadow-xl group"
-                    >
-                      <span className="group-hover:text-violet-700 transition-colors">{service}</span>
-                    </motion.button>
-                  ))}
-                </motion.div>
-
-                {/* Stats Section */}
-                <motion.div
-                  variants={fadeInUp}
-                  className="mt-12 flex items-center justify-center lg:justify-start space-x-8"
-                >
-                  <div className="text-center">
-                    <div className="text-2xl font-bold text-blue-600">500+</div>
-                    <div className="text-sm text-gray-600">Companies Served</div>
-                  </div>
-                  <div className="text-center">
-                    <div className="text-2xl font-bold text-blue-600">98%</div>
-                    <div className="text-sm text-gray-600">Satisfaction Rate</div>
-                  </div>
-                  <div className="text-center">
-                    <div className="text-2xl font-bold text-blue-600">24h</div>
-                    <div className="text-sm text-gray-600">Response Time</div>
+                  <div className="flex justify-center w-full">
+                    <div className="w-full max-w-6xl">
+                      <FullScreenChatbot />
+                    </div>
                   </div>
                 </motion.div>
-              </motion.div>
 
-              {/* Right Content - Enhanced Chatbot Interface */}
-              <div className="relative">
-                {/* Floating Elements Around Chatbot */}
-                <div className="absolute -top-4 -right-4 w-8 h-8 bg-blue-500 rounded-full animate-bounce"></div>
-                <div className="absolute -bottom-4 -left-4 w-6 h-6 bg-violet-400 rounded-full animate-bounce animation-delay-1000"></div>
-                <div className="absolute top-1/2 -right-8 w-4 h-4 bg-violet-300/50 rounded-full animate-pulse"></div>
+
+
+                {/* Social Proof */}
+                <motion.div
+                  variants={fadeInUp}
+                  className="flex items-center justify-center space-x-8"
+                >
+                  <div className="text-center">
+                    <div className="text-3xl font-bold bg-gradient-to-r from-blue-600 to-purple-600 bg-clip-text text-transparent">500+</div>
+                    <div className="text-sm text-slate-600">Companies Served</div>
+                  </div>
+                  <div className="text-center">
+                    <div className="text-3xl font-bold bg-gradient-to-r from-blue-600 to-purple-600 bg-clip-text text-transparent">98%</div>
+                    <div className="text-sm text-slate-600">Satisfaction Rate</div>
+                  </div>
+                  <div className="text-center">
+                    <div className="text-3xl font-bold bg-gradient-to-r from-blue-600 to-purple-600 bg-clip-text text-transparent">24h</div>
+                    <div className="text-sm text-slate-600">Response Time</div>
+                  </div>
+                </motion.div>
+
                 
-                <motion.div
-                  initial={{ opacity: 0, scale: 0.8, rotateY: -15 }}
-                  animate={{ opacity: 1, scale: 1, rotateY: 0 }}
-                  transition={{ duration: 1, delay: 0.2 }}
-                  className="bg-white/95 backdrop-blur-xl rounded-3xl shadow-2xl border border-violet-200/40 p-8 max-w-md mx-auto relative overflow-hidden"
-                >
-                  {/* Enhanced Chatbot Header */}
-                  <div className="flex items-center space-x-4 mb-6">
-                    <div className="w-12 h-12 bg-gradient-to-r from-blue-500 to-blue-600 rounded-full flex items-center justify-center shadow-lg">
-                      <MessageCircle className="w-6 h-6 text-white" />
-                    </div>
-                    <div>
-                      <h3 className="font-bold text-gray-800 text-lg">Staffly AI</h3>
-                      <div className="flex items-center space-x-2">
-                        <div className="w-2 h-2 bg-green-400 rounded-full animate-pulse"></div>
-                        <p className="text-sm text-gray-500">Online • Ready to help</p>
-                      </div>
-                    </div>
-                  </div>
-
-                  {/* Enhanced Chat Messages */}
-                  <div className="space-y-4 mb-6">
-                    <div className="flex justify-end">
-                      <div className="bg-gradient-to-r from-blue-500 to-blue-600 text-white px-4 py-3 rounded-2xl rounded-br-md max-w-xs shadow-lg">
-                        <p className="text-sm">I need a virtual assistant for customer support</p>
-                      </div>
-                    </div>
-                    <div className="flex justify-start">
-                      <div className="bg-gray-100 text-gray-800 px-4 py-3 rounded-2xl rounded-bl-md max-w-xs shadow-lg">
-                        <p className="text-sm">Great! I can help you find the perfect customer support VA. What's your budget and timeline?</p>
-                      </div>
-                    </div>
-                    <div className="flex justify-end">
-                      <div className="bg-gradient-to-r from-blue-500 to-blue-600 text-white px-4 py-3 rounded-2xl rounded-br-md max-w-xs shadow-lg">
-                        <p className="text-sm">Budget is $500/month, need someone ASAP</p>
-                      </div>
-                    </div>
-                  </div>
-
-                  {/* Enhanced Typing Indicator */}
-                  <div className="flex items-center space-x-2 mb-6">
-                    <div className="bg-gray-100 px-4 py-3 rounded-2xl rounded-bl-md shadow-lg">
-                      <div className="flex space-x-1">
-                        <div className="w-2 h-2 bg-gray-400 rounded-full animate-bounce"></div>
-                        <div className="w-2 h-2 bg-gray-400 rounded-full animate-bounce" style={{ animationDelay: '0.1s' }}></div>
-                        <div className="w-2 h-2 bg-gray-400 rounded-full animate-bounce" style={{ animationDelay: '0.2s' }}></div>
-                      </div>
-                    </div>
-                  </div>
-
-                  {/* Enhanced Input Field */}
-                  <div className="flex space-x-3">
-                    <input
-                      type="text"
-                      placeholder="What do you want to scale?"
-                      className="flex-1 px-5 py-3 border-2 border-blue-200 rounded-full focus:outline-none focus:ring-2 focus:ring-blue-400 focus:border-transparent shadow-lg text-gray-700 font-medium"
-                    />
-                    <button className="w-12 h-12 bg-gradient-to-r from-blue-500 to-blue-600 text-white rounded-full flex items-center justify-center hover:shadow-lg transition-all duration-300 transform hover:scale-105">
-                      <ArrowRight className="w-5 h-5" />
-                    </button>
-                  </div>
-                </motion.div>
-              </div>
+              </motion.div>
             </div>
           </div>
         </section>
 
-        {/* Highlight Services Section - Light */}
-        <section id="services" className="py-20 px-4 sm:px-6 lg:px-8 bg-white">
-          <div className="max-w-7xl mx-auto">
+        {/* Our Story Section - Professional Design */}
+        <section id="our-story" className="section bg-gradient-to-br from-slate-50 via-white to-blue-50 relative overflow-hidden">
+          {/* Background Elements */}
+          <div className="absolute inset-0">
+            <div className="absolute top-0 left-0 w-full h-full bg-[radial-gradient(ellipse_at_top,_var(--tw-gradient-stops))] from-blue-100/20 via-transparent to-transparent"></div>
+            <div className="absolute bottom-0 right-0 w-96 h-96 bg-gradient-to-tl from-purple-100/20 to-transparent rounded-full blur-3xl"></div>
+          </div>
+
+          <div className="container relative z-10">
+                <motion.div
+              initial={{ opacity: 0, y: 40 }}
+              whileInView={{ opacity: 1, y: 0 }}
+              transition={{ duration: 0.8 }}
+              viewport={{ once: true }}
+              className="text-center mb-20"
+            >
+              <div className="inline-flex items-center px-4 py-2 bg-blue-100/50 text-blue-700 text-sm font-semibold rounded-full mb-6 border border-blue-200/50">
+                <div className="w-2 h-2 bg-blue-500 rounded-full mr-2"></div>
+                Our Mission
+                    </div>
+              
+              <h2 className="text-6xl font-black text-slate-900 mb-8 leading-tight">
+                Our <span className="gradient-text">Story</span>
+              </h2>
+              
+              <div className="max-w-4xl mx-auto">
+                <p className="text-3xl font-bold text-slate-800 mb-8 leading-tight">
+                  We wouldn't wait for culture to fix itself—<br />
+                  <span className="gradient-text">so we built one that wins.</span>
+                </p>
+                
+                <p className="text-xl text-slate-600 leading-relaxed max-w-3xl mx-auto">
+                  Our founder left a stagnant, protection-first environment to create an agency that{' '}
+                  <span className="font-semibold text-slate-800">demands excellence and rewards ownership</span>. 
+                  We believe the 'people business' is the future—{' '}
+                  <span className="gradient-text font-semibold">amplified by AI</span>, governed by clear frameworks, 
+                  and delivered by operators who think like you.
+                </p>
+              </div>
+            </motion.div>
+
+            <div className="grid lg:grid-cols-2 gap-16 items-center">
+              {/* Left Column - Principles */}
+              <motion.div
+                initial={{ opacity: 0, x: -40 }}
+                whileInView={{ opacity: 1, x: 0 }}
+                transition={{ duration: 0.8, delay: 0.2 }}
+                viewport={{ once: true }}
+                className="space-y-8"
+              >
+                    <div>
+                  <h3 className="text-3xl font-bold text-slate-900 mb-8 flex items-center">
+                    <div className="w-12 h-1 bg-gradient-to-r from-blue-500 to-purple-500 rounded-full mr-4"></div>
+                    What guides us:
+                  </h3>
+                  
+                  <div className="space-y-6">
+                    {[
+                      {
+                        title: "Excellence over comfort",
+                        description: "Top-grade talent and high standards."
+                      },
+                      {
+                        title: "Frameworks over vibes",
+                        description: "Delegation laws, trust principles (UATCI: Understanding, Ability, Track record, Character, Intention), and simple playbooks anyone can run."
+                      },
+                      {
+                        title: "Communication over chaos",
+                        description: "Predictable rhythms that build trust fast."
+                      },
+                      {
+                        title: "Learning over ego",
+                        description: "Coachability, feedback tolerance, and continuous improvement."
+                      }
+                    ].map((principle, index) => (
+                      <motion.div
+                        key={index}
+                        initial={{ opacity: 0, y: 20 }}
+                        whileInView={{ opacity: 1, y: 0 }}
+                        transition={{ duration: 0.6, delay: 0.3 + index * 0.1 }}
+                        viewport={{ once: true }}
+                        className="group"
+                      >
+                        <div className="bg-white/80 backdrop-blur-sm rounded-2xl p-6 border border-slate-200/50 shadow-lg hover:shadow-xl transition-all duration-300 hover:scale-[1.02]">
+                          <h4 className="text-xl font-bold text-slate-900 mb-2 group-hover:text-blue-600 transition-colors">
+                            {principle.title}
+                          </h4>
+                          <p className="text-slate-600 leading-relaxed">
+                            {principle.description}
+                          </p>
+                      </div>
+                      </motion.div>
+                    ))}
+                    </div>
+                  </div>
+              </motion.div>
+
+              {/* Right Column - Vision */}
+              <motion.div
+                initial={{ opacity: 0, x: 40 }}
+                whileInView={{ opacity: 1, x: 0 }}
+                transition={{ duration: 0.8, delay: 0.4 }}
+                viewport={{ once: true }}
+                className="relative"
+              >
+                <div className="bg-gradient-to-br from-blue-600 to-purple-600 rounded-3xl p-10 text-white relative overflow-hidden">
+                  {/* Background Pattern */}
+                  <div className="absolute inset-0 opacity-10">
+                    <div className="absolute inset-0" style={{
+                      backgroundImage: `radial-gradient(circle at 1px 1px, white 1px, transparent 0)`,
+                      backgroundSize: '40px 40px'
+                    }}></div>
+                      </div>
+                  
+                  <div className="relative z-10">
+                    <h3 className="text-3xl font-bold mb-6 flex items-center">
+                      <div className="w-12 h-1 bg-white/30 rounded-full mr-4"></div>
+                      The vision:
+                    </h3>
+                    
+                    <p className="text-xl leading-relaxed text-blue-50">
+                      An <strong className="text-white">AI-assisted talent marketplace</strong> that lets founders filter by industry/role and instantly meet curated, prepped candidates—<strong className="text-white">quality first, resume dumps never</strong>.
+                    </p>
+                    
+                    <div className="mt-8 flex items-center space-x-4">
+                      <div className="w-3 h-3 bg-white/30 rounded-full animate-pulse"></div>
+                      <div className="w-3 h-3 bg-white/30 rounded-full animate-pulse" style={{ animationDelay: '0.2s' }}></div>
+                      <div className="w-3 h-3 bg-white/30 rounded-full animate-pulse" style={{ animationDelay: '0.4s' }}></div>
+                    </div>
+                      </div>
+                    </div>
+                
+                {/* Floating Elements */}
+                <div className="absolute -top-4 -right-4 w-8 h-8 bg-gradient-to-r from-yellow-400 to-orange-500 rounded-full animate-bounce shadow-lg"></div>
+                <div className="absolute -bottom-4 -left-4 w-6 h-6 bg-gradient-to-r from-pink-400 to-red-500 rounded-full animate-bounce shadow-lg" style={{ animationDelay: '1s' }}></div>
+              </motion.div>
+                      </div>
+                    </div>
+        </section>
+
+        {/* Services Section - Scroll Stack Effect */}
+        <section id="services" className="section bg-gradient-to-br from-slate-50 via-white to-blue-50 relative overflow-hidden">
+          {/* Background Elements */}
+          <div className="absolute inset-0">
+            <div className="absolute top-0 left-0 w-full h-full bg-[radial-gradient(ellipse_at_top,_var(--tw-gradient-stops))] from-blue-100/20 via-transparent to-transparent"></div>
+            <div className="absolute bottom-0 right-0 w-96 h-96 bg-gradient-to-tl from-purple-100/20 to-transparent rounded-full blur-3xl"></div>
+          </div>
+
+          <div className="container relative z-10">
             <motion.div
               initial={{ opacity: 0, y: 40 }}
               whileInView={{ opacity: 1, y: 0 }}
-              transition={{ duration: 0.6 }}
+              transition={{ duration: 0.8 }}
               viewport={{ once: true }}
-              className="text-center mb-16"
+              className="text-center mb-20"
             >
-              <h2 className="text-4xl font-bold text-gray-800 mb-6">
-                Our Highlight Services
+              <div className="inline-flex items-center px-4 py-2 bg-blue-100/50 text-blue-700 text-sm font-semibold rounded-full mb-6 border border-blue-200/50">
+                <div className="w-2 h-2 bg-blue-500 rounded-full mr-2"></div>
+                Our Services
+                      </div>
+              
+              <h2 className="text-6xl font-black text-slate-900 mb-8 leading-tight">
+                Comprehensive <span className="gradient-text">Solutions</span>
               </h2>
-              <p className="text-xl text-gray-600 max-w-3xl mx-auto">
-                Comprehensive virtual assistant solutions designed to scale your business efficiently
+              
+              <p className="text-xl text-slate-600 max-w-3xl mx-auto">
+                Elite virtual assistants designed to scale your business with precision and expertise
               </p>
             </motion.div>
 
-            <div className="grid md:grid-cols-2 lg:grid-cols-4 gap-8">
-              {services.map((service, index) => (
-                <motion.div
-                  key={index}
-                  initial={{ opacity: 0, y: 40 }}
-                  whileInView={{ opacity: 1, y: 0 }}
-                  transition={{ duration: 0.6, delay: index * 0.1 }}
-                  viewport={{ once: true }}
-                  className="group"
-                >
-                  <div className="bg-white rounded-2xl p-6 shadow-lg border border-blue-100 hover:shadow-xl hover:scale-105 transition-all duration-300 h-full flex flex-col">
-                    <div className={`w-16 h-16 bg-gradient-to-r ${service.color} rounded-2xl flex items-center justify-center mx-auto mb-6 group-hover:scale-110 transition-transform flex-shrink-0`}>
-                      <service.icon className="w-8 h-8 text-white" />
+            <MagicBento
+              services={[
+                {
+                  title: "Executive Assistants & Operator EAs",
+                  outcome: "Founder leverage and calm execution",
+                  description: "Professional support for founders and executives",
+                  icon: "👔",
+                  color: "from-blue-500 to-blue-600",
+                  bgColor: "from-blue-50 to-blue-100",
+                  borderColor: "border-blue-200",
+                  features: [
+                    "Calendar, inbox, meeting prep, documentation",
+                    "Install cadence (GM/EOD, weekly priorities)",
+                    "Build light systems: Notion, ClickUp/Trello, SOPs"
+                  ]
+                },
+                {
+                  title: "Operations & Project Coordination",
+                  outcome: "Work that ships on time",
+                  description: "Streamlined project management and operations",
+                  icon: "⚡",
+                  color: "from-violet-500 to-violet-600",
+                  bgColor: "from-violet-50 to-violet-100",
+                  borderColor: "border-violet-200",
+                  features: [
+                    "Roadmaps, timelines, resource tracking",
+                    "Cross-team comms, risk/issue tracking",
+                    "Tooling setup and hygiene (CRM/PM stack)"
+                  ]
+                },
+                {
+                  title: "Sales & Growth Support",
+                  outcome: "Clear pipeline and repeatable motion",
+                  description: "Accelerate your sales and growth initiatives",
+                  icon: "🚀",
+                  color: "from-green-500 to-green-600",
+                  bgColor: "from-green-50 to-green-100",
+                  borderColor: "border-green-200",
+                  features: [
+                    "CRM hygiene, lead routing, meeting set",
+                    "Enablement assets, call notes, reporting",
+                    "Daily/weekly sales cadence and support"
+                  ]
+                },
+                {
+                  title: "Customer Experience & Reception",
+                  outcome: "Responsive, consistent customer touchpoints",
+                  description: "Professional front desk and customer support",
+                  icon: "🎯",
+                  color: "from-orange-500 to-orange-600",
+                  bgColor: "from-orange-50 to-orange-100",
+                  borderColor: "border-orange-200",
+                  features: [
+                    "Call handling/triage, appointment booking",
+                    "Ticketing, FAQs, light upsell flows",
+                    "Response-time SLAs, escalation rules"
+                  ]
+                },
+                {
+                  title: "Marketing Ops & Social",
+                  outcome: "Consistent, on-brand presence",
+                  description: "Strategic marketing operations and social media",
+                  icon: "📱",
+                  color: "from-purple-500 to-purple-600",
+                  bgColor: "from-purple-50 to-purple-100",
+                  borderColor: "border-purple-200",
+                  features: [
+                    "Content calendars, asset coordination",
+                    "Creator/vendor wrangling, briefs",
+                    "Basic analytics and iteration loops"
+                  ]
+                },
+                {
+                  title: "Advisory & Playbooks",
+                  outcome: "Team that knows how to delegate and lead",
+                  description: "Strategic guidance and operational frameworks",
+                  icon: "📚",
+                  color: "from-indigo-500 to-indigo-600",
+                  bgColor: "from-indigo-50 to-indigo-100",
+                  borderColor: "border-indigo-200",
+                  features: [
+                    "Delegation frameworks and launch plans",
+                    "Scorecards and 1:1 templates with PCE",
+                    "Manager coaching and QA reviews"
+                  ]
+                }
+              ]}
+            />
+            </div>
+
+            {/* What's Consistent Across Services */}
+            <motion.div
+              initial={{ opacity: 0, y: 40 }}
+              whileInView={{ opacity: 1, y: 0 }}
+              transition={{ duration: 0.8, delay: 0.5 }}
+              viewport={{ once: true }}
+              className="mt-40 bg-gradient-to-r from-slate-100 to-blue-100 rounded-3xl p-10 border border-slate-200 shadow-xl"
+            >
+              <h3 className="text-3xl font-bold text-slate-900 mb-8 text-center">What's consistent across services</h3>
+              <div className="grid md:grid-cols-2 gap-8">
+                <div className="space-y-4">
+                  <div className="flex items-start space-x-4">
+                    <div className="w-8 h-8 bg-gradient-to-r from-blue-500 to-purple-500 rounded-full flex items-center justify-center text-white font-bold text-sm">1</div>
+                    <div>
+                      <h4 className="font-semibold text-slate-900 mb-2">Curated Shortlists</h4>
+                      <p className="text-slate-600">2-4 finalists, pre-briefed on your context</p>
                     </div>
-                    <h3 className="text-xl font-bold text-gray-800 mb-4 text-center">{service.title}</h3>
-                    <p className="text-gray-600 text-center leading-relaxed flex-grow">{service.description}</p>
                   </div>
-                </motion.div>
-              ))}
+                  <div className="flex items-start space-x-4">
+                    <div className="w-8 h-8 bg-gradient-to-r from-blue-500 to-purple-500 rounded-full flex items-center justify-center text-white font-bold text-sm">2</div>
+                    <div>
+                      <h4 className="font-semibold text-slate-900 mb-2">PCE Scoring</h4>
+                      <p className="text-slate-600">Preparation, Capability, Execution on every candidate</p>
+                    </div>
+                  </div>
+                </div>
+                
+                <div className="space-y-4">
+                  <div className="flex items-start space-x-4">
+                    <div className="w-8 h-8 bg-gradient-to-r from-blue-500 to-purple-500 rounded-full flex items-center justify-center text-white font-bold text-sm">3</div>
+                    <div>
+                      <h4 className="font-semibold text-slate-900 mb-2">Account Management</h4>
+                      <p className="text-slate-600">Early micro-observations and monthly reviews</p>
+                    </div>
+                  </div>
+                  <div className="flex items-start space-x-4">
+                    <div className="w-8 h-8 bg-gradient-to-r from-blue-500 to-purple-500 rounded-full flex items-center justify-center text-white font-bold text-sm">4</div>
+                    <div>
+                      <h4 className="font-semibold text-slate-900 mb-2">Quality First</h4>
+                      <p className="text-slate-600">No "cheapest wins" - we optimize for quality and reliability</p>
+                    </div>
+                  </div>
+                </div>
+              </div>
+            </motion.div>
+        </section>
+
+        {/* Pricing Section - Real Pricing */}
+        <section id="pricing" className="section bg-gradient-to-br from-slate-50 via-white to-blue-50 relative overflow-hidden">
+          {/* Background Elements */}
+          <div className="absolute inset-0">
+            <div className="absolute top-0 left-0 w-full h-full bg-[radial-gradient(ellipse_at_top,_var(--tw-gradient-stops))] from-blue-100/20 via-transparent to-transparent"></div>
+            <div className="absolute bottom-0 right-0 w-96 h-96 bg-gradient-to-tl from-purple-100/20 to-transparent rounded-full blur-3xl"></div>
+          </div>
+
+          <div className="container relative z-10">
+            <motion.div
+              initial={{ opacity: 0, y: 40 }}
+              whileInView={{ opacity: 1, y: 0 }}
+              transition={{ duration: 0.8 }}
+              viewport={{ once: true }}
+              className="text-center mb-20"
+            >
+              <h2 className="text-6xl font-black text-slate-900 mb-8 leading-tight">
+                PRICING & <span className="gradient-text">SERVICES</span>
+              </h2>
+              
+              <p className="text-xl text-slate-600 max-w-3xl mx-auto">
+                Average A player placement at minimum wage monthly overhead.
+              </p>
+            </motion.div>
+
+            <div className="grid lg:grid-cols-3 gap-8 max-w-6xl mx-auto">
+              {/* Staffly Starter */}
+              <motion.div
+                initial={{ opacity: 0, y: 40 }}
+                whileInView={{ opacity: 1, y: 0 }}
+                transition={{ duration: 0.8, delay: 0.1 }}
+                viewport={{ once: true }}
+                className="bg-white/80 backdrop-blur-xl rounded-3xl p-8 shadow-xl border border-slate-200/50 hover:shadow-2xl transition-all duration-500 hover:scale-[1.02] group"
+              >
+                <div className="text-center mb-8">
+                  <h3 className="text-2xl font-bold text-slate-900 mb-4">Staffly Starter</h3>
+                  <div className="text-5xl font-black text-slate-900 mb-2">$1800</div>
+                  <div className="text-slate-600 font-medium">USD/mo</div>
+                  <p className="text-slate-500 text-sm mt-2">(Recruit, Team Lead & HR)</p>
+                  <p className="text-slate-600 text-sm mt-2">Up to 120 hours monthly collective clock in time.</p>
+                </div>
+                <button className="w-full bg-gradient-to-r from-blue-600 to-purple-600 text-white font-bold py-4 px-8 rounded-full hover:shadow-lg transition-all duration-300">
+                  Get Started
+                </button>
+              </motion.div>
+
+              {/* Staffly Growth */}
+              <motion.div
+                initial={{ opacity: 0, y: 40 }}
+                whileInView={{ opacity: 1, y: 0 }}
+                transition={{ duration: 0.8, delay: 0.2 }}
+                viewport={{ once: true }}
+                className="bg-white/80 backdrop-blur-xl rounded-3xl p-8 shadow-xl border border-blue-400/40 hover:shadow-2xl transition-all duration-500 hover:scale-[1.02] group relative"
+              >
+                {/* Popular Badge */}
+                <div className="absolute -top-4 left-1/2 transform -translate-x-1/2">
+                  <div className="bg-gradient-to-r from-blue-600 to-purple-600 text-white text-sm font-bold px-6 py-2 rounded-full shadow-lg">
+                    Most Popular
+                  </div>
+                </div>
+                
+                <div className="text-center mb-8 pt-6">
+                  <h3 className="text-2xl font-bold text-slate-900 mb-4">Staffly Growth</h3>
+                  <div className="text-5xl font-black text-slate-900 mb-2">$2500</div>
+                  <div className="text-slate-600 font-medium">USD/mo</div>
+                  <p className="text-slate-600 text-sm mt-2">Up to 160 hours monthly collective clock in time.</p>
+                </div>
+                <button className="w-full bg-gradient-to-r from-blue-600 to-purple-600 text-white font-bold py-4 px-8 rounded-full hover:shadow-lg transition-all duration-300">
+                  Get Started
+                </button>
+              </motion.div>
+
+              {/* Staffly Executive */}
+              <motion.div
+                initial={{ opacity: 0, y: 40 }}
+                whileInView={{ opacity: 1, y: 0 }}
+                transition={{ duration: 0.8, delay: 0.3 }}
+                viewport={{ once: true }}
+                className="bg-white/80 backdrop-blur-xl rounded-3xl p-8 shadow-xl border border-slate-200/50 hover:shadow-2xl transition-all duration-500 hover:scale-[1.02] group"
+              >
+                <div className="text-center mb-8">
+                  <h3 className="text-2xl font-bold text-slate-900 mb-4">Staffly Executive</h3>
+                  <div className="text-slate-600 font-medium mb-4">Click here to learn more</div>
+                  <p className="text-slate-500 text-sm">Click here to generate your scope and we'll send you candidates and their on target OTE expectations.</p>
+                </div>
+                <button className="w-full bg-gradient-to-r from-blue-600 to-purple-600 text-white font-bold py-4 px-8 rounded-full hover:shadow-lg transition-all duration-300">
+                  Learn More
+                </button>
+              </motion.div>
             </div>
           </div>
         </section>
 
-        {/* Testimonials Section - Dark Blue with Moving Animation */}
+        {/* Testimonials Section - Card Swap Animation */}
         <section id="testimonials" className="py-20 px-4 sm:px-6 lg:px-8 bg-gradient-to-br from-blue-800 to-blue-900 overflow-hidden">
           <div className="max-w-7xl mx-auto">
             <motion.div
@@ -411,60 +677,18 @@ const LandingPage = () => {
               </p>
             </motion.div>
 
-            {/* Moving Testimonials Container */}
-            <div className="relative">
-              {/* First Row - Moving Left */}
-              <div className="flex space-x-8 mb-8 animate-scroll-left">
-                {[...testimonials, ...testimonials].map((testimonial, index) => (
-                  <div
-                    key={index}
-                    className="flex-shrink-0 w-80 bg-white/10 backdrop-blur-md rounded-2xl p-6 border border-white/20"
-                  >
-                    <div className="flex items-center mb-4">
-                      <div className="w-12 h-12 bg-gradient-to-r from-blue-400 to-blue-600 rounded-full flex items-center justify-center text-white font-bold text-lg mr-4">
-                        {testimonial.avatar}
-                      </div>
-                      <div>
-                        <p className="font-semibold text-white">{testimonial.name}</p>
-                        <p className="text-blue-200 text-sm">{testimonial.role}</p>
-                      </div>
-                    </div>
-                    <div className="flex items-center mb-4">
-                      {[...Array(testimonial.rating)].map((_, i) => (
-                        <Star key={i} className="w-4 h-4 text-yellow-400 fill-current" />
-                      ))}
-                    </div>
-                    <p className="text-blue-100 italic text-sm leading-relaxed">"{testimonial.content}"</p>
-                  </div>
-                ))}
-              </div>
-
-              {/* Second Row - Moving Right */}
-              <div className="flex space-x-8 animate-scroll-right">
-                {[...testimonials, ...testimonials].map((testimonial, index) => (
-                  <div
-                    key={`row2-${index}`}
-                    className="flex-shrink-0 w-80 bg-white/10 backdrop-blur-md rounded-2xl p-6 border border-white/20"
-                  >
-                    <div className="flex items-center mb-4">
-                      <div className="w-12 h-12 bg-gradient-to-r from-blue-400 to-blue-600 rounded-full flex items-center justify-center text-white font-bold text-lg mr-4">
-                        {testimonial.avatar}
-                      </div>
-                      <div>
-                        <p className="font-semibold text-white">{testimonial.name}</p>
-                        <p className="text-blue-200 text-sm">{testimonial.role}</p>
-                      </div>
-                    </div>
-                    <div className="flex items-center mb-4">
-                      {[...Array(testimonial.rating)].map((_, i) => (
-                        <Star key={i} className="w-4 h-4 text-yellow-400 fill-current" />
-                      ))}
-                    </div>
-                    <p className="text-blue-100 italic text-sm leading-relaxed">"{testimonial.content}"</p>
-                  </div>
-                ))}
-              </div>
-            </div>
+            {/* Card Swap Testimonials */}
+            <CardSwap
+              testimonials={testimonials.map((testimonial, index) => ({
+                id: index,
+                name: testimonial.name,
+                role: testimonial.role,
+                company: testimonial.role.split(',')[1]?.trim() || '',
+                content: testimonial.content,
+                avatar: testimonial.avatar,
+                rating: testimonial.rating
+              }))}
+            />
           </div>
         </section>
 
@@ -494,69 +718,7 @@ const LandingPage = () => {
           </div>
         </section>
 
-        {/* Pricing Section - Dark Blue */}
-        <section id="pricing" className="py-20 px-4 sm:px-6 lg:px-8 bg-gradient-to-br from-blue-900 to-blue-800">
-          <div className="max-w-7xl mx-auto">
-            <motion.div
-              initial={{ opacity: 0, y: 40 }}
-              whileInView={{ opacity: 1, y: 0 }}
-              transition={{ duration: 0.6 }}
-              viewport={{ once: true }}
-              className="text-center mb-16"
-            >
-              <h2 className="text-4xl font-bold text-white mb-6">
-                Simple, Transparent Pricing
-              </h2>
-              <p className="text-xl text-blue-100 max-w-3xl mx-auto">
-                Choose the plan that fits your business needs and scale as you grow
-              </p>
-            </motion.div>
 
-            <div className="grid md:grid-cols-3 gap-8">
-              {pricingPlans.map((plan, index) => (
-                <motion.div
-                  key={index}
-                  initial={{ opacity: 0, y: 40 }}
-                  whileInView={{ opacity: 1, y: 0 }}
-                  transition={{ duration: 0.6, delay: index * 0.1 }}
-                  viewport={{ once: true }}
-                  className={`relative ${plan.popular ? 'scale-105' : ''}`}
-                >
-                  {plan.popular && (
-                    <div className="absolute -top-6 left-1/2 transform -translate-x-1/2 z-10">
-                      <span className="bg-gradient-to-r from-blue-400 to-blue-600 text-white px-6 py-3 rounded-full text-sm font-semibold shadow-lg border border-blue-300/30">
-                        Most Popular
-                      </span>
-                    </div>
-                  )}
-                  <div className={`bg-white/10 backdrop-blur-md rounded-2xl p-8 shadow-lg border ${plan.popular ? 'border-blue-400/40' : 'border-white/20'} h-full flex flex-col ${plan.popular ? 'pt-12' : ''}`}>
-                    <h3 className="text-2xl font-bold text-white mb-2">{plan.name}</h3>
-                    <div className="mb-6">
-                      <span className="text-4xl font-bold text-white">{plan.price}</span>
-                      <span className="text-blue-200">{plan.period}</span>
-                    </div>
-                    <p className="text-blue-100 mb-6">{plan.description}</p>
-                    <ul className="space-y-3 mb-8 flex-grow">
-                      {plan.features.map((feature, featureIndex) => (
-                        <li key={featureIndex} className="flex items-center">
-                          <Check className="w-5 h-5 text-blue-400 mr-3 flex-shrink-0" />
-                          <span className="text-blue-100">{feature}</span>
-                        </li>
-                      ))}
-                    </ul>
-                    <button className={`w-full py-3 px-6 rounded-full font-semibold transition-all duration-300 mt-auto ${
-                      plan.popular 
-                        ? 'bg-gradient-to-r from-blue-400 to-blue-600 text-white hover:shadow-lg' 
-                        : 'border-2 border-white text-white hover:bg-white hover:text-blue-600'
-                    }`}>
-                      Get Started
-                    </button>
-                  </div>
-                </motion.div>
-              ))}
-            </div>
-          </div>
-        </section>
 
         {/* FAQs Section - Light */}
         <section className="py-20 px-4 sm:px-6 lg:px-8 bg-white">
@@ -670,27 +832,246 @@ const LandingPage = () => {
           </div>
         </section>
 
-        {/* Footer - Dark Blue */}
-        <footer className="py-12 px-4 sm:px-6 lg:px-8 bg-gradient-to-br from-blue-900 to-blue-800 border-t border-blue-700/30">
-          <div className="max-w-7xl mx-auto">
-            <div className="flex flex-col md:flex-row justify-between items-center space-y-4 md:space-y-0">
-              <div className="flex items-center space-x-2">
-                <div className="w-8 h-8 bg-gradient-to-r from-blue-400 to-blue-600 rounded-full flex items-center justify-center">
-                  <span className="text-white font-bold text-sm">S</span>
+        {/* Disclaimer Section - Professional Design */}
+        <section className="section bg-gradient-to-br from-slate-50 via-white to-blue-50 relative overflow-hidden">
+          {/* Background Elements */}
+          <div className="absolute inset-0">
+            <div className="absolute top-0 left-0 w-full h-full bg-[radial-gradient(ellipse_at_top,_var(--tw-gradient-stops))] from-blue-100/20 via-transparent to-transparent"></div>
+            <div className="absolute bottom-0 right-0 w-96 h-96 bg-gradient-to-tl from-purple-100/20 to-transparent rounded-full blur-3xl"></div>
                 </div>
-                <span className="text-xl font-bold text-white">Staffly</span>
+
+          <div className="container relative z-10">
+            <motion.div
+              initial={{ opacity: 0, y: 40 }}
+              whileInView={{ opacity: 1, y: 0 }}
+              transition={{ duration: 0.8 }}
+              viewport={{ once: true }}
+              className="text-center mb-16"
+            >
+              <div className="inline-flex items-center px-4 py-2 bg-blue-100/50 text-blue-700 text-sm font-semibold rounded-full mb-6 border border-blue-200/50">
+                <div className="w-2 h-2 bg-yellow-500 rounded-full mr-2 animate-pulse"></div>
+                Legal Information
               </div>
-              <div className="flex space-x-6 text-sm">
-                <Link to="/terms" className="text-blue-200 hover:text-white transition-colors">
-                  Terms of Service
-                </Link>
-                <Link to="/privacy" className="text-blue-200 hover:text-white transition-colors">
-                  Privacy Policy
-                </Link>
+              
+              <h2 className="text-6xl font-black text-slate-900 mb-8 leading-tight">
+                Important <span className="gradient-text">Disclaimer</span>
+              </h2>
+              
+              <p className="text-xl text-slate-600 max-w-3xl mx-auto">
+                Please review our terms and understand the scope of our services
+              </p>
+            </motion.div>
+
+            <motion.div
+              initial={{ opacity: 0, scale: 0.95 }}
+              whileInView={{ opacity: 1, scale: 1 }}
+              transition={{ duration: 0.8, delay: 0.2 }}
+              viewport={{ once: true }}
+              className="max-w-5xl mx-auto"
+            >
+              <div className="bg-white/80 backdrop-blur-xl rounded-3xl p-12 shadow-2xl border border-slate-200/50 relative overflow-hidden">
+                {/* Decorative Elements */}
+                <div className="absolute top-0 left-0 w-full h-1 bg-gradient-to-r from-transparent via-blue-500 to-transparent"></div>
+                <div className="absolute top-4 right-4 w-16 h-16 bg-gradient-to-br from-blue-500/20 to-purple-500/20 rounded-full blur-xl"></div>
+                <div className="absolute bottom-4 left-4 w-20 h-20 bg-gradient-to-tr from-purple-500/20 to-pink-500/20 rounded-full blur-xl"></div>
+                
+                <div className="relative z-10 space-y-8">
+                  {/* Main Disclaimer */}
+                  <div className="text-center mb-10">
+                    <div className="w-20 h-20 bg-gradient-to-r from-yellow-400 to-orange-500 rounded-full flex items-center justify-center mx-auto mb-6 shadow-lg">
+                      <svg className="w-10 h-10 text-white" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                        <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M12 9v2m0 4h.01m-6.938 4h13.856c1.54 0 2.502-1.667 1.732-2.5L13.732 4c-.77-.833-1.964-.833-2.732 0L3.732 16.5c-.77.833.192 2.5 1.732 2.5z" />
+                      </svg>
+                    </div>
+                    <h3 className="text-2xl font-bold text-slate-900 mb-4">Service Scope & Limitations</h3>
+                    <p className="text-lg text-slate-600 leading-relaxed max-w-4xl mx-auto">
+                      Staffly is a platform that connects businesses with virtual assistants. While we strive to provide high-quality services and carefully vet our virtual assistants, we cannot guarantee specific outcomes or results.
+                    </p>
+                  </div>
+
+                  {/* Key Points Grid */}
+                  <div className="grid md:grid-cols-2 gap-8 mb-10">
+                    <div className="bg-white/60 rounded-2xl p-6 border border-slate-200/50">
+                      <div className="flex items-start space-x-4">
+                        <div className="w-12 h-12 bg-gradient-to-r from-blue-500 to-blue-600 rounded-xl flex items-center justify-center flex-shrink-0">
+                          <svg className="w-6 h-6 text-white" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                            <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M9 12l2 2 4-4m6 2a9 9 0 11-18 0 9 9 0 0118 0z" />
+                          </svg>
+                        </div>
+                        <div>
+                          <h4 className="text-lg font-semibold text-slate-900 mb-2">What We Provide</h4>
+                          <p className="text-slate-600 text-sm leading-relaxed">
+                            High-quality virtual assistant profiles, comprehensive vetting, and ongoing support for successful partnerships.
+                          </p>
+                        </div>
+                      </div>
+                    </div>
+
+                    <div className="bg-white/60 rounded-2xl p-6 border border-slate-200/50">
+                      <div className="flex items-start space-x-4">
+                        <div className="w-12 h-12 bg-gradient-to-r from-purple-500 to-purple-600 rounded-xl flex items-center justify-center flex-shrink-0">
+                          <svg className="w-6 h-6 text-white" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                            <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M13 16h-1v-4h-1m1-4h.01M21 12a9 9 0 11-18 0 9 9 0 0118 0z" />
+                          </svg>
+                        </div>
+                        <div>
+                          <h4 className="text-lg font-semibold text-slate-900 mb-2">What We Don't Guarantee</h4>
+                          <p className="text-slate-600 text-sm leading-relaxed">
+                            Specific outcomes, results, or performance levels as these depend on various factors beyond our control.
+                          </p>
+                        </div>
+                      </div>
+                    </div>
+                  </div>
+
+                  {/* Detailed Information */}
+                  <div className="space-y-6">
+                    <div className="bg-gradient-to-r from-blue-500/10 to-purple-500/10 rounded-2xl p-6 border border-blue-500/20">
+                      <h4 className="text-lg font-semibold text-slate-900 mb-3 flex items-center">
+                        <svg className="w-5 h-5 mr-2" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                          <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M9.663 17h4.673M12 3v1m6.364 1.636l-.707.707M21 12h-1M4 12H3m3.343-5.657l-.707-.707m2.828 9.9a5 5 0 117.072 0l-.548.547A3.374 3.374 0 0014 18.469V19a2 2 0 11-4 0v-.531c0-.895-.356-1.754-.988-2.386l-.548-.547z" />
+                        </svg>
+                        Success Factors
+                      </h4>
+                      <p className="text-slate-700 leading-relaxed">
+                        The success of any virtual assistant relationship depends on clear communication, proper training, ongoing management, and collaborative effort between your business and the virtual assistant.
+                      </p>
+                    </div>
+
+                    <div className="bg-gradient-to-r from-green-500/10 to-emerald-500/10 rounded-2xl p-6 border border-green-500/20">
+                      <h4 className="text-lg font-semibold text-slate-900 mb-3 flex items-center">
+                        <svg className="w-5 h-5 mr-2" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                          <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M12 15v2m-6 4h12a2 2 0 002-2v-6a2 2 0 00-2-2H6a2 2 0 00-2 2v6a2 2 0 002 2zm10-10V7a4 4 0 00-8 0v4h8z" />
+                        </svg>
+                        Our Recommendations
+                      </h4>
+                      <p className="text-slate-700 leading-relaxed">
+                        We strongly recommend providing clear expectations, proper onboarding, and ongoing feedback to maximize the effectiveness of your virtual assistant partnerships.
+                      </p>
+                    </div>
+
+                    <div className="bg-gradient-to-r from-orange-500/10 to-red-500/10 rounded-2xl p-6 border border-orange-500/20">
+                      <h4 className="text-lg font-semibold text-slate-900 mb-3 flex items-center">
+                        <svg className="w-5 h-5 mr-2" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                          <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M18.364 5.636l-3.536 3.536m0 5.656l3.536 3.536M9.172 9.172L5.636 5.636m3.536 9.192L5.636 18.364M12 2.25a9.75 9.75 0 100 19.5 9.75 9.75 0 000-19.5z" />
+                        </svg>
+                        Independent Contractors
+                      </h4>
+                      <p className="text-slate-700 leading-relaxed">
+                        Virtual assistants are independent contractors. Staffly is not responsible for their actions, performance, or conduct, as they operate independently from our platform.
+                      </p>
+                    </div>
+                  </div>
+
+                  {/* Final Acknowledgment */}
+                  <div className="text-center pt-6 border-t border-slate-200">
+                    <p className="text-slate-700 leading-relaxed">
+                      By using our services, you acknowledge that you understand these terms and agree to work collaboratively with your virtual assistant to achieve your business goals.
+                    </p>
+                    <div className="mt-6 flex items-center justify-center space-x-2 text-slate-400">
+                      <svg className="w-5 h-5" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                        <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M9 12l2 2 4-4m5.618-4.016A11.955 11.955 0 0112 2.944a11.955 11.955 0 01-8.618 3.04A12.02 12.02 0 003 9c0 5.591 3.824 10.29 9 11.622 5.176-1.332 9-6.03 9-11.622 0-1.042-.133-2.052-.382-3.016z" />
+                      </svg>
+                      <span className="text-sm font-medium">Your success is our priority</span>
+                    </div>
+                  </div>
+                </div>
+              </div>
+            </motion.div>
+          </div>
+        </section>
+
+        {/* Footer - Beautiful Design */}
+        <footer className="relative bg-gradient-to-br from-slate-50 via-white to-blue-50 overflow-hidden">
+          {/* Background Elements */}
+          <div className="absolute inset-0">
+            <div className="absolute top-0 left-0 w-full h-full bg-[radial-gradient(ellipse_at_top,_var(--tw-gradient-stops))] from-blue-100/20 via-transparent to-transparent"></div>
+            <div className="absolute bottom-0 right-0 w-96 h-96 bg-gradient-to-tl from-purple-100/20 to-transparent rounded-full blur-3xl"></div>
+          </div>
+
+          <div className="container relative z-10">
+            {/* Main Footer Content */}
+            <div className="grid lg:grid-cols-4 gap-12 py-20">
+              {/* Company Info */}
+              <div className="lg:col-span-2">
+                                  <div className="flex items-center space-x-3 mb-6">
+                    <div className="w-12 h-12 bg-gradient-to-r from-blue-400 to-purple-500 rounded-full flex items-center justify-center shadow-lg">
+                      <span className="text-white font-bold text-xl">S</span>
+                    </div>
+                    <div>
+                      <h3 className="text-2xl font-bold text-slate-900">Staffly</h3>
+                      <p className="text-blue-600 text-sm">Elite Virtual Assistants</p>
+                    </div>
+                  </div>
+                  <p className="text-slate-600 mb-6 max-w-md leading-relaxed">
+                    Transform your business with A+ virtual assistants. We connect you with elite talent that thinks like you do.
+                  </p>
+                <div className="flex space-x-4">
+                  <div className="w-10 h-10 bg-blue-100 rounded-full flex items-center justify-center hover:bg-blue-200 transition-colors cursor-pointer">
+                    <svg className="w-5 h-5 text-blue-600" fill="currentColor" viewBox="0 0 24 24">
+                      <path d="M24 4.557c-.883.392-1.832.656-2.828.775 1.017-.609 1.798-1.574 2.165-2.724-.951.564-2.005.974-3.127 1.195-.897-.957-2.178-1.555-3.594-1.555-3.179 0-5.515 2.966-4.797 6.045-4.091-.205-7.719-2.165-10.148-5.144-1.29 2.213-.669 5.108 1.523 6.574-.806-.026-1.566-.247-2.229-.616-.054 2.281 1.581 4.415 3.949 4.89-.693.188-1.452.232-2.224.084.626 1.956 2.444 3.379 4.6 3.419-2.07 1.623-4.678 2.348-7.29 2.04 2.179 1.397 4.768 2.212 7.548 2.212 9.142 0 14.307-7.721 13.995-14.646.962-.695 1.797-1.562 2.457-2.549z"/>
+                    </svg>
+                  </div>
+                  <div className="w-10 h-10 bg-blue-100 rounded-full flex items-center justify-center hover:bg-blue-200 transition-colors cursor-pointer">
+                    <svg className="w-5 h-5 text-blue-600" fill="currentColor" viewBox="0 0 24 24">
+                      <path d="M20.447 20.452h-3.554v-5.569c0-1.328-.027-3.037-1.852-3.037-1.853 0-2.136 1.445-2.136 2.939v5.667H9.351V9h3.414v1.561h.046c.477-.9 1.637-1.85 3.37-1.85 3.601 0 4.267 2.37 4.267 5.455v6.286zM5.337 7.433c-1.144 0-2.063-.926-2.063-2.065 0-1.138.92-2.063 2.063-2.063 1.14 0 2.064.925 2.064 2.063 0 1.139-.925 2.065-2.064 2.065zm1.782 13.019H3.555V9h3.564v11.452zM22.225 0H1.771C.792 0 0 .774 0 1.729v20.542C0 23.227.792 24 1.771 24h20.451C23.2 24 24 23.227 24 22.271V1.729C24 .774 23.2 0 22.222 0h.003z"/>
+                    </svg>
+                  </div>
+                  <div className="w-10 h-10 bg-blue-100 rounded-full flex items-center justify-center hover:bg-blue-200 transition-colors cursor-pointer">
+                    <svg className="w-5 h-5 text-blue-600" fill="currentColor" viewBox="0 0 24 24">
+                      <path d="M12.017 0C5.396 0 .029 5.367.029 11.987c0 5.079 3.158 9.417 7.618 11.174-.105-.949-.199-2.403.041-3.439.219-.937 1.406-5.957 1.406-5.957s-.359-.72-.359-1.781c0-1.663.967-2.911 2.168-2.911 1.024 0 1.518.769 1.518 1.688 0 1.029-.653 2.567-.992 3.992-.285 1.193.6 2.165 1.775 2.165 2.128 0 3.768-2.245 3.768-5.487 0-2.861-2.063-4.869-5.008-4.869-3.41 0-5.409 2.562-5.409 5.199 0 1.033.394 2.143.889 2.741.099.12.112.225.085.345-.09.375-.293 1.199-.334 1.363-.053.225-.172.271-.402.165-1.495-.69-2.433-2.878-2.433-4.646 0-3.776 2.748-7.252 7.92-7.252 4.158 0 7.392 2.967 7.392 6.923 0 4.135-2.607 7.462-6.233 7.462-1.214 0-2.357-.629-2.746-1.378l-.748 2.853c-.271 1.043-1.002 2.35-1.492 3.146C9.57 23.812 10.763 24.009 12.017 24.009c6.624 0 11.99-5.367 11.99-11.988C24.007 5.367 18.641.001 12.017.001z"/>
+                    </svg>
+                  </div>
+                </div>
+              </div>
+
+              {/* Quick Links */}
+              <div>
+                <h4 className="text-lg font-semibold text-slate-900 mb-6">Quick Links</h4>
+                <ul className="space-y-3">
+                  <li><Link to="/" className="text-slate-600 hover:text-slate-900 transition-colors">Home</Link></li>
+                  <li><Link to="/#our-story" className="text-slate-600 hover:text-slate-900 transition-colors">Our Story</Link></li>
+                  <li><Link to="/#services" className="text-slate-600 hover:text-slate-900 transition-colors">Services</Link></li>
+                  <li><Link to="/#pricing" className="text-slate-600 hover:text-slate-900 transition-colors">Pricing</Link></li>
+                  <li><Link to="/hire" className="text-slate-600 hover:text-slate-900 transition-colors">Hire VAs</Link></li>
+                </ul>
+              </div>
+
+              {/* Services */}
+              <div>
+                <h4 className="text-lg font-semibold text-slate-900 mb-6">Services</h4>
+                <ul className="space-y-3">
+                  <li><span className="text-slate-600">Executive Assistants</span></li>
+                  <li><span className="text-slate-600">Operations & Project Coordination</span></li>
+                  <li><span className="text-slate-600">Sales & Growth Support</span></li>
+                  <li><span className="text-slate-600">Customer Experience</span></li>
+                  <li><span className="text-slate-600">Marketing Operations</span></li>
+                </ul>
               </div>
             </div>
-            <div className="mt-8 text-center text-blue-300">
-              <p>&copy; 2025 Staffly. All rights reserved.</p>
+
+            {/* Bottom Section */}
+            <div className="border-t border-slate-200 pt-8 pb-12">
+              <div className="flex flex-col md:flex-row justify-between items-center space-y-4 md:space-y-0">
+                <div className="flex items-center space-x-6 text-sm">
+                  <Link to="/terms" className="text-slate-500 hover:text-slate-700 transition-colors">
+                  Terms of Service
+                </Link>
+                  <Link to="/privacy" className="text-slate-500 hover:text-slate-700 transition-colors">
+                  Privacy Policy
+                </Link>
+                  <span className="text-slate-500">Cookie Policy</span>
+              </div>
+                
+                <div className="text-center md:text-right">
+                  <p className="text-slate-500 text-sm mb-2">
+                    &copy; 2025 Staffly. All rights reserved.
+                  </p>
+                  <p className="text-slate-400 text-xs">
+                    Made with ❤️ for scaling businesses
+                  </p>
+            </div>
+              </div>
             </div>
           </div>
         </footer>

@@ -31,11 +31,10 @@ const FloatingNavbar = () => {
 
   const navItems = [
     { path: '/', label: 'Home', icon: Home },
-    { path: '/jobs', label: 'Find Jobs', icon: Users },
-    { path: '/hire', label: 'Hire VAs', icon: Briefcase },
-    { path: '/partner', label: 'Partner', icon: Rocket },
+    { path: '/#our-story', label: 'Our Story', icon: BookOpen },
+    { path: '/#services', label: 'Services', icon: Settings },
+    { path: '/#pricing', label: 'Pricing', icon: Briefcase },
     { path: '/playbooks', label: 'Playbooks', icon: BookOpen },
-    { path: '/services', label: 'Services', icon: Settings },
     { path: '/contact', label: 'Contact', icon: Phone },
   ];
 
@@ -47,7 +46,7 @@ const FloatingNavbar = () => {
         initial={{ y: -100, x: '-50%' }}
         animate={{ y: isVisible ? 0 : -100, x: '-50%' }}
         transition={{ duration: 0.3, ease: 'easeInOut' }}
-        className="fixed top-4 z-50 px-3 sm:px-4 py-3 bg-white/90 backdrop-blur-xl rounded-full shadow-xl border border-white/30 hover:bg-white/95 transition-all duration-300 max-w-[95vw]"
+        className="fixed top-8 z-50 px-3 sm:px-4 py-3 bg-white/90 backdrop-blur-xl rounded-full shadow-xl border border-white/30 hover:bg-white/95 transition-all duration-300 max-w-[95vw]"
         style={{ left: '50%', transform: 'translateX(-50%)' }}
       >
         <div className="flex items-center space-x-4 sm:space-x-6 lg:space-x-8">
