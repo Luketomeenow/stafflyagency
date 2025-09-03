@@ -60,29 +60,68 @@ const FullScreenChatbot: React.FC = () => {
 
     try {
       const apiKey = import.meta.env.VITE_OPENAI_API_KEY;
-      if (!apiKey || apiKey === 'your_openai_api_key_here') {
-        throw new Error('OpenAI API key not configured. Please check your .env file.');
+      
+      // Check if API key exists
+      if (!apiKey) {
+        throw new Error('OpenAI API key not configured');
       }
 
-      // Simulate API call for now
-      setTimeout(() => {
-        const botMessage: Message = {
-          id: (Date.now() + 1).toString(),
-          text: "I understand you're looking for help with that. Let me connect you with the perfect virtual assistant for your needs. What's your budget and timeline?",
-          sender: 'bot',
-          timestamp: new Date()
-        };
-        
-        setMessages(prev => [...prev, botMessage]);
-        setIsLoading(false);
-        setIsTyping(false);
-      }, 2000);
+      // Make actual API call to OpenAI
+      const response = await fetch('https://api.openai.com/v1/chat/completions', {
+        method: 'POST',
+        headers: {
+          'Content-Type': 'application/json',
+          'Authorization': `Bearer ${apiKey}`
+        },
+        body: JSON.stringify({
+          model: 'gpt-3.5-turbo',
+          messages: [
+            {
+              role: 'system',
+              content: 'You are Staffly AI, a helpful assistant specializing in virtual assistant services. You help businesses find the perfect virtual assistants for their needs. Be friendly, professional, and knowledgeable about VA services including admin support, customer service, social media management, data entry, and project management. Keep responses concise and helpful.'
+            },
+            {
+              role: 'user',
+              content: userMessage.text
+            }
+          ],
+          max_tokens: 300,
+          temperature: 0.7
+        })
+      });
+
+      if (!response.ok) {
+        throw new Error(`API request failed: ${response.status}`);
+      }
+
+      const data = await response.json();
+      const botMessage: Message = {
+        id: (Date.now() + 1).toString(),
+        text: data.choices[0].message.content,
+        sender: 'bot',
+        timestamp: new Date()
+      };
+      
+      setMessages(prev => [...prev, botMessage]);
+      setIsLoading(false);
+      setIsTyping(false);
 
     } catch (error) {
       console.error('Error:', error);
+      
+      let errorText = "I'm sorry, but I'm having trouble connecting right now. Please try again in a moment.";
+      
+      if (error instanceof Error) {
+        if (error.message.includes('API key not configured')) {
+          errorText = "I'm sorry, but the AI service is not properly configured. Please contact support to get this fixed.";
+        } else if (error.message.includes('API request failed')) {
+          errorText = "I'm having trouble connecting to the AI service. Please check your internet connection and try again.";
+        }
+      }
+      
       const errorMessage: Message = {
         id: (Date.now() + 1).toString(),
-        text: "I'm sorry, but the AI service is not properly configured. Please contact support to get this fixed.",
+        text: errorText,
         sender: 'bot',
         timestamp: new Date()
       };
