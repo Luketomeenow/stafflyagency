@@ -1,6 +1,9 @@
 import React, { useState, useRef, useEffect } from 'react';
 import { motion, AnimatePresence } from 'framer-motion';
 import { MessageCircle, Send, User, Bot, Loader2, X, Minimize2 } from 'lucide-react';
+// RAG: use server-side search; keep client MiniSearch fallback only if needed
+import { ingestPdfIfRequested } from '../knowledge/rag';
+import { supabase } from '../lib/supabase';
 
 interface Message {
   id: string;
@@ -9,12 +12,79 @@ interface Message {
   timestamp: Date;
 }
 
+const SYSTEM_PROMPT = `You are Staffly AI, the friendly, concise, and professional “Staffly Guide.” You help founders and business owners match with the right Filipino Virtual Assistants (VAs) so they can free up time and focus on growth.
+
+OBJECTIVE
+- Qualify the user, discover their pain, recommend a VA type, collect an email, optionally offer a call, and confirm next steps.
+- Keep messages short (1–3 sentences), ask only one question at a time, and present clear options.
+- Be upbeat and business-focused. Use light emojis (✅ 📅 ✉️) sparingly.
+
+HOW TO USE KNOWLEDGE
+- You may receive an additional hidden instruction titled “Staffly Knowledge” containing snippets from internal documents (with page numbers).
+- When a user asks a specific factual question, first consult these snippets and answer using them. Prefer these over general knowledge. Do NOT mention “system” or “snippets.”
+- Briefly cite like: “(Source: page X)” when the answer clearly derives from a snippet.
+- If no relevant snippet exists, say you don’t have that in your notes and offer to check with the team, then continue the flow.
+- After answering any off-flow question, gracefully steer back to the next step of the flow.
+
+PRICING POLICY
+- If asked about pricing: “Staffly offers competitive rates starting at $299/month. I can connect you with a specialist for detailed pricing.”
+
+GUARDRAILS
+- Never collect payment or sensitive data. Only collect email for sending curated profiles.
+- Validate email format; if invalid, ask once more for a valid email.
+- If the user declines to continue, offer to send a quick checklist and end politely if they refuse.
+
+CONVERSATION FLOW (one step per turn)
+1) GREETING & POSITIONING
+   “👋 Hey there! I’m your Staffly Guide… Can I ask a few quick questions to recommend the right VA for your business?”
+   Options: [Yes, let’s do it ✅] [Not right now ❌]
+
+2) QUALIFYING QUESTIONS
+   Q1 Industry? Options: [Agency / Marketing] [Coaching / Consulting] [E-commerce] [Real Estate] [Other]
+   Q2 Team size? Options: [Just me] [2–5 employees] [6–15 employees] [15+ employees]
+   Q3 Approx. monthly revenue? Options: [Under $10k/month] [$10k–$50k/month] [$50k–$200k/month] [$200k+/month]
+
+3) PAIN DISCOVERY
+   “Which challenge sounds most like you right now?”
+   Options: [Generating more leads & sales] [I’m drowning in admin / inbox / scheduling] [Too much time on creative work] [Other challenges]
+
+4) OBJECTION SOFTENER (if user hesitates)
+   “Many founders are stuck in low‑value tasks. Do you spend more time on sales & growth or admin/ops?”
+   Options: [Sales & Growth] [Admin/Operational tasks]
+
+5) PRESCRIPTION (RECOMMENDATION)
+   Map pain → VA type:
+   - Leads/Sales → Lead Generation VA (prospecting, outreach, appointment setting → more deals closed)
+   - Admin drowning → Executive/Advanced Admin VA (inbox, calendar, recurring ops → focus on high‑value work)
+   - Creative overload → Creative VA (video editing, Canva/design → offload time‑consuming creative)
+   - Other → ask one clarifying question, then map accordingly.
+   Format: “Based on what you’ve shared, I recommend a [VA Type]. They’ll handle [2–3 key tasks] so you can [business outcome].”
+
+6) CLOSE & NEXT STEP (EMAIL)
+   “I’ll send you 2–3 curated VA profiles from our pre‑vetted database matched to your needs. What’s the best email to send them to? ✉️”
+   Validate email; if invalid, ask once more.
+   After a valid email, optionally ask: “Would you like to book a quick call to walk through the candidates together?” Options: [Yes, schedule a call 📅] [No thanks, just send profiles]
+
+7) CONFIRMATION
+   “Perfect! 🎉 Your curated VA matches will be on their way within 24 hours.” If a call is booked, confirm enthusiastically.
+
+STYLE & UX RULES
+- One question per turn. Options in square brackets like buttons.
+- Keep replies skimmable. Infer and confirm when users reply in free text.
+- After answering any knowledge question, return to the flow without repeating prior steps.
+
+REFERENCE REMINDERS
+- Lead Gen VA: prospecting, list-building, outreach, follow-ups, appointment setting.
+- Exec/Admin VA: inbox triage, calendar, SOPs, recurring ops, light project coordination.
+- Creative VA: video editing, thumbnails, Canva/design, light content repurposing.
+- Pricing line: “Starting at $299/month” with offer to connect to a specialist.`;
+
 const FullScreenChatbot: React.FC = () => {
   const [isFullScreen, setIsFullScreen] = useState(false);
   const [messages, setMessages] = useState<Message[]>([
     {
       id: '1',
-      text: "Hi! I'm Staffly AI. I can help you find the perfect virtual assistant for your business needs. What type of help are you looking for?",
+      text: "👋 Hey there! I’m your Staffly Guide. I help founders and business owners like you match with the right Filipino VAs so you can free up time and focus on growth. Can I ask you a few quick questions so I can recommend the right VA for your business?",
       sender: 'bot',
       timestamp: new Date()
     }
@@ -24,6 +94,46 @@ const FullScreenChatbot: React.FC = () => {
   const [isTyping, setIsTyping] = useState(false);
   const messagesEndRef = useRef<HTMLDivElement>(null);
   const inputRef = useRef<HTMLInputElement>(null);
+  const [conversationId, setConversationId] = useState<string | null>(null);
+  // Optional query param ?ingest=1 to ingest the PDF to Supabase via Edge Function
+  useEffect(() => {
+    const supabaseUrl = import.meta.env.VITE_SUPABASE_URL as string | undefined
+    const anonKey = import.meta.env.VITE_SUPABASE_ANON_KEY as string | undefined
+    ingestPdfIfRequested(supabaseUrl, anonKey)
+  }, [])
+
+  // Create conversation on mount
+  useEffect(() => {
+    (async () => {
+      try {
+        if (!supabase) return
+        const sessionId = crypto.randomUUID()
+        const res = await supabase
+          .from('conversations')
+          .insert({ session_id: sessionId, metadata: { user_agent: navigator.userAgent } })
+          .select('id')
+          .single()
+        if (res.error) throw res.error
+        setConversationId(res.data.id)
+      } catch (e) {
+        console.warn('Conversation create failed', e)
+      }
+    })()
+  }, [])
+
+  // Lead capture and gated profiles state
+  const [capturedEmail, setCapturedEmail] = useState<string | null>(null);
+  const [profilesUnlocked, setProfilesUnlocked] = useState(false);
+  const [leadName, setLeadName] = useState('');
+  const [leadEmail, setLeadEmail] = useState('');
+  const [leadPhone, setLeadPhone] = useState('');
+  const [showSearching, setShowSearching] = useState(false);
+
+  useEffect(() => {
+    if (capturedEmail && !profilesUnlocked) {
+      setLeadEmail(capturedEmail);
+    }
+  }, [capturedEmail, profilesUnlocked]);
 
   const scrollToBottom = () => {
     messagesEndRef.current?.scrollIntoView({ behavior: 'smooth' });
@@ -59,32 +169,54 @@ const FullScreenChatbot: React.FC = () => {
     }
 
     try {
+      if (supabase && conversationId) {
+        try { await supabase.from('conversation_messages').insert({ conversation_id: conversationId, role: 'user', content: userMessage.text }) } catch {}
+      }
       const apiKey = import.meta.env.VITE_OPENAI_API_KEY;
-      
-      // Check if API key exists
+      const model = import.meta.env.VITE_OPENAI_MODEL || 'gpt-3.5-turbo';
+
       if (!apiKey) {
         throw new Error('OpenAI API key not configured');
       }
 
-      // Make actual API call to OpenAI
-      const response = await fetch('https://api.openai.com/v1/chat/completions', {
+      // Build full conversation history so the model follows the flow
+      // Server-side retrieval via Supabase Edge Function
+      let kbSnippets: string[] = []
+      try {
+        const supabaseUrl = import.meta.env.VITE_SUPABASE_URL as string
+        const anonKey = import.meta.env.VITE_SUPABASE_ANON_KEY as string
+        const endpoint = supabaseUrl.replace('supabase.co', 'functions.supabase.co') + '/rag-search'
+        const res = await fetch(endpoint, {
+          method: 'POST',
+          headers: { 'Content-Type': 'application/json', 'Authorization': `Bearer ${anonKey}` },
+          body: JSON.stringify({ query: userMessage.text, top_k: 3, min_similarity: 0.2 })
+        })
+        if (res.ok) {
+          const data = await res.json()
+          kbSnippets = (data.matches || []).map((m: any) => `Source (page ${m.page}): ${m.content}`)
+        }
+      } catch (e) {
+        console.warn('RAG search failed, continuing without snippets', e)
+      }
+
+      const openAiMessages = [
+        { role: 'system', content: SYSTEM_PROMPT },
+        ...(kbSnippets.length ? [{ role: 'system', content: `Staffly Knowledge (use when relevant, cite briefly):\n${kbSnippets.join('\n\n')}` }] : []),
+        ...[...messages, userMessage].map(m => ({
+          role: m.sender === 'user' ? 'user' : 'assistant',
+          content: m.text
+        }))
+      ];
+
+      const response = await fetch('/api/openai/v1/chat/completions', {
         method: 'POST',
         headers: {
           'Content-Type': 'application/json',
           'Authorization': `Bearer ${apiKey}`
         },
         body: JSON.stringify({
-          model: 'gpt-3.5-turbo',
-          messages: [
-            {
-              role: 'system',
-              content: 'You are Staffly AI, a helpful assistant specializing in virtual assistant services. You help businesses find the perfect virtual assistants for their needs. Be friendly, professional, and knowledgeable about VA services including admin support, customer service, social media management, data entry, and project management. Keep responses concise and helpful.'
-            },
-            {
-              role: 'user',
-              content: userMessage.text
-            }
-          ],
+          model: model,
+          messages: openAiMessages,
           max_tokens: 300,
           temperature: 0.7
         })
@@ -105,6 +237,21 @@ const FullScreenChatbot: React.FC = () => {
       setMessages(prev => [...prev, botMessage]);
       setIsLoading(false);
       setIsTyping(false);
+
+      if (supabase && conversationId) {
+        try { await supabase.from('conversation_messages').insert({ conversation_id: conversationId, role: 'assistant', content: botMessage.text }) } catch {}
+      }
+
+      // Detect email capture from user's last message
+      const emailRegex = /^[^\s@]+@[^\s@]+\.[^\s@]+$/;
+      if (emailRegex.test(userMessage.text)) {
+        setCapturedEmail(userMessage.text);
+        // simulate searching animation before showing profiles
+        setShowSearching(true);
+        setTimeout(() => {
+          setShowSearching(false);
+        }, 1800);
+      }
 
     } catch (error) {
       console.error('Error:', error);
@@ -384,36 +531,113 @@ const FullScreenChatbot: React.FC = () => {
             </div>
           </div>
 
-          {/* Right Side - AI Output/Results */}
+          {/* Right Side - Intro / Searching / Gated VA Profiles */}
           <div className="w-1/2 p-6">
-            <div className="h-full bg-slate-50 rounded-2xl border border-slate-200 p-6 overflow-y-auto">
-              <h3 className="text-xl font-bold text-slate-900 mb-4">AI Analysis & Recommendations</h3>
-              
-              {messages.length <= 1 ? (
-                <div className="text-center text-slate-600 mt-20">
-                  <MessageCircle className="w-16 h-16 mx-auto mb-4 opacity-50 text-slate-500" />
-                  <p className="text-lg text-slate-800">Start a conversation to see AI insights</p>
-                  <p className="text-sm mt-2 text-slate-700">The AI will analyze your needs and provide personalized recommendations</p>
+            <div className="h-full bg-slate-50 rounded-2xl border border-slate-200 p-6 overflow-y-auto relative">
+              {/* Hero intro when conversation just starts */}
+              {(!capturedEmail && !showSearching) && (
+                <div className="h-full flex flex-col items-center justify-center text-center">
+                  <div className="text-5xl font-black text-slate-900 mb-4">Hire A+ <span className="bg-gradient-to-r from-blue-600 to-purple-600 bg-clip-text text-transparent">Operators</span></div>
+                  <div className="text-2xl text-slate-700">— For 60% Less</div>
+                  <p className="mt-6 text-slate-600 max-w-lg">Answer a few quick questions in the chat and I’ll curate 2–3 pre-vetted VA profiles for you.</p>
                 </div>
-              ) : (
-                <div className="space-y-4">
-                  <div className="bg-gradient-to-r from-blue-500/20 to-purple-500/20 rounded-xl p-4 border border-blue-500/30">
-                    <h4 className="font-semibold text-slate-800 mb-2">💡 AI Insight</h4>
-                    <p className="text-slate-800">Based on your request, I recommend focusing on these key areas for your virtual assistant needs.</p>
+              )}
+
+              {/* Searching animation after email capture */}
+              {capturedEmail && showSearching && (
+                <div className="h-full flex flex-col items-center justify-center">
+                  <div className="w-16 h-16 rounded-full border-4 border-blue-200 border-t-blue-600 animate-spin mb-4"></div>
+                  <p className="text-slate-700 font-medium">Finding your best-fit profiles…</p>
+                  <p className="text-slate-500 text-sm mt-1">Matching skills, availability, and track record</p>
+                </div>
+              )}
+
+              {(capturedEmail || profilesUnlocked || showSearching) && (
+                <h3 className="text-xl font-bold text-slate-900 mb-4">Curated VA Profiles</h3>
+              )}
+
+              {/* Profiles Grid */}
+              {(capturedEmail || profilesUnlocked || showSearching) && (
+              <div className={`grid grid-cols-1 md:grid-cols-2 gap-4 ${profilesUnlocked ? '' : 'blur-sm select-none pointer-events-none'}`}>
+                {[0,1,2,3,4].map((i) => (
+                  <div key={i} className="bg-white rounded-xl border border-slate-200 shadow-sm p-4">
+                    <div className="flex items-center space-x-3 mb-3">
+                      <div className="w-10 h-10 rounded-full bg-gradient-to-r from-blue-500 to-purple-500 text-white flex items-center justify-center font-bold">{['AM','JR','KP','LC','VN'][i]}</div>
+                      <div>
+                        <div className="font-semibold text-slate-900">{['Alexa M.','Jared R.','Kyla P.','Liam C.','Vera N.'][i]}</div>
+                        <div className="text-slate-600 text-sm">{['Executive Assistant','Lead Gen Specialist','Project Coordinator','Customer Support','Creative VA'][i]}</div>
+                      </div>
+                    </div>
+                    <div className="text-slate-700 text-sm">
+                      <div className="mb-1"><span className="font-medium">Strengths:</span> {[
+                        'Inbox, Calendar, SOPs',
+                        'Prospecting, Outreach, Booking',
+                        'Timelines, Coordination, Docs',
+                        'Tickets, SLAs, CRM',
+                        'Video Editing, Canva, Thumbnails'
+                      ][i]}</div>
+                      <div className="text-slate-500 text-xs">Availability: Immediate • Timezone: PH</div>
+                    </div>
                   </div>
-                  
-                  <div className="bg-gradient-to-r from-green-500/20 to-emerald-500/20 rounded-xl p-4 border border-green-500/30">
-                    <h4 className="font-semibold text-slate-800 mb-2">🎯 Recommended Services</h4>
-                    <ul className="text-slate-800 space-y-2">
-                      <li>• Executive Assistant support</li>
-                      <li>• Project coordination</li>
-                      <li>• Customer experience management</li>
-                    </ul>
-                  </div>
-                  
-                  <div className="bg-gradient-to-r from-purple-500/20 to-pink-500/20 rounded-xl p-4 border border-purple-500/30">
-                    <h4 className="font-semibold text-slate-800 mb-2">💰 Estimated Budget</h4>
-                    <p className="text-slate-800">Based on your requirements, expect to invest $1,800 - $2,500/month for quality virtual assistants.</p>
+                ))}
+              </div>
+              )}
+
+              {/* Gating overlay */}
+              {capturedEmail && !profilesUnlocked && !showSearching && (
+                <div className="absolute inset-0 bg-white/70 backdrop-blur-sm rounded-2xl flex items-center justify-center">
+                  <div className="bg-white rounded-2xl border border-slate-200 shadow-xl p-6 w-full max-w-md">
+                    <h4 className="text-lg font-bold text-slate-900 mb-1">Unlock your curated profiles</h4>
+                    <p className="text-slate-600 text-sm mb-4">Complete this quick form and we’ll reveal 2–3 best-fit candidates immediately.</p>
+
+                    <form
+                      onSubmit={(e) => {
+                        e.preventDefault();
+                        const emailRegex = /^[^\s@]+@[^\s@]+\.[^\s@]+$/;
+                        const phoneDigits = leadPhone.replace(/\D/g, '');
+                        if (!leadName.trim()) return;
+                        if (!emailRegex.test(leadEmail)) return;
+                        if (phoneDigits.length < 7) return;
+                        setProfilesUnlocked(true);
+                        // TODO: send to backend or webhook if available
+                        console.log('Lead captured', { leadName, leadEmail, leadPhone });
+                      }}
+                      className="space-y-3"
+                    >
+                      <input
+                        type="text"
+                        value={leadName}
+                        onChange={(e) => setLeadName(e.target.value)}
+                        placeholder="Full Name"
+                        className="w-full px-4 py-3 border border-slate-300 rounded-lg focus:outline-none focus:ring-2 focus:ring-blue-500"
+                        required
+                      />
+                      <input
+                        type="email"
+                        value={leadEmail}
+                        onChange={(e) => setLeadEmail(e.target.value)}
+                        placeholder="Email Address"
+                        className="w-full px-4 py-3 border border-slate-300 rounded-lg focus:outline-none focus:ring-2 focus:ring-blue-500"
+                        required
+                      />
+                      <input
+                        type="tel"
+                        value={leadPhone}
+                        onChange={(e) => setLeadPhone(e.target.value)}
+                        placeholder="Phone Number"
+                        className="w-full px-4 py-3 border border-slate-300 rounded-lg focus:outline-none focus:ring-2 focus:ring-blue-500"
+                        required
+                      />
+                      <button
+                        type="submit"
+                        className="w-full bg-gradient-to-r from-blue-600 to-purple-600 text-white font-bold py-3 rounded-lg hover:shadow-lg transition"
+                      >
+                        View Profiles
+                      </button>
+                      {!!capturedEmail && (
+                        <div className="text-xs text-slate-500 text-center">Using email from chat: {capturedEmail}</div>
+                      )}
+                    </form>
                   </div>
                 </div>
               )}
