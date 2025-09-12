@@ -176,6 +176,7 @@ const FullScreenChatbot: React.FC = () => {
       const model = import.meta.env.VITE_OPENAI_MODEL || 'gpt-3.5-turbo';
 
       if (!apiKey) {
+        console.error('OpenAI API key not configured');
         throw new Error('OpenAI API key not configured');
       }
 
@@ -185,15 +186,22 @@ const FullScreenChatbot: React.FC = () => {
       try {
         const supabaseUrl = import.meta.env.VITE_SUPABASE_URL as string
         const anonKey = import.meta.env.VITE_SUPABASE_ANON_KEY as string
-        const endpoint = supabaseUrl.replace('supabase.co', 'functions.supabase.co') + '/rag-search'
-        const res = await fetch(endpoint, {
-          method: 'POST',
-          headers: { 'Content-Type': 'application/json', 'Authorization': `Bearer ${anonKey}` },
-          body: JSON.stringify({ query: userMessage.text, top_k: 3, min_similarity: 0.2 })
-        })
-        if (res.ok) {
-          const data = await res.json()
-          kbSnippets = (data.matches || []).map((m: any) => `Source (page ${m.page}): ${m.content}`)
+        
+        if (supabaseUrl && anonKey) {
+          const endpoint = supabaseUrl.replace('supabase.co', 'functions.supabase.co') + '/rag-search'
+          const res = await fetch(endpoint, {
+            method: 'POST',
+            headers: { 'Content-Type': 'application/json', 'Authorization': `Bearer ${anonKey}` },
+            body: JSON.stringify({ query: userMessage.text, top_k: 3, min_similarity: 0.2 })
+          })
+          if (res.ok) {
+            const data = await res.json()
+            kbSnippets = (data.matches || []).map((m: any) => `Source (page ${m.page}): ${m.content}`)
+          } else {
+            console.warn('RAG search failed with status:', res.status)
+          }
+        } else {
+          console.warn('Supabase credentials not available for RAG search')
         }
       } catch (e) {
         console.warn('RAG search failed, continuing without snippets', e)
@@ -208,7 +216,12 @@ const FullScreenChatbot: React.FC = () => {
         }))
       ];
 
-      const response = await fetch('/api/openai/v1/chat/completions', {
+      // Use direct OpenAI API in production, proxy in development
+      const apiUrl = import.meta.env.DEV 
+        ? '/api/openai/v1/chat/completions'
+        : 'https://api.openai.com/v1/chat/completions';
+        
+      const response = await fetch(apiUrl, {
         method: 'POST',
         headers: {
           'Content-Type': 'application/json',
@@ -286,21 +299,6 @@ const FullScreenChatbot: React.FC = () => {
     }
   };
 
-  const quickResponses = [
-    'Virtual Admin',
-    'Customer Support', 
-    'Social Media',
-    'Data Entry',
-    'Project Management'
-  ];
-
-  const handleQuickResponse = (response: string) => {
-    setInputText(response);
-    setTimeout(() => {
-      setInputText(response);
-      handleSendMessage();
-    }, 100);
-  };
 
   // Compact Chatbot (Hero Section)
   if (!isFullScreen) {
