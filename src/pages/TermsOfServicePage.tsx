@@ -38,16 +38,16 @@ const TermsOfServicePage = () => {
               <GlassCard className="p-8 rounded-3xl">
                 <h2 className="text-2xl font-bold text-gray-900 mb-4">1. Introduction</h2>
                 <p className="text-gray-700 leading-relaxed mb-4">
-                  These Terms of Use ("Terms") govern your use of the services and website provided by Diaz Strategic Consulting ("Company," "we," "us," or "our"). By accessing our website (www.migueldiaz.ca) or engaging our services, you ("User," "Client," or "you") agree to comply with these Terms and our Privacy Policy (if applicable). If you disagree, please discontinue use immediately.
+                  These Terms of Use ("Terms") govern your use of the services and website provided by Staffly HQ AI ("Company," "we," "us," or "our"). By accessing our website (www.stafflyhq.ai) or engaging our services, you ("User," "Client," or "you") agree to comply with these Terms and our Privacy Policy (if applicable). If you disagree, please discontinue use immediately.
                 </p>
                 
                 <div className="bg-gray-50 p-6 rounded-2xl mb-4">
                   <h3 className="font-semibold text-gray-900 mb-3">Company Details:</h3>
                   <ul className="space-y-2 text-gray-700">
-                    <li><strong>Name:</strong> Diaz Strategic Consulting</li>
+                    <li><strong>Name:</strong> Staffly HQ AI</li>
                     <li><strong>Mailing Address:</strong> PO Box 80528, Scarborough RPO White Shields, ON, M1P 4Z5</li>
-                    <li><strong>Email:</strong> ADMIN@MIGUELDIAZ.CA</li>
-                    <li><strong>Website:</strong> www.migueldiaz.ca</li>
+                    <li><strong>Email:</strong> admin@stafflyhq.ai</li>
+                    <li><strong>Website:</strong> www.stafflyhq.ai</li>
                   </ul>
                   <p className="text-sm text-gray-600 mt-3 italic">
                     Note: This is our official business mailing address used for communication and correspondence purposes. Legal business address is available upon request or when required by law.
@@ -179,7 +179,7 @@ const TermsOfServicePage = () => {
               <GlassCard className="p-8 rounded-3xl">
                 <h2 className="text-2xl font-bold text-gray-900 mb-4">7. Intellectual Property</h2>
                 <p className="text-gray-700 leading-relaxed">
-                  All website/content materials (designs, text, software, SOPs, branding, etc.) are <strong>owned by Diaz Strategic Consulting</strong>. Unauthorized reproduction or distribution is prohibited.
+                  All website/content materials (designs, text, software, SOPs, branding, etc.) are <strong>owned by Staffly HQ AI</strong>. Unauthorized reproduction or distribution is prohibited.
                 </p>
               </GlassCard>
             </MagneticCard>
@@ -262,7 +262,7 @@ const TermsOfServicePage = () => {
                 <h2 className="text-2xl font-bold text-gray-900 mb-4">14. Contact Us</h2>
                 <p className="text-gray-700 leading-relaxed mb-4">For questions:</p>
                 <div className="bg-gray-50 p-6 rounded-2xl">
-                  <p className="text-gray-700 mb-2"><strong>Email:</strong> ADMIN@MIGUELDIAZ.CA</p>
+                  <p className="text-gray-700 mb-2"><strong>Email:</strong> admin@stafflyhq.ai</p>
                   <p className="text-gray-700"><strong>Mail:</strong> PO Box 80528, Scarborough RPO White Shields, ON, M1P 4Z5</p>
                 </div>
                 <p className="text-gray-700 leading-relaxed mt-4 font-semibold">

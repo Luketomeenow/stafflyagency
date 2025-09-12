@@ -38,7 +38,7 @@ const PrivacyPolicyPage = () => {
               <GlassCard className="p-8 rounded-3xl">
                 <h2 className="text-2xl font-bold text-gray-900 mb-4">1. Who We Are</h2>
                 <p className="text-gray-700 leading-relaxed mb-4">
-                  Diaz Strategic Consulting is a Canadian-based B2B consulting agency. Our mailing address is PO Box 80528, Scarborough RPO White Shields, ON, M1P 4Z5. (Our legal business address is available upon request.)
+                  Staffly HQ AI is a Canadian-based B2B consulting agency. Our mailing address is PO Box 80528, Scarborough RPO White Shields, ON, M1P 4Z5. (Our legal business address is available upon request.)
                 </p>
                 <p className="text-gray-700 leading-relaxed mb-4">We specialize in:</p>
                 <ul className="space-y-3 text-gray-700 mb-4">
@@ -72,7 +72,7 @@ const PrivacyPolicyPage = () => {
                   By accessing our website or using our services, you agree to our Terms of Service and accept this Privacy Policy. If you are under the age of 16, a parent or legal guardian must provide consent.
                 </p>
                 <p className="text-gray-700 leading-relaxed">
-                  You may withdraw consent at any time by contacting <strong>admin@migueldiaz.ca</strong>. Please note that withdrawing consent may limit our ability to provide services to you.
+                  You may withdraw consent at any time by contacting <strong>admin@stafflyhq.ai</strong>. Please note that withdrawing consent may limit our ability to provide services to you.
                 </p>
               </GlassCard>
             </MagneticCard>
@@ -198,7 +198,7 @@ const PrivacyPolicyPage = () => {
                     </h3>
                     <p className="text-gray-700 ml-7 mb-2">Examples include onboarding notices, project/status updates, appointment/reminder notifications, and support messages.</p>
                     <p className="text-gray-700 ml-7 text-sm">
-                      You can opt out at any time by using the unsubscribe link (email) or emailing us at <strong>admin@migueldiaz.ca</strong>.
+                      You can opt out at any time by using the unsubscribe link (email) or emailing us at <strong>admin@stafflyhq.ai</strong>.
                     </p>
                   </div>
                 </div>
@@ -206,7 +206,7 @@ const PrivacyPolicyPage = () => {
                 <div className="bg-yellow-50 border border-yellow-200 rounded-2xl p-6 mt-6">
                   <h4 className="font-semibold text-yellow-800 mb-3">SMS Terms & Conditions (A2P Messaging)</h4>
                   <p className="text-yellow-700 text-sm leading-relaxed">
-                    Upon messaging opt-in, you agree to receive <strong>SMS messages from Diaz Strategic Consulting strictly related to your account and use of our services</strong>. <strong>Message frequency varies. Message and data rates may apply.</strong> You can <strong>opt out by replying "STOP."</strong> To request more information, <strong>reply "HELP."</strong> If you need assistance or have questions about our SMS service, reply "HELP" to any SMS message you receive, or contact our customer support team at <strong>226-241-4547</strong> or <strong>admin@migueldiaz.ca</strong>.
+                    Upon messaging opt-in, you agree to receive <strong>SMS messages from Staffly HQ AI strictly related to your account and use of our services</strong>. <strong>Message frequency varies. Message and data rates may apply.</strong> You can <strong>opt out by replying "STOP."</strong> To request more information, <strong>reply "HELP."</strong> If you need assistance or have questions about our SMS service, reply "HELP" to any SMS message you receive, or contact our customer support team at <strong>226-241-4547</strong> or <strong>admin@stafflyhq.ai</strong>.
                   </p>
                 </div>
               </GlassCard>
@@ -330,7 +330,7 @@ const PrivacyPolicyPage = () => {
                   </li>
                 </ul>
                 <p className="text-gray-700 leading-relaxed">
-                  To exercise your rights, email <strong>admin@migueldiaz.ca</strong> with your request.
+                  To exercise your rights, email <strong>admin@stafflyhq.ai</strong> with your request.
                 </p>
               </GlassCard>
             </MagneticCard>
@@ -396,14 +396,14 @@ const PrivacyPolicyPage = () => {
                   <div className="flex items-start space-x-4 mb-4">
                     <MapPin className="w-5 h-5 text-gray-600 mt-1" />
                     <div>
-                      <p className="font-semibold text-gray-900">Diaz Strategic Consulting</p>
+                      <p className="font-semibold text-gray-900">Staffly HQ AI</p>
                       <p className="text-gray-700">PO Box 80528</p>
                       <p className="text-gray-700">Scarborough RPO White Shields, ON, M1P 4Z5</p>
                     </div>
                   </div>
                   <div className="flex items-center space-x-4">
                     <Mail className="w-5 h-5 text-gray-600" />
-                    <p className="text-gray-700"><strong>Email:</strong> admin@migueldiaz.ca</p>
+                    <p className="text-gray-700"><strong>Email:</strong> admin@stafflyhq.ai</p>
                   </div>
                 </div>
                 <p className="text-gray-700 leading-relaxed mt-4 font-semibold">
