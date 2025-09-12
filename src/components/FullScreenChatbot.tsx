@@ -79,7 +79,11 @@ REFERENCE REMINDERS
 - Creative VA: video editing, thumbnails, Canva/design, light content repurposing.
 - Pricing line: “Starting at $299/month” with offer to connect to a specialist.`;
 
-const FullScreenChatbot: React.FC = () => {
+interface FullScreenChatbotProps {
+  autoOpen?: boolean;
+}
+
+const FullScreenChatbot: React.FC<FullScreenChatbotProps> = ({ autoOpen = false }) => {
   const [isFullScreen, setIsFullScreen] = useState(false);
   const [messages, setMessages] = useState<Message[]>([
     {
@@ -95,6 +99,14 @@ const FullScreenChatbot: React.FC = () => {
   const messagesEndRef = useRef<HTMLDivElement>(null);
   const inputRef = useRef<HTMLInputElement>(null);
   const [conversationId, setConversationId] = useState<string | null>(null);
+  
+  // Handle autoOpen prop
+  useEffect(() => {
+    if (autoOpen) {
+      setIsFullScreen(true);
+    }
+  }, [autoOpen]);
+  
   // Optional query param ?ingest=1 to ingest the PDF to Supabase via Edge Function
   useEffect(() => {
     const supabaseUrl = import.meta.env.VITE_SUPABASE_URL as string | undefined

@@ -1,6 +1,6 @@
 import { motion } from 'framer-motion';
 import { Link, useLocation } from 'react-router-dom';
-import { ArrowRight, Users, Briefcase, Rocket, Star, Globe, Shield, Zap, Sparkles, MessageCircle, Play, Check, ChevronDown, Crown } from 'lucide-react';
+import { ArrowRight, Users, Briefcase, Rocket, Star, Globe, Shield, Zap, Sparkles, MessageCircle, Check, ChevronDown, Crown } from 'lucide-react';
 import FloatingNavbar from '../components/FloatingNavbar';
 import FullScreenChatbot from '../components/FullScreenChatbot';
 import ScrollStack, { ScrollStackItem } from '../components/ScrollStack';
@@ -8,10 +8,21 @@ import DarkVeil from '../components/DarkVeil';
 import SplitTextAnimation from '../components/SplitTextAnimation';
 import MagicBento from '../components/MagicBento';
 import CardSwap, { Card } from '../components/CardSwap';
-import { useEffect } from 'react';
+import { useEffect, useState } from 'react';
 
 const LandingPage = () => {
   const location = useLocation();
+  const [openChatbot, setOpenChatbot] = useState(false);
+
+  // Reset chatbot state when it's closed
+  useEffect(() => {
+    if (openChatbot) {
+      const timer = setTimeout(() => {
+        setOpenChatbot(false);
+      }, 100);
+      return () => clearTimeout(timer);
+    }
+  }, [openChatbot]);
 
   useEffect(() => {
     // Handle anchor links for smooth scrolling
@@ -227,7 +238,7 @@ const LandingPage = () => {
                 >
                   <div className="flex justify-center w-full">
                     <div className="w-full max-w-6xl">
-                      <FullScreenChatbot />
+                      <FullScreenChatbot autoOpen={openChatbot} />
                     </div>
                   </div>
                 </motion.div>
@@ -727,33 +738,42 @@ const LandingPage = () => {
           </div>
         </section>
 
-        {/* Video Asset Section - Light */}
-        <section className="py-20 px-4 sm:px-6 lg:px-8 bg-blue-50">
-          <div className="max-w-4xl mx-auto text-center">
+        {/* Calendar Booking Section */}
+        <section className="py-20 px-4 sm:px-6 lg:px-8 bg-white">
+          <div className="max-w-6xl mx-auto">
             <motion.div
               initial={{ opacity: 0, y: 40 }}
               whileInView={{ opacity: 1, y: 0 }}
               transition={{ duration: 0.6 }}
               viewport={{ once: true }}
+              className="text-center mb-12"
             >
               <h2 className="text-4xl font-bold text-gray-800 mb-6">
-                See Staffly in Action
+                Book a Consultation
               </h2>
-              <p className="text-xl text-gray-600 mb-8">
-                Watch how our platform revolutionizes virtual assistant hiring and management
+              <p className="text-xl text-gray-600 max-w-3xl mx-auto">
+                Ready to transform your business with virtual assistants? Schedule a free consultation to discuss your needs.
               </p>
-              <div className="bg-white rounded-2xl p-8 shadow-lg border border-blue-100">
-                <div className="w-full h-64 bg-gradient-to-r from-blue-100 to-blue-200 rounded-xl flex items-center justify-center">
-                  <button className="w-20 h-20 bg-gradient-to-r from-blue-500 to-blue-700 rounded-full flex items-center justify-center shadow-lg hover:scale-110 transition-transform">
-                    <Play className="w-8 h-8 text-white ml-1" />
-                  </button>
-                </div>
-              </div>
+            </motion.div>
+            
+            <motion.div
+              initial={{ opacity: 0, y: 40 }}
+              whileInView={{ opacity: 1, y: 0 }}
+              transition={{ duration: 0.6, delay: 0.2 }}
+              viewport={{ once: true }}
+              className="bg-white rounded-2xl p-8 shadow-lg border border-gray-200"
+            >
+              <iframe
+                src="https://calendly.com/stafflyhq/consultation"
+                width="100%"
+                height="700"
+                frameBorder="0"
+                title="Book a Consultation"
+                className="rounded-xl"
+              ></iframe>
             </motion.div>
           </div>
         </section>
-
-
 
         {/* FAQs Section - Light */}
         <section className="py-20 px-4 sm:px-6 lg:px-8 bg-white">
@@ -807,11 +827,12 @@ const LandingPage = () => {
               <h2 className="text-5xl font-bold text-white mb-8">
                 So, What are we scaling?
               </h2>
-              <Link to="/hire">
-                <button className="bg-gradient-to-r from-blue-400 to-blue-600 text-white font-bold py-4 px-8 rounded-full shadow-lg hover:shadow-xl transform hover:scale-105 transition-all duration-300">
-                  Start scaling
-                </button>
-              </Link>
+              <button 
+                onClick={() => setOpenChatbot(true)}
+                className="bg-gradient-to-r from-blue-400 to-blue-600 text-white font-bold py-4 px-8 rounded-full shadow-lg hover:shadow-xl transform hover:scale-105 transition-all duration-300"
+              >
+                Start scaling
+              </button>
             </motion.div>
           </div>
         </section>
