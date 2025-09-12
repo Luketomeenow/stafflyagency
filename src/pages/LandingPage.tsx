@@ -8,6 +8,7 @@ import DarkVeil from '../components/DarkVeil';
 import SplitTextAnimation from '../components/SplitTextAnimation';
 import MagicBento from '../components/MagicBento';
 import CardSwap, { Card } from '../components/CardSwap';
+import CalComEmbed from '../components/CalComEmbed';
 import { useEffect, useState } from 'react';
 
 const LandingPage = () => {
@@ -763,14 +764,7 @@ const LandingPage = () => {
               viewport={{ once: true }}
               className="bg-white rounded-2xl p-8 shadow-lg border border-gray-200"
             >
-              <iframe
-                src="https://calendly.com/stafflyhq/consultation"
-                width="100%"
-                height="700"
-                frameBorder="0"
-                title="Book a Consultation"
-                className="rounded-xl"
-              ></iframe>
+              <CalComEmbed />
             </motion.div>
           </div>
         </section>
