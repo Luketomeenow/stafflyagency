@@ -1,6 +1,7 @@
 import { motion } from 'framer-motion';
 import { Link } from 'react-router-dom';
 import { Rocket, CheckCircle, ArrowRight, Users, Globe, Shield, TrendingUp, Star, DollarSign } from 'lucide-react';
+import placeholderImg from '../assets/images/placeholder.png';
 
 const PartnerPage = () => {
   const fadeInUp = {
@@ -77,9 +78,9 @@ const PartnerPage = () => {
                 className="inline-flex items-center px-4 py-2 bg-white/10 backdrop-blur-sm rounded-full text-white/90 text-sm font-medium mb-8"
               >
                 <div className="flex items-center space-x-2">
-                  <img src="/api/placeholder/24/24" alt="PinoyVA" className="w-6 h-6 rounded" />
+                  <img src={placeholderImg} alt="PinoyVA" className="w-6 h-6 rounded" />
                   <span>x</span>
-                  <img src="/api/placeholder/24/24" alt="Artisko" className="w-6 h-6 rounded" />
+                  <img src={placeholderImg} alt="Artisko" className="w-6 h-6 rounded" />
                   <span className="ml-2">Partnership Program</span>
                 </div>
               </motion.div>
