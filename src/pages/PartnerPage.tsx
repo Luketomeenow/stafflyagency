@@ -1,7 +1,7 @@
 import { motion } from 'framer-motion';
 import { Link } from 'react-router-dom';
 import { Rocket, CheckCircle, ArrowRight, Users, Globe, Shield, TrendingUp, Star, DollarSign } from 'lucide-react';
-import placeholderImg from '../assets/images/placeholder.png';
+import placeholderImg from '/assets/images/placeholder.png';
 
 const PartnerPage = () => {
   const fadeInUp = {
