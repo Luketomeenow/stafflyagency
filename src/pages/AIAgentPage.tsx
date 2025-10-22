@@ -118,17 +118,17 @@ const AIAgentPage = () => {
               whileInView={{ opacity: 1, y: 0 }}
               transition={{ duration: 0.8, delay: 0.2 }}
               viewport={{ once: true }}
-              className="max-w-6xl mx-auto"
+              className="max-w-6xl mx-auto px-4"
             >
-              <div className="text-center mb-16">
-                <div className="inline-flex items-center px-4 py-2 bg-purple-100/50 text-purple-700 text-sm font-semibold rounded-full mb-6 border border-purple-200/50">
-                  <div className="w-2 h-2 bg-purple-500 rounded-full mr-2 animate-pulse"></div>
+              <div className="text-center mb-12 md:mb-16">
+                <div className="inline-flex items-center px-3 py-1.5 md:px-4 md:py-2 bg-purple-100/50 text-purple-700 text-xs md:text-sm font-semibold rounded-full mb-4 md:mb-6 border border-purple-200/50">
+                  <div className="w-1.5 h-1.5 md:w-2 md:h-2 bg-purple-500 rounded-full mr-2 animate-pulse"></div>
                   Our Story
                 </div>
-                <h2 className="text-5xl md:text-6xl font-black text-slate-900 mb-6 leading-tight">
+                <h2 className="text-3xl sm:text-4xl md:text-5xl lg:text-6xl font-black text-slate-900 mb-4 md:mb-6 leading-tight px-2">
                   The Evolution of <span className="bg-gradient-to-r from-purple-600 to-pink-600 bg-clip-text text-transparent">Outsourcing</span>
                 </h2>
-                <p className="text-xl text-slate-600 max-w-3xl mx-auto">
+                <p className="text-base md:text-xl text-slate-600 max-w-3xl mx-auto px-2">
                   Outsourcing in the Philippines has gone through phases. Here's how we're changing the game.
                 </p>
               </div>
@@ -136,7 +136,7 @@ const AIAgentPage = () => {
               {/* Timeline */}
               <div className="relative">
                 {/* Vertical Line */}
-                <div className="absolute left-8 md:left-1/2 top-0 bottom-0 w-1 bg-gradient-to-b from-blue-200 via-purple-200 to-pink-200 transform md:-translate-x-1/2"></div>
+                <div className="absolute left-6 md:left-1/2 top-0 bottom-0 w-0.5 md:w-1 bg-gradient-to-b from-blue-200 via-purple-200 to-pink-200 transform md:-translate-x-1/2"></div>
 
                 {/* Phase 1 */}
                 <motion.div
@@ -144,25 +144,25 @@ const AIAgentPage = () => {
                   whileInView={{ opacity: 1, x: 0 }}
                   transition={{ duration: 0.6, delay: 0.1 }}
                   viewport={{ once: true }}
-                  className="relative mb-16 md:mb-24"
+                  className="relative mb-12 md:mb-24"
                 >
                   <div className="flex flex-col md:flex-row items-start md:items-center gap-8">
-                    <div className="md:w-1/2 md:text-right md:pr-12">
-                      <div className="bg-white/80 backdrop-blur-xl rounded-3xl p-8 shadow-xl border border-slate-200/50 hover:shadow-2xl transition-all duration-300">
-                        <div className="inline-flex items-center px-4 py-2 bg-slate-100 text-slate-700 text-sm font-bold rounded-full mb-4">
+                    <div className="md:w-1/2 md:text-right md:pr-12 pl-16 md:pl-0">
+                      <div className="bg-white/80 backdrop-blur-xl rounded-2xl md:rounded-3xl p-6 md:p-8 shadow-xl border border-slate-200/50 hover:shadow-2xl transition-all duration-300">
+                        <div className="inline-flex items-center px-3 py-1.5 md:px-4 md:py-2 bg-slate-100 text-slate-700 text-xs md:text-sm font-bold rounded-full mb-3 md:mb-4">
                           Phase 1
                         </div>
-                        <h3 className="text-3xl font-bold text-slate-900 mb-4">The Early BPO Years</h3>
-                        <p className="text-slate-600 leading-relaxed mb-4">
+                        <h3 className="text-2xl md:text-3xl font-bold text-slate-900 mb-3 md:mb-4">The Early BPO Years</h3>
+                        <p className="text-sm md:text-base text-slate-600 leading-relaxed mb-3 md:mb-4">
                           Runners, customer service agents, and admins handling repetitive, low-value tasks.
                         </p>
-                        <p className="text-slate-500 italic">
+                        <p className="text-sm md:text-base text-slate-500 italic">
                           Businesses got cheap labor, but no real leverage.
                         </p>
                       </div>
                     </div>
-                    <div className="absolute left-8 md:left-1/2 transform md:-translate-x-1/2 w-16 h-16 bg-gradient-to-r from-slate-400 to-slate-500 rounded-full flex items-center justify-center shadow-lg border-4 border-white">
-                      <span className="text-white font-bold text-xl">1</span>
+                    <div className="absolute left-2 md:left-1/2 transform md:-translate-x-1/2 w-12 h-12 md:w-16 md:h-16 bg-gradient-to-r from-slate-400 to-slate-500 rounded-full flex items-center justify-center shadow-lg border-2 md:border-4 border-white">
+                      <span className="text-white font-bold text-lg md:text-xl">1</span>
                     </div>
                     <div className="md:w-1/2"></div>
                   </div>
@@ -174,23 +174,23 @@ const AIAgentPage = () => {
                   whileInView={{ opacity: 1, x: 0 }}
                   transition={{ duration: 0.6, delay: 0.2 }}
                   viewport={{ once: true }}
-                  className="relative mb-16 md:mb-24"
+                  className="relative mb-12 md:mb-24"
                 >
                   <div className="flex flex-col md:flex-row items-start md:items-center gap-8">
                     <div className="md:w-1/2"></div>
-                    <div className="absolute left-8 md:left-1/2 transform md:-translate-x-1/2 w-16 h-16 bg-gradient-to-r from-blue-400 to-blue-500 rounded-full flex items-center justify-center shadow-lg border-4 border-white">
-                      <span className="text-white font-bold text-xl">2</span>
+                    <div className="absolute left-2 md:left-1/2 transform md:-translate-x-1/2 w-12 h-12 md:w-16 md:h-16 bg-gradient-to-r from-blue-400 to-blue-500 rounded-full flex items-center justify-center shadow-lg border-2 md:border-4 border-white">
+                      <span className="text-white font-bold text-lg md:text-xl">2</span>
                     </div>
-                    <div className="md:w-1/2 md:pl-12">
-                      <div className="bg-white/80 backdrop-blur-xl rounded-3xl p-8 shadow-xl border border-blue-200/50 hover:shadow-2xl transition-all duration-300">
-                        <div className="inline-flex items-center px-4 py-2 bg-blue-100 text-blue-700 text-sm font-bold rounded-full mb-4">
+                    <div className="md:w-1/2 md:pl-12 pl-16 md:pl-12">
+                      <div className="bg-white/80 backdrop-blur-xl rounded-2xl md:rounded-3xl p-6 md:p-8 shadow-xl border border-blue-200/50 hover:shadow-2xl transition-all duration-300">
+                        <div className="inline-flex items-center px-3 py-1.5 md:px-4 md:py-2 bg-blue-100 text-blue-700 text-xs md:text-sm font-bold rounded-full mb-3 md:mb-4">
                           Phase 2
                         </div>
-                        <h3 className="text-3xl font-bold text-slate-900 mb-4">The Digital Footprint Era</h3>
-                        <p className="text-slate-600 leading-relaxed mb-4">
+                        <h3 className="text-2xl md:text-3xl font-bold text-slate-900 mb-3 md:mb-4">The Digital Footprint Era</h3>
+                        <p className="text-sm md:text-base text-slate-600 leading-relaxed mb-3 md:mb-4">
                           Businesses started needing websites, content and social media management to build their online presence.
                         </p>
-                        <p className="text-slate-500 italic">
+                        <p className="text-sm md:text-base text-slate-500 italic">
                           Creative roles entered the picture, but most providers delivered execution without frameworks, consistency, or ROI. Talent was still treated as task-doers, not long-term operators.
                         </p>
                       </div>
@@ -207,8 +207,8 @@ const AIAgentPage = () => {
                   className="relative"
                 >
                   <div className="flex flex-col md:flex-row items-start md:items-center gap-8">
-                    <div className="md:w-1/2 md:text-right md:pr-12">
-                      <div className="bg-gradient-to-br from-purple-600 to-pink-600 rounded-3xl p-8 shadow-2xl border-4 border-white relative overflow-hidden">
+                    <div className="md:w-1/2 md:text-right md:pr-12 pl-16 md:pl-0">
+                      <div className="bg-gradient-to-br from-purple-600 to-pink-600 rounded-2xl md:rounded-3xl p-6 md:p-8 shadow-2xl border-2 md:border-4 border-white relative overflow-hidden">
                         {/* Background Pattern */}
                         <div className="absolute inset-0 opacity-10">
                           <div className="absolute inset-0" style={{
@@ -218,43 +218,43 @@ const AIAgentPage = () => {
                         </div>
                         
                         <div className="relative z-10">
-                          <div className="inline-flex items-center px-4 py-2 bg-white/20 backdrop-blur-sm text-white text-sm font-bold rounded-full mb-4 border border-white/30">
+                          <div className="inline-flex items-center px-3 py-1.5 md:px-4 md:py-2 bg-white/20 backdrop-blur-sm text-white text-xs md:text-sm font-bold rounded-full mb-3 md:mb-4 border border-white/30">
                             Phase 3 - NOW
                           </div>
-                          <h3 className="text-4xl font-black text-white mb-4 flex items-center gap-3">
-                            <span>⚡</span>
+                          <h3 className="text-2xl md:text-3xl lg:text-4xl font-black text-white mb-3 md:mb-4 flex items-center gap-2 md:gap-3">
+                            <span className="text-xl md:text-2xl">⚡</span>
                             The StafflyAI Movement
                           </h3>
-                          <p className="text-white text-lg leading-relaxed mb-6">
+                          <p className="text-white text-base md:text-lg leading-relaxed mb-4 md:mb-6">
                             We created <strong className="text-yellow-300">AI Enhanced Operators</strong>.
                           </p>
-                          <div className="space-y-3">
-                            <div className="flex items-start gap-3 text-white">
-                              <span className="text-yellow-300 text-xl">✓</span>
-                              <p className="text-blue-50">Full-time operators equipped with AI workflows</p>
+                          <div className="space-y-2 md:space-y-3">
+                            <div className="flex items-start gap-2 md:gap-3 text-white">
+                              <span className="text-yellow-300 text-lg md:text-xl flex-shrink-0">✓</span>
+                              <p className="text-blue-50 text-sm md:text-base">Full-time operators equipped with AI workflows</p>
                             </div>
-                            <div className="flex items-start gap-3 text-white">
-                              <span className="text-yellow-300 text-xl">✓</span>
-                              <p className="text-blue-50">Proven frameworks and success managers</p>
+                            <div className="flex items-start gap-2 md:gap-3 text-white">
+                              <span className="text-yellow-300 text-lg md:text-xl flex-shrink-0">✓</span>
+                              <p className="text-blue-50 text-sm md:text-base">Proven frameworks and success managers</p>
                             </div>
-                            <div className="flex items-start gap-3 text-white">
-                              <span className="text-yellow-300 text-xl">✓</span>
-                              <p className="text-blue-50">Designed to multiply business output</p>
+                            <div className="flex items-start gap-2 md:gap-3 text-white">
+                              <span className="text-yellow-300 text-lg md:text-xl flex-shrink-0">✓</span>
+                              <p className="text-blue-50 text-sm md:text-base">Designed to multiply business output</p>
                             </div>
-                            <div className="flex items-start gap-3 text-white">
-                              <span className="text-yellow-300 text-xl">✓</span>
-                              <p className="text-blue-50">Career stability and growth for Filipino talent</p>
+                            <div className="flex items-start gap-2 md:gap-3 text-white">
+                              <span className="text-yellow-300 text-lg md:text-xl flex-shrink-0">✓</span>
+                              <p className="text-blue-50 text-sm md:text-base">Career stability and growth for Filipino talent</p>
                             </div>
                           </div>
                         </div>
 
                         {/* Glow Effect */}
-                        <div className="absolute -top-4 -right-4 w-24 h-24 bg-yellow-400 rounded-full blur-3xl opacity-30"></div>
-                        <div className="absolute -bottom-4 -left-4 w-24 h-24 bg-pink-400 rounded-full blur-3xl opacity-30"></div>
+                        <div className="absolute -top-4 -right-4 w-16 h-16 md:w-24 md:h-24 bg-yellow-400 rounded-full blur-3xl opacity-30"></div>
+                        <div className="absolute -bottom-4 -left-4 w-16 h-16 md:w-24 md:h-24 bg-pink-400 rounded-full blur-3xl opacity-30"></div>
                       </div>
                     </div>
-                    <div className="absolute left-8 md:left-1/2 transform md:-translate-x-1/2 w-20 h-20 bg-gradient-to-r from-purple-500 to-pink-500 rounded-full flex items-center justify-center shadow-2xl border-4 border-white animate-pulse">
-                      <span className="text-white font-bold text-2xl">3</span>
+                    <div className="absolute left-2 md:left-1/2 transform md:-translate-x-1/2 w-14 h-14 md:w-20 md:h-20 bg-gradient-to-r from-purple-500 to-pink-500 rounded-full flex items-center justify-center shadow-2xl border-2 md:border-4 border-white animate-pulse">
+                      <span className="text-white font-bold text-xl md:text-2xl">3</span>
                     </div>
                     <div className="md:w-1/2"></div>
                   </div>

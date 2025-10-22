@@ -209,24 +209,24 @@ const Feature = ({
 
   return (
     <section ref={ref} id="features">
-      <div className="py-14">
+      <div className="py-10 md:py-14">
         <div className="container flex w-full flex-col items-center justify-center p-4">
-          <div className="mx-auto max-w-5xl text-center">
-            <h4 className="text-xl font-bold tracking-tight text-slate-900">
+          <div className="mx-auto max-w-5xl text-center px-4">
+            <h4 className="text-base md:text-xl font-bold tracking-tight text-slate-900 mb-2 md:mb-3">
               Comprehensive Solutions
             </h4>
-            <h2 className="text-4xl font-bold tracking-tight text-slate-900 sm:text-6xl">
+            <h2 className="text-2xl sm:text-3xl md:text-4xl lg:text-5xl xl:text-6xl font-bold tracking-tight text-slate-900">
               Everything you need to scale your operations
             </h2>
           </div>
-          <div className="mx-auto my-12 grid h-full max-w-5xl grid-cols-5 gap-x-10">
+          <div className="mx-auto my-8 md:my-12 grid h-full max-w-5xl grid-cols-5 gap-x-6 md:gap-x-10">
             <div
               className={`col-span-2 hidden md:flex ${
                 ltr ? "md:order-2 md:justify-end" : "justify-start"
               }`}
             >
               <Accordion.Root
-                className="w-[300px]"
+                className="w-full md:w-[300px]"
                 type="single"
                 defaultValue={`item-${currentIndex}`}
                 value={`item-${currentIndex}`}
@@ -237,7 +237,7 @@ const Feature = ({
                 {cardData.map((item, index) => (
                   <AccordionItem
                     key={item.id}
-                    className="relative mb-8 last:mb-0"
+                    className="relative mb-6 md:mb-8 last:mb-0"
                     value={`item-${index}`}
                   >
                     <div
@@ -259,16 +259,16 @@ const Feature = ({
                         }}
                       ></div>
                     </div>
-                    <AccordionTrigger className="text-xl font-bold">
+                    <AccordionTrigger className="text-lg md:text-xl font-bold">
                       {item.title}
                     </AccordionTrigger>
-                    <AccordionContent>{item.content}</AccordionContent>
+                    <AccordionContent className="text-sm md:text-base">{item.content}</AccordionContent>
                   </AccordionItem>
                 ))}
               </Accordion.Root>
             </div>
             <div
-              className={`col-span-5 h-[350px] min-h-[200px] w-auto md:col-span-3 ${
+              className={`col-span-5 h-[250px] md:h-[350px] min-h-[200px] w-auto md:col-span-3 ${
                 ltr && "md:order-1"
               }`}
             >
@@ -299,15 +299,15 @@ const Feature = ({
 
             <ul
               ref={carouselRef}
-              className="col-span-5 flex h-full snap-x snap-mandatory flex-nowrap overflow-x-auto [mask-image:linear-gradient(90deg,transparent,black_20%,white_80%,transparent)] py-10 [-ms-overflow-style:none] [-webkit-mask-image:linear-gradient(90deg,transparent,black_20%,white_80%,transparent)] [scrollbar-width:none] md:hidden [&::-webkit-scrollbar]:hidden"
+              className="col-span-5 flex h-full snap-x snap-mandatory flex-nowrap overflow-x-auto [mask-image:linear-gradient(90deg,transparent,black_20%,white_80%,transparent)] py-6 md:py-10 [-ms-overflow-style:none] [-webkit-mask-image:linear-gradient(90deg,transparent,black_20%,white_80%,transparent)] [scrollbar-width:none] md:hidden [&::-webkit-scrollbar]:hidden"
               style={{
-                padding: "50px calc(50%)",
+                padding: "30px calc(50%)",
               }}
             >
               {cardData.map((item, index) => (
                 <a
                   key={item.id}
-                  className="card relative mr-8 grid h-full max-w-60 shrink-0 items-start justify-center py-4 last:mr-0"
+                  className="card relative mr-6 md:mr-8 grid h-full max-w-[240px] md:max-w-60 shrink-0 items-start justify-center py-3 md:py-4 last:mr-0"
                   onClick={() => setCurrentIndex(index)}
                   style={{
                     scrollSnapAlign: "center",
@@ -324,8 +324,8 @@ const Feature = ({
                       }}
                     ></div>
                   </div>
-                  <h2 className="text-xl font-bold">{item.title}</h2>
-                  <p className="mx-0 max-w-sm text-sm text-balance">
+                  <h2 className="text-lg md:text-xl font-bold mb-2">{item.title}</h2>
+                  <p className="mx-0 max-w-sm text-xs md:text-sm text-balance leading-relaxed">
                     {item.content}
                   </p>
                 </a>
