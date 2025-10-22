@@ -50,39 +50,39 @@ const AIAgentPage = () => {
               whileInView={{ opacity: 1, y: 0 }}
               transition={{ duration: 0.8 }}
               viewport={{ once: true }}
-              className="max-w-6xl mx-auto mb-24"
+              className="max-w-6xl mx-auto mb-16 md:mb-24 px-4"
             >
-              <div className="text-center mb-12">
-                <div className="inline-flex items-center px-4 py-2 bg-blue-50 text-blue-600 text-sm font-semibold rounded-full mb-6 border border-blue-100">
-                  <div className="w-2 h-2 bg-blue-500 rounded-full mr-2 animate-pulse"></div>
+              <div className="text-center mb-8 md:mb-12">
+                <div className="inline-flex items-center px-3 py-1.5 md:px-4 md:py-2 bg-blue-50 text-blue-600 text-xs md:text-sm font-semibold rounded-full mb-4 md:mb-6 border border-blue-100">
+                  <div className="w-1.5 h-1.5 md:w-2 md:h-2 bg-blue-500 rounded-full mr-2 animate-pulse"></div>
                   Our Mission
                 </div>
-                <h2 className="text-5xl md:text-6xl font-black text-slate-900 mb-6 leading-tight">
+                <h2 className="text-3xl sm:text-4xl md:text-5xl lg:text-6xl font-black text-slate-900 mb-4 md:mb-6 leading-tight px-2">
                   Redefining <span className="bg-gradient-to-r from-blue-600 to-purple-600 bg-clip-text text-transparent">Outsourcing</span>
                 </h2>
-                <p className="text-xl text-slate-600 max-w-3xl mx-auto leading-relaxed">
+                <p className="text-base sm:text-lg md:text-xl text-slate-600 max-w-3xl mx-auto leading-relaxed px-2">
                   Building the world's first platform of <span className="font-semibold text-slate-900">AI Enhanced Operators</span> — Filipino talent trained to become long-term Executive Assistants and future Chiefs of Staff.
                 </p>
               </div>
 
-              <div className="grid md:grid-cols-2 gap-8">
+              <div className="grid grid-cols-1 md:grid-cols-2 gap-6 md:gap-8">
                 {/* For Founders Card */}
                 <motion.div
                   initial={{ opacity: 0, x: -20 }}
                   whileInView={{ opacity: 1, x: 0 }}
                   transition={{ duration: 0.6, delay: 0.2 }}
                   viewport={{ once: true }}
-                  className="group relative bg-white rounded-3xl p-8 shadow-lg border border-slate-200 hover:shadow-2xl hover:border-blue-300 transition-all duration-300"
+                  className="group relative bg-white rounded-2xl md:rounded-3xl p-6 md:p-8 shadow-lg border border-slate-200 hover:shadow-2xl hover:border-blue-300 transition-all duration-300"
                 >
-                  <div className="absolute top-0 right-0 w-32 h-32 bg-gradient-to-br from-blue-100 to-purple-100 rounded-full blur-3xl opacity-50 group-hover:opacity-70 transition-opacity"></div>
+                  <div className="absolute top-0 right-0 w-24 h-24 md:w-32 md:h-32 bg-gradient-to-br from-blue-100 to-purple-100 rounded-full blur-3xl opacity-50 group-hover:opacity-70 transition-opacity"></div>
                   <div className="relative z-10">
-                    <div className="w-14 h-14 bg-gradient-to-r from-blue-600 to-purple-600 rounded-2xl flex items-center justify-center mb-6 shadow-lg">
-                      <svg className="w-7 h-7 text-white" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                    <div className="w-12 h-12 md:w-14 md:h-14 bg-gradient-to-r from-blue-600 to-purple-600 rounded-xl md:rounded-2xl flex items-center justify-center mb-4 md:mb-6 shadow-lg">
+                      <svg className="w-6 h-6 md:w-7 md:h-7 text-white" fill="none" stroke="currentColor" viewBox="0 0 24 24">
                         <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M13 10V3L4 14h7v7l9-11h-7z" />
                       </svg>
                     </div>
-                    <h3 className="text-2xl font-bold text-slate-900 mb-4">For Founders</h3>
-                    <p className="text-slate-600 leading-relaxed text-lg">
+                    <h3 className="text-xl md:text-2xl font-bold text-slate-900 mb-3 md:mb-4">For Founders</h3>
+                    <p className="text-slate-600 leading-relaxed text-base md:text-lg">
                       We give you leverage, buy back your time, and help you scale your business with trusted operators who grow with you.
                     </p>
                   </div>
@@ -94,17 +94,17 @@ const AIAgentPage = () => {
                   whileInView={{ opacity: 1, x: 0 }}
                   transition={{ duration: 0.6, delay: 0.3 }}
                   viewport={{ once: true }}
-                  className="group relative bg-white rounded-3xl p-8 shadow-lg border border-slate-200 hover:shadow-2xl hover:border-purple-300 transition-all duration-300"
+                  className="group relative bg-white rounded-2xl md:rounded-3xl p-6 md:p-8 shadow-lg border border-slate-200 hover:shadow-2xl hover:border-purple-300 transition-all duration-300"
                 >
-                  <div className="absolute top-0 right-0 w-32 h-32 bg-gradient-to-br from-purple-100 to-pink-100 rounded-full blur-3xl opacity-50 group-hover:opacity-70 transition-opacity"></div>
+                  <div className="absolute top-0 right-0 w-24 h-24 md:w-32 md:h-32 bg-gradient-to-br from-purple-100 to-pink-100 rounded-full blur-3xl opacity-50 group-hover:opacity-70 transition-opacity"></div>
                   <div className="relative z-10">
-                    <div className="w-14 h-14 bg-gradient-to-r from-purple-600 to-pink-600 rounded-2xl flex items-center justify-center mb-6 shadow-lg">
-                      <svg className="w-7 h-7 text-white" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                    <div className="w-12 h-12 md:w-14 md:h-14 bg-gradient-to-r from-purple-600 to-pink-600 rounded-xl md:rounded-2xl flex items-center justify-center mb-4 md:mb-6 shadow-lg">
+                      <svg className="w-6 h-6 md:w-7 md:h-7 text-white" fill="none" stroke="currentColor" viewBox="0 0 24 24">
                         <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M12 4.354a4 4 0 110 5.292M15 21H3v-1a6 6 0 0112 0v1zm0 0h6v-1a6 6 0 00-9-5.197M13 7a4 4 0 11-8 0 4 4 0 018 0z" />
                       </svg>
                     </div>
-                    <h3 className="text-2xl font-bold text-slate-900 mb-4">For Operators</h3>
-                    <p className="text-slate-600 leading-relaxed text-lg">
+                    <h3 className="text-xl md:text-2xl font-bold text-slate-900 mb-3 md:mb-4">For Operators</h3>
+                    <p className="text-slate-600 leading-relaxed text-base md:text-lg">
                       We nurture talent to master AI, grow in responsibility, and evolve into trusted executives who support companies for years.
                     </p>
                   </div>
