@@ -39,7 +39,7 @@ export function Hero() {
             <div className="flex flex-col items-center gap-6 pb-8 text-center">
               <motion.h1
                 ref={fadeInRef}
-                className="bg-gradient-to-r from-slate-900 via-blue-700 to-purple-600 bg-clip-text text-transparent py-6 text-5xl leading-none font-extrabold tracking-tight text-balance sm:text-6xl md:text-7xl lg:text-8xl"
+                className="bg-gradient-to-r from-slate-900 via-blue-700 to-purple-600 bg-clip-text text-transparent py-4 md:py-6 text-3xl leading-tight font-extrabold tracking-tight text-balance sm:text-5xl md:text-6xl lg:text-7xl xl:text-8xl"
                 animate={fadeInInView ? "animate" : "initial"}
                 variants={fadeUpVariants}
                 initial={false}
@@ -55,7 +55,7 @@ export function Hero() {
               </motion.h1>
 
               <motion.p
-                className="text-lg tracking-tight text-balance text-slate-700 md:text-xl"
+                className="text-base tracking-tight text-balance text-slate-700 md:text-lg lg:text-xl px-4 md:px-0"
                 animate={fadeInInView ? "animate" : "initial"}
                 variants={fadeUpVariants}
                 initial={false}
@@ -72,7 +72,7 @@ export function Hero() {
               <motion.div
                 animate={fadeInInView ? "animate" : "initial"}
                 variants={fadeUpVariants}
-                className="flex flex-col gap-4 lg:flex-row"
+                className="flex flex-col gap-4 lg:flex-row px-4 md:px-0"
                 initial={false}
                 transition={{
                   duration: 0.6,
@@ -88,14 +88,14 @@ export function Hero() {
                     "bg-blue-600 text-white shadow hover:bg-blue-700",
 
                     // layout
-                    "group focus-visible:ring-ring relative inline-flex h-10 w-full items-center justify-center gap-2 overflow-hidden rounded-md px-6 py-2 text-base font-semibold tracking-tight whitespace-pre focus-visible:ring-1 focus-visible:outline-none disabled:pointer-events-none disabled:opacity-50 md:flex",
+                    "group focus-visible:ring-ring relative inline-flex h-12 md:h-10 w-full items-center justify-center gap-2 overflow-hidden rounded-md px-6 py-3 md:py-2 text-base md:text-base font-semibold tracking-tight whitespace-pre focus-visible:ring-1 focus-visible:outline-none disabled:pointer-events-none disabled:opacity-50 md:flex",
 
                     // animation
                     "hover:ring-primary transform-gpu ring-offset-current transition-all duration-300 ease-out hover:ring-2 hover:ring-offset-2"
                   )}
                 >
                   Start Scaling
-                  <ChevronRight className="size-4 translate-x-0 transition-all duration-300 ease-out group-hover:translate-x-1" />
+                  <ChevronRight className="size-4 md:size-4 translate-x-0 transition-all duration-300 ease-out group-hover:translate-x-1" />
                 </a>
               </motion.div>
             </div>

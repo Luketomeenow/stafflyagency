@@ -618,28 +618,28 @@ const FullScreenChatbot: React.FC<FullScreenChatbotProps> = ({ autoOpen = false 
         className="fixed inset-0 z-50 bg-white"
       >
         {/* Header */}
-        <div className="flex items-center justify-between p-6 border-b border-slate-200">
-          <div className="flex items-center space-x-4">
-            <div className="w-12 h-12 bg-gradient-to-r from-blue-500 to-purple-500 rounded-full flex items-center justify-center">
-              <MessageCircle className="w-6 h-6 text-white" />
+        <div className="flex items-center justify-between p-4 md:p-6 border-b border-slate-200">
+          <div className="flex items-center space-x-3 md:space-x-4">
+            <div className="w-10 h-10 md:w-12 md:h-12 bg-gradient-to-r from-blue-500 to-purple-500 rounded-full flex items-center justify-center flex-shrink-0">
+              <MessageCircle className="w-5 h-5 md:w-6 md:h-6 text-white" />
             </div>
             <div>
-              <h2 className="text-2xl font-bold text-slate-900">Staffly AI Assistant</h2>
-              <p className="text-slate-600">Your virtual assistant specialist</p>
+              <h2 className="text-lg md:text-2xl font-bold text-slate-900">Staffly AI Assistant</h2>
+              <p className="text-xs md:text-base text-slate-600 hidden sm:block">Your virtual assistant specialist</p>
             </div>
           </div>
           
           <button
             onClick={() => setIsFullScreen(false)}
-            className="w-10 h-10 bg-slate-100 rounded-full flex items-center justify-center text-slate-600 hover:bg-slate-200 transition-colors"
+            className="w-9 h-9 md:w-10 md:h-10 bg-slate-100 rounded-full flex items-center justify-center text-slate-600 hover:bg-slate-200 transition-colors flex-shrink-0"
           >
-            <X className="w-5 h-5" />
+            <X className="w-4 h-4 md:w-5 md:h-5" />
           </button>
         </div>
 
-        <div className="flex h-[calc(100vh-120px)]">
+        <div className="flex flex-col md:flex-row h-[calc(100vh-120px)]">
           {/* Left Side - Chat Interface */}
-          <div className="w-4/5 border-r border-slate-200 p-6 flex flex-col">
+          <div className="w-full md:w-4/5 border-r-0 md:border-r border-slate-200 p-4 md:p-6 flex flex-col">
             <div className="flex-1 space-y-6 mb-8 overflow-y-auto max-h-full">
               <AnimatePresence>
                 {messages.map((message) => {
@@ -655,26 +655,26 @@ const FullScreenChatbot: React.FC<FullScreenChatbotProps> = ({ autoOpen = false 
                     transition={{ duration: 0.3 }}
                     className={`flex ${message.sender === 'user' ? 'justify-end' : 'justify-start'}`}
                   >
-                    <div className={`flex items-start space-x-3 max-w-[70%] ${message.sender === 'user' ? 'flex-row-reverse space-x-reverse' : ''}`}>
-                      <div className={`w-10 h-10 rounded-full flex items-center justify-center flex-shrink-0 ${
+                    <div className={`flex items-start space-x-2 md:space-x-3 max-w-[85%] md:max-w-[70%] ${message.sender === 'user' ? 'flex-row-reverse space-x-reverse' : ''}`}>
+                      <div className={`w-8 h-8 md:w-10 md:h-10 rounded-full flex items-center justify-center flex-shrink-0 ${
                         message.sender === 'user' 
                           ? 'bg-blue-600' 
                           : 'bg-slate-500'
                       }`}>
                         {message.sender === 'user' ? (
-                          <User className="w-5 h-5 text-white" />
+                          <User className="w-4 h-4 md:w-5 md:h-5 text-white" />
                         ) : (
-                          <Bot className="w-5 h-5 text-white" />
+                          <Bot className="w-4 h-4 md:w-5 md:h-5 text-white" />
                         )}
                       </div>
-                      <div className={`px-6 py-4 rounded-2xl shadow ${
+                      <div className={`px-4 py-3 md:px-6 md:py-4 rounded-2xl shadow ${
                         message.sender === 'user'
                           ? 'bg-blue-600 text-white'
                           : 'bg-slate-50 text-slate-900 border border-slate-200'
                       }`}>
-                        <p className="text-base leading-relaxed">{displayText}</p>
+                        <p className="text-sm md:text-base leading-relaxed">{displayText}</p>
                         {showOptions && (
-                          <div className="mt-4 grid grid-cols-2 gap-3">
+                          <div className="mt-3 md:mt-4 grid grid-cols-1 md:grid-cols-2 gap-2 md:gap-3">
                             {parsed.options.map((opt, idx) => (
                               <button
                                 key={idx}
@@ -723,7 +723,7 @@ const FullScreenChatbot: React.FC<FullScreenChatbotProps> = ({ autoOpen = false 
             {/* Input Section */}
             <div className="space-y-4">
               {/* Input Field */}
-              <div className="flex space-x-3">
+              <div className="flex space-x-2 md:space-x-3">
                 <input
                   ref={inputRef}
                   type="text"
@@ -732,17 +732,17 @@ const FullScreenChatbot: React.FC<FullScreenChatbotProps> = ({ autoOpen = false 
                   onKeyPress={handleKeyPress}
                   placeholder="What do you want to scale?"
                   disabled={isLoading}
-                  className="flex-1 px-6 py-4 bg-white/80 border-2 border-slate-200 rounded-full focus:outline-none focus:ring-2 focus:ring-blue-500 focus:border-transparent shadow-lg text-slate-900 font-medium disabled:opacity-50 placeholder-slate-500 text-lg"
+                  className="flex-1 px-4 py-3 md:px-6 md:py-4 bg-white/80 border-2 border-slate-200 rounded-full focus:outline-none focus:ring-2 focus:ring-blue-500 focus:border-transparent shadow-lg text-slate-900 font-medium disabled:opacity-50 placeholder-slate-500 text-sm md:text-lg"
                 />
                 <button
                   onClick={handleSendMessage}
                   disabled={isLoading || !inputText.trim()}
-                  className="w-16 h-16 bg-gradient-to-r from-blue-500 to-purple-500 text-white rounded-full flex items-center justify-center hover:shadow-lg transition-all duration-300 transform hover:scale-105 disabled:opacity-50 disabled:cursor-not-allowed disabled:transform-none"
+                  className="w-12 h-12 md:w-16 md:h-16 bg-gradient-to-r from-blue-500 to-purple-500 text-white rounded-full flex items-center justify-center hover:shadow-lg transition-all duration-300 transform hover:scale-105 disabled:opacity-50 disabled:cursor-not-allowed disabled:transform-none flex-shrink-0"
                 >
                   {isLoading ? (
-                    <Loader2 className="w-6 h-6 animate-spin" />
+                    <Loader2 className="w-5 h-5 md:w-6 md:h-6 animate-spin" />
                   ) : (
-                    <Send className="w-6 h-6" />
+                    <Send className="w-5 h-5 md:w-6 md:h-6" />
                   )}
                 </button>
               </div>
@@ -750,7 +750,7 @@ const FullScreenChatbot: React.FC<FullScreenChatbotProps> = ({ autoOpen = false 
           </div>
 
           {/* Right Side - Intro / Searching / Gated VA Profiles */}
-          <div className="w-1/2 p-6">
+          <div className="hidden md:block md:w-1/2 p-6">
             <div className="h-full bg-slate-50 rounded-2xl border border-slate-200 p-6 overflow-y-auto relative">
               {/* Searching for candidates animation */}
               {searchingCandidates && (

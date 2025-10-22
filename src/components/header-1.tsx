@@ -1,5 +1,6 @@
 import { useEffect, useMemo, useRef, useState } from "react"
 import { AnimatePresence, motion, MotionConfig } from "motion/react"
+import { Menu, X } from "lucide-react"
 
 export function useScrollY(containerRef: React.RefObject<HTMLElement | null>) {
   const [scrollY, setScrollY] = useState(0)
@@ -41,6 +42,7 @@ export function StickyHeader({
   const stickyNavRef = useRef<HTMLElement>(null)
   const theme = typeof document !== 'undefined' && document.documentElement.classList.contains('dark') ? 'dark' : 'light'
   const [active, setActive] = useState(false)
+  const [mobileMenuOpen, setMobileMenuOpen] = useState(false)
 
   const navLinks = useMemo(
     () => [
@@ -157,6 +159,15 @@ export function StickyHeader({
         >
           <a href="/#chat" className="text-sm font-medium text-slate-700 hover:text-slate-900">Start Scaling</a>
         </motion.div>
+
+        {/* Mobile Menu Button */}
+        <button
+          onClick={() => setMobileMenuOpen(!mobileMenuOpen)}
+          className="md:hidden w-10 h-10 flex items-center justify-center text-slate-700 hover:bg-slate-100 rounded-lg transition-colors"
+          aria-label="Toggle menu"
+        >
+          {mobileMenuOpen ? <X className="w-5 h-5" /> : <Menu className="w-5 h-5" />}
+        </button>
         <MotionConfig transition={{ duration: 0.3, ease: "easeInOut" }}>
           <motion.button
             onClick={() => setActive((prev) => !prev)}
@@ -208,6 +219,44 @@ export function StickyHeader({
           </motion.button>
         </MotionConfig>
       </nav>
+
+      {/* Mobile Menu Dropdown */}
+      <AnimatePresence>
+        {mobileMenuOpen && (
+          <motion.div
+            initial={{ opacity: 0, height: 0 }}
+            animate={{ opacity: 1, height: "auto" }}
+            exit={{ opacity: 0, height: 0 }}
+            transition={{ duration: 0.3 }}
+            className="md:hidden bg-white border-b border-slate-200 shadow-lg overflow-hidden"
+          >
+            <nav className="container mx-auto px-4 py-4">
+              <ul className="space-y-3">
+                {navLinks.map((navItem) => (
+                  <li key={navItem.id}>
+                    <a
+                      href={navItem.link}
+                      onClick={() => setMobileMenuOpen(false)}
+                      className="block px-4 py-3 text-base font-medium text-slate-700 hover:bg-slate-50 hover:text-blue-600 rounded-lg transition-colors"
+                    >
+                      {navItem.label}
+                    </a>
+                  </li>
+                ))}
+                <li>
+                  <a
+                    href="/#chat"
+                    onClick={() => setMobileMenuOpen(false)}
+                    className="block px-4 py-3 text-base font-bold text-white bg-blue-600 hover:bg-blue-700 rounded-lg transition-colors text-center"
+                  >
+                    Start Scaling
+                  </a>
+                </li>
+              </ul>
+            </nav>
+          </motion.div>
+        )}
+      </AnimatePresence>
     </motion.header>
   )
 }
