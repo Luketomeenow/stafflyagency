@@ -1,0 +1,31 @@
+<svg width="64" height="64" viewBox="0 0 64 64" fill="none" xmlns="http://www.w3.org/2000/svg">
+  <!-- Outer Circle with Gradient -->
+  <circle cx="32" cy="32" r="30" fill="url(#iconGradient)" />
+  
+  <!-- Inner Design - Abstract "S" with AI element -->
+  <path d="M 20 22 Q 26 18 32 22 Q 38 26 38 32 Q 38 36 32 38 Q 26 40 26 44 Q 26 48 32 50 Q 38 52 44 48" 
+        stroke="white" 
+        stroke-width="4" 
+        stroke-linecap="round" 
+        fill="none"
+        opacity="0.95"/>
+  
+  <!-- AI Dots/Nodes -->
+  <circle cx="22" cy="24" r="3" fill="white" opacity="0.9"/>
+  <circle cx="42" cy="34" r="3" fill="white" opacity="0.9"/>
+  <circle cx="34" cy="46" r="3" fill="white" opacity="0.9"/>
+  
+  <!-- Connection Lines (subtle) -->
+  <line x1="22" y1="24" x2="32" y2="22" stroke="white" stroke-width="1.5" opacity="0.4"/>
+  <line x1="42" y1="34" x2="38" y2="32" stroke="white" stroke-width="1.5" opacity="0.4"/>
+  <line x1="34" y1="46" x2="32" y2="50" stroke="white" stroke-width="1.5" opacity="0.4"/>
+  
+  <!-- Gradients -->
+  <defs>
+    <linearGradient id="iconGradient" x1="0%" y1="0%" x2="100%" y2="100%">
+      <stop offset="0%" style="stop-color:#3b82f6;stop-opacity:1" />
+      <stop offset="100%" style="stop-color:#8b5cf6;stop-opacity:1" />
+    </linearGradient>
+  </defs>
+</svg>
+

@@ -1,0 +1,351 @@
+import { useState } from 'react'
+import { motion } from 'framer-motion'
+import { Upload, CheckCircle, AlertCircle } from 'lucide-react'
+
+type FormData = {
+  // Personal Information
+  firstName: string
+  lastName: string
+  city: string
+  phone: string
+  whatsapp: string
+  ageRange: string
+  gender: string
+  
+  // Background & Experience
+  industryExperience: string[]
+  desiredIndustry: string[]
+  desiredRoles: string[]
+  
+  // Resume & Portfolio
+  resume: File | null
+  portfolioLinks: string
+  
+  // Assessments (will be completed)
+  temperamentCompleted: boolean
+  roleValidationCompleted: boolean
+  communicationCompleted: boolean
+  behavioralCompleted: boolean
+  
+  // Technical Setup
+  internetSpeed: File | null
+  workspacePhoto: File | null
+  
+  // Tech Stack (will be filled after industries selected)
+  techStack: Record<string, 'B' | 'I' | 'A'>
+}
+
+const INDUSTRIES = [
+  'Real Estate', 'IT / Technology', 'E-commerce', 'Legal', 'Marketing / Advertising',
+  'Healthcare', 'Finance / Accounting', 'Hospitality', 'Education', 'Construction'
+]
+
+const ROLE_CATEGORIES = {
+  'Runner Roles': ['Appointment Setter', 'Customer Support', 'Data Entry', 'Research Assistant'],
+  'Admin / Secretary Roles': ['Administrative Assistant', 'Transaction Coordinator', 'Bookkeeper', 'Scheduler'],
+  'Executive Assistant Roles': ['Executive Assistant', 'SDR', 'Account Executive', 'Project Manager', 'Operations Analyst', 'Recruiter'],
+  'Chief of Staff Roles': ['Chief of Staff', 'Operations Lead', 'Department Coordinator', 'Business Analyst', 'Technical Systems Manager']
+}
+
+const AGE_RANGES = ['18-24', '25-34', '35-44', '45-54', '55+']
+
+const TECH_TOOLS_BY_INDUSTRY: Record<string, string[]> = {
+  'Real Estate': ['Salesforce', 'Follow Up Boss', 'Dotloop', 'Calendly', 'Canva', 'Google Workspace', 'Zoom', 'DocuSign', 'Slack', 'Trello'],
+  'IT / Technology': ['Jira', 'GitHub', 'Slack', 'Confluence', 'AWS', 'Docker', 'Asana', 'Zendesk', 'Notion', 'Linear'],
+  'E-commerce': ['Shopify', 'WooCommerce', 'Klaviyo', 'Google Analytics', 'Facebook Ads Manager', 'Canva', 'Asana', 'Zendesk', 'Mailchimp', 'Hootsuite'],
+  'Marketing / Advertising': ['HubSpot', 'Google Analytics', 'Facebook Ads Manager', 'Canva', 'Hootsuite', 'Mailchimp', 'SEMrush', 'Ahrefs', 'Asana', 'Slack'],
+  'Finance / Accounting': ['QuickBooks', 'Xero', 'Excel', 'SAP', 'NetSuite', 'Bill.com', 'Expensify', 'Gusto', 'ADP', 'Slack']
+}
+
+const CandidateApplicationPage = () => {
+  const [step, setStep] = useState(1)
+  const [formData, setFormData] = useState<FormData>({
+    firstName: '', lastName: '', city: '', phone: '', whatsapp: '', ageRange: '', gender: '',
+    industryExperience: [], desiredIndustry: [], desiredRoles: [],
+    resume: null, portfolioLinks: '',
+    temperamentCompleted: false, roleValidationCompleted: false,
+    communicationCompleted: false, behavioralCompleted: false,
+    internetSpeed: null, workspacePhoto: null,
+    techStack: {}
+  })
+
+  const [submitted, setSubmitted] = useState(false)
+
+  const updateField = (field: keyof FormData, value: any) => {
+    setFormData(prev => ({ ...prev, [field]: value }))
+  }
+
+  const toggleMultiSelect = (field: 'industryExperience' | 'desiredIndustry' | 'desiredRoles', value: string) => {
+    setFormData(prev => ({
+      ...prev,
+      [field]: prev[field].includes(value)
+        ? prev[field].filter(v => v !== value)
+        : [...prev[field], value]
+    }))
+  }
+
+  const handleFileUpload = (field: 'resume' | 'internetSpeed' | 'workspacePhoto', e: React.ChangeEvent<HTMLInputElement>) => {
+    if (e.target.files && e.target.files[0]) {
+      updateField(field, e.target.files[0])
+    }
+  }
+
+  const handleSubmit = async (e: React.FormEvent) => {
+    e.preventDefault()
+    // TODO: Send to Supabase or backend
+    console.log('Application submitted:', formData)
+    setSubmitted(true)
+  }
+
+  const renderStep = () => {
+    switch (step) {
+      case 1:
+        return (
+          <div className="space-y-6">
+            <h2 className="text-2xl font-bold text-slate-900">Personal Information</h2>
+            <div className="grid md:grid-cols-2 gap-4">
+              <input type="text" placeholder="First Name *" value={formData.firstName} onChange={e => updateField('firstName', e.target.value)} className="input-field" required />
+              <input type="text" placeholder="Last Name *" value={formData.lastName} onChange={e => updateField('lastName', e.target.value)} className="input-field" required />
+            </div>
+            <input type="text" placeholder="Current City *" value={formData.city} onChange={e => updateField('city', e.target.value)} className="input-field" required />
+            <div className="grid md:grid-cols-2 gap-4">
+              <input type="tel" placeholder="Mobile Phone *" value={formData.phone} onChange={e => updateField('phone', e.target.value)} className="input-field" required />
+              <input type="tel" placeholder="WhatsApp Number *" value={formData.whatsapp} onChange={e => updateField('whatsapp', e.target.value)} className="input-field" required />
+            </div>
+            <div className="grid md:grid-cols-2 gap-4">
+              <select value={formData.ageRange} onChange={e => updateField('ageRange', e.target.value)} className="input-field" required>
+                <option value="">Age Range *</option>
+                {AGE_RANGES.map(range => <option key={range} value={range}>{range}</option>)}
+              </select>
+              <select value={formData.gender} onChange={e => updateField('gender', e.target.value)} className="input-field" required>
+                <option value="">Gender *</option>
+                <option value="Male">Male</option>
+                <option value="Female">Female</option>
+                <option value="Non-binary">Non-binary</option>
+                <option value="Prefer not to say">Prefer not to say</option>
+              </select>
+            </div>
+          </div>
+        )
+
+      case 2:
+        return (
+          <div className="space-y-6">
+            <h2 className="text-2xl font-bold text-slate-900">Background & Experience</h2>
+            <div>
+              <label className="block font-semibold text-slate-700 mb-2">Industry Experience (Select all that apply)</label>
+              <div className="grid md:grid-cols-3 gap-3">
+                {INDUSTRIES.map(industry => (
+                  <button key={industry} type="button" onClick={() => toggleMultiSelect('industryExperience', industry)}
+                    className={`px-4 py-2 rounded-lg border text-sm ${formData.industryExperience.includes(industry) ? 'bg-blue-600 text-white border-blue-600' : 'bg-white text-slate-700 border-slate-300 hover:border-blue-400'}`}>
+                    {industry}
+                  </button>
+                ))}
+              </div>
+            </div>
+            <div>
+              <label className="block font-semibold text-slate-700 mb-2">Desired Industry (Industries you want to explore)</label>
+              <div className="grid md:grid-cols-3 gap-3">
+                {INDUSTRIES.map(industry => (
+                  <button key={industry} type="button" onClick={() => toggleMultiSelect('desiredIndustry', industry)}
+                    className={`px-4 py-2 rounded-lg border text-sm ${formData.desiredIndustry.includes(industry) ? 'bg-purple-600 text-white border-purple-600' : 'bg-white text-slate-700 border-slate-300 hover:border-purple-400'}`}>
+                    {industry}
+                  </button>
+                ))}
+              </div>
+            </div>
+            <div>
+              <label className="block font-semibold text-slate-700 mb-2">Desired Roles (Select all that apply)</label>
+              {Object.entries(ROLE_CATEGORIES).map(([category, roles]) => (
+                <div key={category} className="mb-4">
+                  <div className="font-medium text-slate-600 mb-2">{category}</div>
+                  <div className="grid md:grid-cols-3 gap-2">
+                    {roles.map(role => (
+                      <button key={role} type="button" onClick={() => toggleMultiSelect('desiredRoles', role)}
+                        className={`px-3 py-2 rounded-lg border text-sm ${formData.desiredRoles.includes(role) ? 'bg-green-600 text-white border-green-600' : 'bg-white text-slate-700 border-slate-300 hover:border-green-400'}`}>
+                        {role}
+                      </button>
+                    ))}
+                  </div>
+                </div>
+              ))}
+            </div>
+          </div>
+        )
+
+      case 3:
+        return (
+          <div className="space-y-6">
+            <h2 className="text-2xl font-bold text-slate-900">Resume & Portfolio</h2>
+            <div>
+              <label className="block font-semibold text-slate-700 mb-2">Upload Resume (PDF required) *</label>
+              <label className="flex flex-col items-center justify-center w-full h-32 border-2 border-dashed border-slate-300 rounded-lg cursor-pointer hover:border-blue-500 bg-slate-50">
+                <Upload className="w-8 h-8 text-slate-400 mb-2" />
+                <span className="text-sm text-slate-600">{formData.resume ? formData.resume.name : 'Click to upload PDF'}</span>
+                <input type="file" accept=".pdf" onChange={e => handleFileUpload('resume', e)} className="hidden" />
+              </label>
+            </div>
+            <div>
+              <label className="block font-semibold text-slate-700 mb-2">Creative Portfolio Links (Optional)</label>
+              <textarea placeholder="Paste links to your Canva, CapCut, Figma, or other portfolio work" value={formData.portfolioLinks} onChange={e => updateField('portfolioLinks', e.target.value)} className="input-field" rows={4} />
+            </div>
+          </div>
+        )
+
+      case 4:
+        return (
+          <div className="space-y-6">
+            <h2 className="text-2xl font-bold text-slate-900">Assessments & Quizzes</h2>
+            <p className="text-slate-600">Please complete the following assessments to help us match you with the right opportunities.</p>
+            <div className="space-y-4">
+              {[
+                { name: 'Temperament Quiz', field: 'temperamentCompleted', desc: 'Measures your natural work style and preferences.' },
+                { name: 'Role Validation Assessment', field: 'roleValidationCompleted', desc: 'Audio-based validation of your experience level.' },
+                { name: 'Communication Style Test', field: 'communicationCompleted', desc: 'Determines your communication quadrant.' },
+                { name: 'Behavioral Stress Test', field: 'behavioralCompleted', desc: 'Measures adaptability and people skills.' }
+              ].map((assessment: any) => (
+                <div key={assessment.field} className="border border-slate-200 rounded-lg p-4">
+                  <div className="flex items-center justify-between">
+                    <div>
+                      <div className="font-semibold text-slate-900">{assessment.name}</div>
+                      <div className="text-sm text-slate-600">{assessment.desc}</div>
+                    </div>
+                    <button type="button" onClick={() => updateField(assessment.field as keyof FormData, !formData[assessment.field as keyof FormData])}
+                      className={`px-4 py-2 rounded-lg font-medium ${formData[assessment.field as keyof FormData] ? 'bg-green-600 text-white' : 'bg-slate-200 text-slate-700'}`}>
+                      {formData[assessment.field as keyof FormData] ? <CheckCircle className="w-5 h-5" /> : 'Start'}
+                    </button>
+                  </div>
+                </div>
+              ))}
+            </div>
+          </div>
+        )
+
+      case 5:
+        return (
+          <div className="space-y-6">
+            <h2 className="text-2xl font-bold text-slate-900">Technical Setup</h2>
+            <div>
+              <label className="block font-semibold text-slate-700 mb-2">Internet Speed Test Screenshot *</label>
+              <p className="text-sm text-slate-600 mb-2">Visit Speedtest.net, run a test, and upload a screenshot</p>
+              <label className="flex flex-col items-center justify-center w-full h-32 border-2 border-dashed border-slate-300 rounded-lg cursor-pointer hover:border-blue-500 bg-slate-50">
+                <Upload className="w-8 h-8 text-slate-400 mb-2" />
+                <span className="text-sm text-slate-600">{formData.internetSpeed ? formData.internetSpeed.name : 'Upload screenshot'}</span>
+                <input type="file" accept="image/*" onChange={e => handleFileUpload('internetSpeed', e)} className="hidden" />
+              </label>
+            </div>
+            <div>
+              <label className="block font-semibold text-slate-700 mb-2">Remote Workspace Photo *</label>
+              <p className="text-sm text-slate-600 mb-2">Upload a photo showing your desk, laptop/desktop, monitors, and headset</p>
+              <label className="flex flex-col items-center justify-center w-full h-32 border-2 border-dashed border-slate-300 rounded-lg cursor-pointer hover:border-blue-500 bg-slate-50">
+                <Upload className="w-8 h-8 text-slate-400 mb-2" />
+                <span className="text-sm text-slate-600">{formData.workspacePhoto ? formData.workspacePhoto.name : 'Upload photo'}</span>
+                <input type="file" accept="image/*" onChange={e => handleFileUpload('workspacePhoto', e)} className="hidden" />
+              </label>
+            </div>
+          </div>
+        )
+
+      case 6:
+        const selectedIndustry = formData.industryExperience[0] || formData.desiredIndustry[0]
+        const tools = selectedIndustry ? TECH_TOOLS_BY_INDUSTRY[selectedIndustry] || [] : []
+        
+        return (
+          <div className="space-y-6">
+            <h2 className="text-2xl font-bold text-slate-900">Tech Stack Proficiency</h2>
+            <p className="text-slate-600">Rate your familiarity with common tools in {selectedIndustry || 'your industry'}</p>
+            {tools.length > 0 ? (
+              <div className="space-y-3">
+                {tools.map(tool => (
+                  <div key={tool} className="flex items-center justify-between border border-slate-200 rounded-lg p-4">
+                    <span className="font-medium text-slate-900">{tool}</span>
+                    <div className="flex gap-2">
+                      {(['B', 'I', 'A'] as const).map(level => (
+                        <button key={level} type="button"
+                          onClick={() => updateField('techStack', { ...formData.techStack, [tool]: level })}
+                          className={`px-4 py-2 rounded-lg font-medium text-sm ${formData.techStack[tool] === level ? 'bg-blue-600 text-white' : 'bg-slate-100 text-slate-700 hover:bg-slate-200'}`}>
+                          {level === 'B' ? 'Beginner' : level === 'I' ? 'Intermediate' : 'Advanced'}
+                        </button>
+                      ))}
+                    </div>
+                  </div>
+                ))}
+              </div>
+            ) : (
+              <div className="text-center py-8 text-slate-500">
+                <AlertCircle className="w-12 h-12 mx-auto mb-2 text-slate-400" />
+                Please select an industry in Step 2 to see relevant tools
+              </div>
+            )}
+          </div>
+        )
+
+      default:
+        return null
+    }
+  }
+
+  if (submitted) {
+    return (
+      <div className="min-h-screen bg-gradient-to-br from-blue-50 via-white to-purple-50 flex items-center justify-center p-6">
+        <motion.div initial={{ opacity: 0, scale: 0.9 }} animate={{ opacity: 1, scale: 1 }} className="bg-white rounded-3xl p-12 shadow-2xl border border-slate-200 max-w-2xl text-center">
+          <CheckCircle className="w-20 h-20 text-green-600 mx-auto mb-6" />
+          <h1 className="text-4xl font-bold text-slate-900 mb-4">Application Submitted!</h1>
+          <p className="text-xl text-slate-600 mb-8">Thank you for applying. Our team will review your application and get back to you within 2-3 business days.</p>
+          <button onClick={() => window.location.href = '/'} className="bg-blue-600 text-white font-bold py-3 px-8 rounded-full hover:bg-blue-700 transition">Back to Home</button>
+        </motion.div>
+      </div>
+    )
+  }
+
+  return (
+    <div className="min-h-screen bg-gradient-to-br from-blue-50 via-white to-purple-50 py-12 px-4">
+      <div className="max-w-4xl mx-auto">
+        <motion.div initial={{ opacity: 0, y: 20 }} animate={{ opacity: 1, y: 0 }} className="bg-white rounded-3xl shadow-2xl border border-slate-200 overflow-hidden">
+          {/* Progress (minimal) */}
+          <div className="p-6 border-b border-slate-200 bg-white">
+            <div className="h-2 bg-slate-100 rounded-full overflow-hidden">
+              <div className="h-full bg-gradient-to-r from-blue-600 to-purple-600 rounded-full transition-all duration-300" style={{ width: `${(step / 6) * 100}%` }} />
+            </div>
+          </div>
+
+          {/* Form */}
+          <form onSubmit={handleSubmit} className="p-8">
+            {renderStep()}
+
+            {/* Navigation */}
+            <div className="flex justify-between mt-8 pt-6 border-t border-slate-200">
+              {step > 1 && (
+                <button type="button" onClick={() => setStep(step - 1)} className="px-6 py-3 border border-slate-300 rounded-lg text-slate-700 font-medium hover:bg-slate-50">Previous</button>
+              )}
+              {step < 6 ? (
+                <button type="button" onClick={() => setStep(step + 1)} className="ml-auto px-6 py-3 bg-blue-600 text-white rounded-lg font-medium hover:bg-blue-700">Next</button>
+              ) : (
+                <button type="submit" className="ml-auto px-8 py-3 bg-gradient-to-r from-blue-600 to-purple-600 text-white rounded-lg font-bold hover:shadow-lg">Submit Application</button>
+              )}
+            </div>
+          </form>
+        </motion.div>
+      </div>
+
+      <style>{`
+        .input-field {
+          width: 100%;
+          padding: 0.75rem 1rem;
+          border: 1px solid rgb(203 213 225);
+          border-radius: 0.5rem;
+          font-size: 0.875rem;
+          transition: all 0.2s;
+        }
+        .input-field:focus {
+          outline: none;
+          border-color: rgb(59 130 246);
+          ring: 2px;
+          ring-color: rgb(59 130 246 / 0.2);
+        }
+      `}</style>
+    </div>
+  )
+}
+
+export default CandidateApplicationPage

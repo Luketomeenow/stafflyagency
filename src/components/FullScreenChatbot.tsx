@@ -1,0 +1,995 @@
+import React, { useState, useRef, useEffect } from 'react';
+import { motion, AnimatePresence } from 'framer-motion';
+import { MessageCircle, Send, User, Bot, Loader2, X, Minimize2 } from 'lucide-react';
+// RAG: use server-side search; keep client MiniSearch fallback only if needed
+import { ingestPdfIfRequested } from '../knowledge/rag';
+import { supabase } from '../lib/supabase';
+import Cal, { getCalApi } from '@calcom/embed-react'
+import { matchCandidates, generateMatchEmail, type Lead, type Candidate } from '../lib/candidateMatching'
+
+interface Message {
+  id: string;
+  text: string;
+  sender: 'user' | 'bot';
+  timestamp: Date;
+}
+
+// Remove emojis and decorative glyphs from text
+const stripEmojis = (text: string) => {
+  return text
+    .replace(/[\u{1F1E6}-\u{1F1FF}]/gu, '')
+    .replace(/[\u{1F300}-\u{1F5FF}]/gu, '')
+    .replace(/[\u{1F600}-\u{1F64F}]/gu, '')
+    .replace(/[\u{1F680}-\u{1F6FF}]/gu, '')
+    .replace(/[\u{1F700}-\u{1F77F}]/gu, '')
+    .replace(/[\u{1F780}-\u{1F7FF}]/gu, '')
+    .replace(/[\u{1F800}-\u{1F8FF}]/gu, '')
+    .replace(/[\u{1F900}-\u{1F9FF}]/gu, '')
+    .replace(/[\u{1FA00}-\u{1FAFF}]/gu, '')
+    .replace(/[\u{2600}-\u{26FF}]/gu, '')
+    .replace(/[\u{2700}-\u{27BF}]/gu, '')
+    .replace(/\uFE0F/gu, '')
+    .replace(/\u200D/gu, '')
+    .replace(/\s{2,}/g, ' ')
+    .trim();
+};
+
+// Extract bracketed option labels from a bot message
+const extractOptions = (text: string): { cleanedText: string; options: string[] } => {
+  const options: string[] = [];
+  const bracketMatches = [...text.matchAll(/\[([^\]]+)\]/g)];
+  for (const m of bracketMatches) {
+    const candidate = (m[1] || '').trim();
+    if (candidate) options.push(candidate);
+  }
+  const cleanedText = text.replace(/Options?:[\s\S]*$/i, '').trim();
+  return { cleanedText: cleanedText || text, options };
+};
+
+const SYSTEM_PROMPT = `0) SYSTEM ROLE (Core Prompt)
+You are the official StafflyAI Assistant, a professional, conversational guide that helps business owners determine which StafflyAI service best fits their needs and prepares them for a strategy call.
+Your purpose:
+- Greet visitors warmly and make the conversation natural.
+- Ask one question at a time — short, clear, and friendly.
+- Collect all essential business details before presenting the embedded calendar for booking.
+- Keep the tone confident but relaxed. Never push.
+- Avoid jargon, filler, or long explanations. Focus on clarity.
+- Do not quote prices, timelines, or make guarantees. Your job is to qualify, not to sell.
+- Summarize what’s been learned before showing the booking calendar.
+
+Important: Do NOT ask for name, email, or phone inside the chat. Those will be captured via a right-side form that appears after industry is provided. Continue the flow questions but rely on the form for contact details.
+
+At the end of every full conversation, the goal is to ensure the consultant has:
+- Clear understanding of the service type, business size, operator role or scope, and goals.
+- Verified contact info and readiness for the strategy call.
+
+1) VOICE & STYLE
+- Tone: professional, calm, confident, friendly.
+- Keep replies short (1–3 sentences max).
+- Always sound helpful, not salesy.
+- When collecting data, explain why (e.g., “This helps our consultant prepare for your call.”).
+
+2) DATA MODEL (Memory Fields)
+{
+  service, goal, role_or_scope, hours_per_week, timezone, tools_stack, industry, team_size,
+  revenue_range, tech_stack, api_access, timeline, name_first, name_last, email, phone, company, notes
+}
+Validation:
+- Email must include "@".
+- Phone must contain at least 10 digits.
+- Revenue range required for all service paths.
+- Team size required for the Operator path.
+- Calendar only appears after required data is valid.
+
+3) QUALIFICATION FLOWS
+Follow the question order and options for: A) Operators, B) Websites, C) Web Apps, D) AI Adoption/Automation (as provided).
+After required details are captured and validated, say the calendar handoff line and show the calendar.
+
+4) MICRO-PROOF & REASSURANCE
+Use sparingly and only after relevant responses.
+
+5) CALENDAR HANDOFF
+Once all required info is collected and validated, say: "That's everything I need - you can now view your profile candidates after filling up the form on the right side."
+If hesitant, offer to forward details to a consultant.
+
+6) FALLBACKS & SAFETY
+Stay on-topic, never collect sensitive data, keep a friendly, concise tone.
+`
+
+interface FullScreenChatbotProps {
+  autoOpen?: boolean;
+}
+
+const FullScreenChatbot: React.FC<FullScreenChatbotProps> = ({ autoOpen = false }) => {
+  const [isFullScreen, setIsFullScreen] = useState(false);
+  const [messages, setMessages] = useState<Message[]>([
+    {
+      id: '1',
+      text: "Hey there! I’m your Staffly Guide. I help founders and business owners match with the right Filipino VAs so you can free up time and focus on growth. Can I ask you a few quick questions so I can recommend the right VA for your business?",
+      sender: 'bot',
+      timestamp: new Date()
+    }
+  ]);
+  const [inputText, setInputText] = useState('');
+  const [isLoading, setIsLoading] = useState(false);
+  const [isTyping, setIsTyping] = useState(false);
+  const messagesEndRef = useRef<HTMLDivElement>(null);
+  const inputRef = useRef<HTMLInputElement>(null);
+  const [conversationId, setConversationId] = useState<string | null>(null);
+  
+  // Handle autoOpen prop: default false so the page starts at the landing view
+  useEffect(() => {
+    if (autoOpen) {
+      setIsFullScreen(true);
+    } else {
+      setIsFullScreen(false);
+    }
+  }, [autoOpen]);
+  
+  // Optional query param ?ingest=1 to ingest the PDF to Supabase via Edge Function
+  useEffect(() => {
+    const supabaseUrl = import.meta.env.VITE_SUPABASE_URL as string | undefined
+    const anonKey = import.meta.env.VITE_SUPABASE_ANON_KEY as string | undefined
+    ingestPdfIfRequested(supabaseUrl, anonKey)
+  }, [])
+
+  // Create conversation only when first message is sent (moved to handleSendMessage)
+
+  // Lead capture and gated profiles state
+  // Email capture via chat no longer used; contact is collected via form
+  const [profilesUnlocked, setProfilesUnlocked] = useState(false);
+  const [leadName, setLeadName] = useState('');
+  const [leadEmail, setLeadEmail] = useState('');
+  const [leadPhone, setLeadPhone] = useState('');
+  // optional searching animation state removed for simplicity
+  const [leadSubmitted, setLeadSubmitted] = useState(false);
+  const [confirmationOpen, setConfirmationOpen] = useState(false);
+  const [showCalendarOnRight, setShowCalendarOnRight] = useState(false);
+  const [showLeadForm, setShowLeadForm] = useState(false);
+  const [searchingCandidates, setSearchingCandidates] = useState(false);
+
+  // Extract business qualification data from conversation messages
+  const extractQualificationData = (messages: Message[]) => {
+    const normalize = (s: string) => s.toLowerCase().replace(/\s+/g, ' ').trim()
+    const userMsgs = messages.filter(m => m.sender === 'user').map(m => normalize(m.text))
+    const allMsgs = messages.map(m => normalize(m.text))
+
+    const firstMatch = (options: string[]) => {
+      for (const msg of userMsgs) {
+        for (const opt of options) {
+          if (msg.includes(normalize(opt))) return opt
+        }
+      }
+      return null
+    }
+
+    // Service type
+    const service = firstMatch(['operators', 'operator', 'websites', 'website', 'web apps', 'web app', 'ai adoption', 'automation', 'ai expert']) || null
+
+    // Industry
+    const industry = firstMatch([
+      'real estate', 'agency', 'marketing', 'coaching', 'consulting', 
+      'e-commerce', 'ecommerce', 'it', 'technology', 'legal', 
+      'healthcare', 'finance', 'accounting', 'hospitality', 'education', 'construction'
+    ]) || null
+
+    // Company name - look for patterns like "at [company]" or "for [company]"
+    let company: string | null = null
+    for (const msg of userMsgs) {
+      const match = msg.match(/(?:at|for|with|called)\s+([a-z0-9\s&\-\.]+?)(?:\.|,|$|\s+and\s|\s+in\s)/i)
+      if (match && match[1].length > 2 && match[1].length < 50) {
+        company = match[1].trim()
+        break
+      }
+    }
+
+    // Team size - extract number or bucket
+    let team_size: string | null = null
+    for (const msg of userMsgs) {
+      const numMatch = msg.match(/(\d+)\s*(employees?|staff|people|team|members?)/)
+      if (numMatch) {
+        team_size = numMatch[1]
+        break
+      }
+    }
+    if (!team_size) {
+      team_size = firstMatch(['just me', '2-5', '2–5', '4-10', '6-15', '6–15', '11-25', '26-50', '15+', '51+'])
+    }
+
+    // Revenue range
+    let revenue_range: string | null = null
+    for (const msg of userMsgs) {
+      const rangeMatch = msg.match(/(?:under\s+)?\$?(\d+(?:\.\d+)?)\s*([km])?\s*(?:-|–|to)\s*\$?(\d+(?:\.\d+)?)\s*([km])?/)
+      if (rangeMatch) {
+        revenue_range = msg.match(/[\$\d\sk\-–m]+/)?.[0] || null
+        break
+      }
+      if (msg.includes('10k') || msg.includes('50k') || msg.includes('100k') || msg.includes('200k')) {
+        revenue_range = msg.match(/[\$\d\sk\-–m]+/)?.[0] || null
+        break
+      }
+    }
+    if (!revenue_range) {
+      revenue_range = firstMatch(['under $10k', '$10k-$50k', '$10k–$50k', '$50k-$200k', '$51-100k', '$101-200k', '$200k+'])
+    }
+
+    // Role/scope for operators
+    const role_or_scope = firstMatch([
+      'support', 'customer support', 'appointment setter', 'data entry', 'research assistant',
+      'administrative assistant', 'admin', 'transaction coordinator', 'bookkeeper', 'scheduler',
+      'executive assistant', 'ea', 'sdr', 'account executive', 'project manager', 'operations analyst', 'recruiter',
+      'chief of staff', 'cos', 'operations lead', 'department coordinator', 'business analyst', 'technical systems manager'
+    ]) || null
+
+    // Hours per week
+    const hours_per_week = firstMatch(['10', '20', '30', '40', 'part-time', 'full-time', 'not sure']) || null
+
+    // Timezone
+    const timezone = firstMatch(['pst', 'est', 'cst', 'mst', 'utc', 'gmt', 'ph', 'philippines', 'pacific', 'eastern', 'central', 'mountain']) || null
+
+    // Tools/tech stack - collect mentions of tools
+    const toolKeywords = ['salesforce', 'hubspot', 'crm', 'asana', 'trello', 'slack', 'notion', 'google workspace', 'microsoft', 'office', 'excel', 'calendly', 'zoom', 'shopify', 'woocommerce']
+    const tools: string[] = []
+    for (const msg of allMsgs) {
+      toolKeywords.forEach(tool => {
+        if (msg.includes(tool) && !tools.includes(tool)) tools.push(tool)
+      })
+    }
+    const tools_stack = tools.length > 0 ? tools.join(', ') : null
+    const tech_stack = tools_stack // same for now
+
+    // API access
+    const api_access = firstMatch(['yes', 'no', 'not sure']) || null
+
+    // Timeline
+    const timeline = firstMatch(['now', 'immediately', '2-4 weeks', '2–4 weeks', 'later', 'not sure']) || null
+
+    // Goal - try to find what they want to achieve
+    let goal: string | null = null
+    for (const msg of userMsgs) {
+      if (msg.includes('want to') || msg.includes('need to') || msg.includes('looking to') || msg.includes('goal')) {
+        goal = msg.substring(0, 150)
+        break
+      }
+    }
+
+    return {
+      service,
+      industry,
+      goal,
+      company,
+      team_size,
+      revenue_range,
+      role_or_scope,
+      hours_per_week,
+      timezone,
+      tools_stack,
+      tech_stack,
+      api_access,
+      timeline
+    }
+  }
+
+  // Initialize Cal embed when we show it on the right panel
+  useEffect(() => {
+    if (!showCalendarOnRight) return;
+    (async () => {
+      try {
+        const cal = await getCalApi({ namespace: '45-strategy-call' })
+        cal('ui', { hideEventTypeDetails: false, layout: 'month_view' })
+      } catch {}
+    })();
+  }, [showCalendarOnRight]);
+
+  // Load Cal.com embed when lead is submitted and calendar should appear
+  useEffect(() => {
+    if (!leadSubmitted) return;
+    // Avoid double-injecting
+    const existing = document.querySelector('script[src="https://app.cal.com/embed/embed.js"]') as HTMLScriptElement | null
+    const initCal = () => {
+      // @ts-ignore
+      if (window.Cal) {
+        // @ts-ignore
+        window.Cal("init", "45-strategy-call", { origin: "https://app.cal.com" })
+        // @ts-ignore
+        window.Cal.ns && window.Cal.ns["45-strategy-call"] && window.Cal.ns["45-strategy-call"]("inline", {
+          elementOrSelector: "#my-cal-inline-45-strategy-call",
+          config: { layout: "month_view" },
+          calLink: "stafflyai/45-strategy-call",
+        })
+        // @ts-ignore
+        window.Cal.ns && window.Cal.ns["45-strategy-call"] && window.Cal.ns["45-strategy-call"]("ui", { hideEventTypeDetails: false, layout: "month_view" })
+      }
+    }
+    if (!existing) {
+      const s = document.createElement('script')
+      s.src = 'https://app.cal.com/embed/embed.js'
+      s.async = true
+      s.onload = initCal
+      document.head.appendChild(s)
+    } else {
+      initCal()
+    }
+  }, [leadSubmitted])
+
+  // profilesUnlocked manages right-panel preview blur only
+
+  const scrollToBottom = () => {
+    messagesEndRef.current?.scrollIntoView({ behavior: 'smooth' });
+  };
+
+  useEffect(() => {
+    if (isFullScreen) {
+      scrollToBottom();
+    }
+  }, [messages, isFullScreen]);
+
+  const handleSendMessage = async () => {
+    if (!inputText.trim() || isLoading) return;
+
+    const userMessage: Message = {
+      id: Date.now().toString(),
+      text: inputText.trim(),
+      sender: 'user',
+      timestamp: new Date()
+    };
+
+    setMessages(prev => [...prev, userMessage]);
+    setInputText('');
+    setIsLoading(true);
+    setIsTyping(true);
+
+    // Smoothly transition to full screen when user sends a message
+    if (!isFullScreen) {
+      // Add a small delay for smooth transition
+      setTimeout(() => {
+        setIsFullScreen(true);
+      }, 300);
+    }
+
+    try {
+      // Create conversation on first message if not exists
+      let currentConversationId = conversationId
+      if (supabase && !currentConversationId) {
+        try {
+          const sessionId = crypto.randomUUID()
+          const res = await supabase
+            .from('conversations')
+            .insert({ session_id: sessionId, metadata: { user_agent: navigator.userAgent } })
+            .select('id')
+            .single()
+          if (!res.error && res.data) {
+            currentConversationId = res.data.id
+            setConversationId(currentConversationId)
+          }
+        } catch (e) {
+          console.warn('Conversation create failed', e)
+        }
+      }
+
+      if (supabase && currentConversationId) {
+        try { await supabase.from('conversation_messages').insert({ conversation_id: currentConversationId, role: 'user', content: userMessage.text }) } catch {}
+      }
+      // Industry detection removed; form shows after bot summary
+      const apiKey = import.meta.env.VITE_OPENAI_API_KEY;
+      const model = import.meta.env.VITE_OPENAI_MODEL || 'gpt-3.5-turbo';
+
+      if (!apiKey) {
+        console.error('OpenAI API key not configured');
+        throw new Error('OpenAI API key not configured');
+      }
+
+      // Build full conversation history so the model follows the flow
+      // Server-side retrieval via Supabase Edge Function
+      let kbSnippets: string[] = []
+      try {
+        const supabaseUrl = import.meta.env.VITE_SUPABASE_URL as string
+        const anonKey = import.meta.env.VITE_SUPABASE_ANON_KEY as string
+        
+        if (supabaseUrl && anonKey) {
+          const endpoint = supabaseUrl.replace('supabase.co', 'functions.supabase.co') + '/rag-search'
+          const res = await fetch(endpoint, {
+            method: 'POST',
+            headers: { 'Content-Type': 'application/json', 'Authorization': `Bearer ${anonKey}` },
+            body: JSON.stringify({ query: userMessage.text, top_k: 3, min_similarity: 0.2 })
+          })
+          if (res.ok) {
+            const data = await res.json()
+            kbSnippets = (data.matches || []).map((m: any) => `Source (page ${m.page}): ${m.content}`)
+          } else {
+            console.warn('RAG search failed with status:', res.status)
+          }
+        } else {
+          console.warn('Supabase credentials not available for RAG search')
+        }
+      } catch (e) {
+        console.warn('RAG search failed, continuing without snippets', e)
+      }
+
+      const openAiMessages = [
+        { role: 'system', content: SYSTEM_PROMPT },
+        ...(kbSnippets.length ? [{ role: 'system', content: `Staffly Knowledge (use when relevant, cite briefly):\n${kbSnippets.join('\n\n')}` }] : []),
+        ...[...messages, userMessage].map(m => ({
+          role: m.sender === 'user' ? 'user' : 'assistant',
+          content: m.text
+        }))
+      ];
+
+      // Use direct OpenAI API in production, proxy in development
+      const apiUrl = import.meta.env.DEV 
+        ? '/api/openai/v1/chat/completions'
+        : 'https://api.openai.com/v1/chat/completions';
+        
+      const response = await fetch(apiUrl, {
+        method: 'POST',
+        headers: {
+          'Content-Type': 'application/json',
+          'Authorization': `Bearer ${apiKey}`
+        },
+        body: JSON.stringify({
+          model: model,
+          messages: openAiMessages,
+          max_tokens: 300,
+          temperature: 0.7
+        })
+      });
+
+      if (!response.ok) {
+        throw new Error(`API request failed: ${response.status}`);
+      }
+
+      const data = await response.json();
+      const botMessage: Message = {
+        id: (Date.now() + 1).toString(),
+        text: stripEmojis(data.choices[0].message.content),
+        sender: 'bot',
+        timestamp: new Date()
+      };
+      
+      setMessages(prev => [...prev, botMessage]);
+      setIsLoading(false);
+      setIsTyping(false);
+
+      if (supabase && currentConversationId) {
+        try { await supabase.from('conversation_messages').insert({ conversation_id: currentConversationId, role: 'assistant', content: botMessage.text }) } catch {}
+      }
+
+      // Detect if bot has summarized and trigger the searching animation, then form
+      const summaryKeywords = ['summarize','that\'s everything','you can now book','you can now view','strategy call','calendar below']
+      const lowerBot = botMessage.text.toLowerCase()
+      if (!showLeadForm && !searchingCandidates && summaryKeywords.some(k => lowerBot.includes(k))) {
+        setSearchingCandidates(true)
+        // After 2.5 seconds, show the form
+        setTimeout(() => {
+          setSearchingCandidates(false)
+          setShowLeadForm(true)
+        }, 2500)
+      }
+
+    } catch (error) {
+      console.error('Error:', error);
+      
+      let errorText = "I'm sorry, but I'm having trouble connecting right now. Please try again in a moment.";
+      
+      if (error instanceof Error) {
+        if (error.message.includes('API key not configured')) {
+          errorText = "I'm sorry, but the AI service is not properly configured. Please contact support to get this fixed.";
+        } else if (error.message.includes('API request failed')) {
+          errorText = "I'm having trouble connecting to the AI service. Please check your internet connection and try again.";
+        }
+      }
+      
+      const errorMessage: Message = {
+        id: (Date.now() + 1).toString(),
+        text: errorText,
+        sender: 'bot',
+        timestamp: new Date()
+      };
+      
+      setMessages(prev => [...prev, errorMessage]);
+      setIsLoading(false);
+      setIsTyping(false);
+    }
+  };
+
+  const handleKeyPress = (e: React.KeyboardEvent) => {
+    if (e.key === 'Enter' && !e.shiftKey) {
+      e.preventDefault();
+      handleSendMessage();
+    }
+  };
+
+
+  // Compact Chatbot (Hero Section)
+  if (!isFullScreen) {
+    return (
+      <motion.div
+        initial={{ opacity: 0, scale: 0.8, rotateY: -15 }}
+        animate={{ opacity: 1, scale: 1, rotateY: 0 }}
+        transition={{ duration: 1, delay: 0.2 }}
+        className="bg-white/10 backdrop-blur-xl rounded-3xl shadow-2xl border border-white/20 p-8 max-w-[90vw] mx-auto relative overflow-hidden"
+      >
+        {/* Chatbot Header */}
+        <div className="flex items-center space-x-4 mb-6">
+          <div className="w-12 h-12 bg-gradient-to-r from-blue-500 to-purple-500 rounded-full flex items-center justify-center shadow-lg">
+            <MessageCircle className="w-6 h-6 text-white" />
+          </div>
+          <div>
+            <h3 className="font-bold text-slate-900 text-lg">Staffly AI</h3>
+            <div className="flex items-center space-x-2">
+              <div className="w-2 h-2 bg-green-500 rounded-full animate-pulse"></div>
+              <p className="text-sm text-slate-700 font-medium">Online • Ready to help</p>
+            </div>
+          </div>
+        </div>
+
+        {/* Chat Messages */}
+        <div className="space-y-4 mb-6 max-h-80 overflow-y-auto">
+          <AnimatePresence>
+            {messages.slice(0, 3).map((message) => (
+              <motion.div
+                key={message.id}
+                initial={{ opacity: 0, y: 10 }}
+                animate={{ opacity: 1, y: 0 }}
+                exit={{ opacity: 0, y: -10 }}
+                transition={{ duration: 0.3 }}
+                className={`flex ${message.sender === 'user' ? 'justify-end' : 'justify-start'}`}
+              >
+                <div className={`flex items-start space-x-2 max-w-xs ${message.sender === 'user' ? 'flex-row-reverse space-x-reverse' : ''}`}>
+                  <div className={`w-8 h-8 rounded-full flex items-center justify-center flex-shrink-0 ${
+                    message.sender === 'user' 
+                      ? 'bg-gradient-to-r from-blue-600 to-purple-600' 
+                      : 'bg-gradient-to-r from-slate-600 to-slate-700'
+                  }`}>
+                    {message.sender === 'user' ? (
+                      <User className="w-4 h-4 text-white" />
+                    ) : (
+                      <Bot className="w-4 h-4 text-white" />
+                    )}
+                  </div>
+                <div className={`px-4 py-3 rounded-2xl shadow ${
+                    message.sender === 'user'
+                      ? 'bg-blue-600 text-white'
+                      : 'bg-slate-50 text-slate-900 border border-slate-200'
+                  }`}>
+                    <p className="text-sm leading-relaxed">{message.text}</p>
+                  </div>
+                </div>
+              </motion.div>
+            ))}
+          </AnimatePresence>
+
+          {messages.length > 3 && (
+            <div className="text-center">
+              <button
+                onClick={() => setIsFullScreen(true)}
+                className="text-blue-500 hover:text-blue-400 text-sm font-medium transition-colors"
+              >
+                View full conversation →
+              </button>
+            </div>
+          )}
+        </div>
+
+        {/* Input Field */}
+        <div className="flex space-x-3">
+          <input
+            ref={inputRef}
+            type="text"
+            value={inputText}
+            onChange={(e) => setInputText(e.target.value)}
+            onKeyPress={handleKeyPress}
+            placeholder="What do you want to scale?"
+            disabled={isLoading}
+            className="flex-1 px-5 py-3 bg-white/90 border border-slate-200 rounded-full focus:outline-none focus:ring-2 focus:ring-blue-500 focus:border-transparent shadow text-slate-900 font-medium disabled:opacity-50 placeholder-slate-500"
+          />
+          <button
+            onClick={handleSendMessage}
+            disabled={isLoading || !inputText.trim()}
+            className="w-12 h-12 bg-blue-600 text-white rounded-full flex items-center justify-center hover:bg-blue-700 transition-colors disabled:opacity-50 disabled:cursor-not-allowed"
+          >
+            {isLoading ? (
+              <Loader2 className="w-5 h-5 animate-spin" />
+            ) : (
+              <Send className="w-5 h-5" />
+            )}
+          </button>
+        </div>
+
+        {/* Expand Button */}
+        <button
+          onClick={() => setIsFullScreen(true)}
+          className="absolute top-4 right-4 w-8 h-8 bg-white/20 rounded-full flex items-center justify-center text-white hover:bg-white/30 transition-colors"
+        >
+          <Minimize2 className="w-4 h-4" />
+        </button>
+      </motion.div>
+    );
+  }
+
+  // Full Screen Chatbot
+  return (
+    <AnimatePresence>
+      <motion.div
+        initial={{ opacity: 0, scale: 0.95 }}
+        animate={{ opacity: 1, scale: 1 }}
+        exit={{ opacity: 0, scale: 0.95 }}
+        transition={{ duration: 0.5, ease: "easeInOut" }}
+        className="fixed inset-0 z-50 bg-white"
+      >
+        {/* Header */}
+        <div className="flex items-center justify-between p-6 border-b border-slate-200">
+          <div className="flex items-center space-x-4">
+            <div className="w-12 h-12 bg-gradient-to-r from-blue-500 to-purple-500 rounded-full flex items-center justify-center">
+              <MessageCircle className="w-6 h-6 text-white" />
+            </div>
+            <div>
+              <h2 className="text-2xl font-bold text-slate-900">Staffly AI Assistant</h2>
+              <p className="text-slate-600">Your virtual assistant specialist</p>
+            </div>
+          </div>
+          
+          <button
+            onClick={() => setIsFullScreen(false)}
+            className="w-10 h-10 bg-slate-100 rounded-full flex items-center justify-center text-slate-600 hover:bg-slate-200 transition-colors"
+          >
+            <X className="w-5 h-5" />
+          </button>
+        </div>
+
+        <div className="flex h-[calc(100vh-120px)]">
+          {/* Left Side - Chat Interface */}
+          <div className="w-4/5 border-r border-slate-200 p-6 flex flex-col">
+            <div className="flex-1 space-y-6 mb-8 overflow-y-auto max-h-full">
+              <AnimatePresence>
+                {messages.map((message) => {
+                  const parsed = message.sender === 'bot' ? extractOptions(message.text) : { cleanedText: message.text, options: [] as string[] };
+                  const displayText = parsed.cleanedText;
+                  const showOptions = parsed.options.length > 0 && message.sender === 'bot';
+                  return (
+                  <motion.div
+                    key={message.id}
+                    initial={{ opacity: 0, y: 10 }}
+                    animate={{ opacity: 1, y: 0 }}
+                    exit={{ opacity: 0, y: -10 }}
+                    transition={{ duration: 0.3 }}
+                    className={`flex ${message.sender === 'user' ? 'justify-end' : 'justify-start'}`}
+                  >
+                    <div className={`flex items-start space-x-3 max-w-[70%] ${message.sender === 'user' ? 'flex-row-reverse space-x-reverse' : ''}`}>
+                      <div className={`w-10 h-10 rounded-full flex items-center justify-center flex-shrink-0 ${
+                        message.sender === 'user' 
+                          ? 'bg-blue-600' 
+                          : 'bg-slate-500'
+                      }`}>
+                        {message.sender === 'user' ? (
+                          <User className="w-5 h-5 text-white" />
+                        ) : (
+                          <Bot className="w-5 h-5 text-white" />
+                        )}
+                      </div>
+                      <div className={`px-6 py-4 rounded-2xl shadow ${
+                        message.sender === 'user'
+                          ? 'bg-blue-600 text-white'
+                          : 'bg-slate-50 text-slate-900 border border-slate-200'
+                      }`}>
+                        <p className="text-base leading-relaxed">{displayText}</p>
+                        {showOptions && (
+                          <div className="mt-4 grid grid-cols-2 gap-3">
+                            {parsed.options.map((opt, idx) => (
+                              <button
+                                key={idx}
+                                onClick={() => {
+                                  setInputText(opt);
+                                  setTimeout(() => handleSendMessage(), 0);
+                                }}
+                                className="text-sm px-3 py-2 rounded-xl border border-slate-200 bg-white text-slate-700 hover:border-blue-400 hover:text-blue-700 hover:shadow-sm transition-colors text-left"
+                              >
+                                {opt}
+                              </button>
+                            ))}
+                          </div>
+                        )}
+                      </div>
+                    </div>
+                  </motion.div>
+                );})}
+              </AnimatePresence>
+
+              {/* Typing Indicator */}
+              {isTyping && (
+                <motion.div
+                  initial={{ opacity: 0, y: 10 }}
+                  animate={{ opacity: 1, y: 0 }}
+                  className="flex justify-start"
+                >
+                  <div className="flex items-start space-x-3">
+                    <div className="w-10 h-10 bg-gradient-to-r from-slate-400 to-slate-500 rounded-full flex items-center justify-center flex-shrink-0">
+                      <Bot className="w-5 h-5 text-white" />
+                    </div>
+                    <div className="bg-white/10 px-6 py-4 rounded-2xl rounded-bl-md">
+                      <div className="flex space-x-2">
+                        <div className="w-3 h-3 bg-white/60 rounded-full animate-bounce"></div>
+                        <div className="w-3 h-3 bg-white/60 rounded-full animate-bounce" style={{ animationDelay: '0.1s' }}></div>
+                        <div className="w-3 h-3 bg-white/60 rounded-full animate-bounce" style={{ animationDelay: '0.2s' }}></div>
+                      </div>
+                    </div>
+                  </div>
+                </motion.div>
+              )}
+              
+              <div ref={messagesEndRef} />
+            </div>
+
+            {/* Input Section */}
+            <div className="space-y-4">
+              {/* Input Field */}
+              <div className="flex space-x-3">
+                <input
+                  ref={inputRef}
+                  type="text"
+                  value={inputText}
+                  onChange={(e) => setInputText(e.target.value)}
+                  onKeyPress={handleKeyPress}
+                  placeholder="What do you want to scale?"
+                  disabled={isLoading}
+                  className="flex-1 px-6 py-4 bg-white/80 border-2 border-slate-200 rounded-full focus:outline-none focus:ring-2 focus:ring-blue-500 focus:border-transparent shadow-lg text-slate-900 font-medium disabled:opacity-50 placeholder-slate-500 text-lg"
+                />
+                <button
+                  onClick={handleSendMessage}
+                  disabled={isLoading || !inputText.trim()}
+                  className="w-16 h-16 bg-gradient-to-r from-blue-500 to-purple-500 text-white rounded-full flex items-center justify-center hover:shadow-lg transition-all duration-300 transform hover:scale-105 disabled:opacity-50 disabled:cursor-not-allowed disabled:transform-none"
+                >
+                  {isLoading ? (
+                    <Loader2 className="w-6 h-6 animate-spin" />
+                  ) : (
+                    <Send className="w-6 h-6" />
+                  )}
+                </button>
+              </div>
+            </div>
+          </div>
+
+          {/* Right Side - Intro / Searching / Gated VA Profiles */}
+          <div className="w-1/2 p-6">
+            <div className="h-full bg-slate-50 rounded-2xl border border-slate-200 p-6 overflow-y-auto relative">
+              {/* Searching for candidates animation */}
+              {searchingCandidates && (
+                <div className="h-full flex flex-col items-center justify-center text-center">
+                  <div className="relative mb-6">
+                    <div className="w-24 h-24 rounded-full border-4 border-blue-200 border-t-blue-600 animate-spin"></div>
+                    <div className="absolute inset-0 flex items-center justify-center">
+                      <div className="w-16 h-16 rounded-full bg-gradient-to-r from-blue-500 to-purple-500 opacity-20 animate-pulse"></div>
+                    </div>
+                  </div>
+                  <h3 className="text-2xl font-bold text-slate-900 mb-2">Finding Your Perfect Match</h3>
+                  <p className="text-slate-600 max-w-md">
+                    Searching our database of pre-vetted candidates...
+                  </p>
+                  <div className="mt-6 flex items-center space-x-2">
+                    <div className="w-2 h-2 bg-blue-600 rounded-full animate-bounce" style={{ animationDelay: '0ms' }}></div>
+                    <div className="w-2 h-2 bg-blue-600 rounded-full animate-bounce" style={{ animationDelay: '150ms' }}></div>
+                    <div className="w-2 h-2 bg-blue-600 rounded-full animate-bounce" style={{ animationDelay: '300ms' }}></div>
+                  </div>
+                </div>
+              )}
+
+              {/* Hero intro when conversation just starts */}
+              {(!leadSubmitted && !showLeadForm && !searchingCandidates) && (
+                <div className="h-full flex flex-col items-center justify-center text-center">
+                  <div className="text-5xl font-black text-slate-900 mb-4">Hire A+ <span className="bg-gradient-to-r from-blue-600 to-purple-600 bg-clip-text text-transparent">Operators</span></div>
+                  <div className="text-2xl text-slate-700">— For 60% Less</div>
+                  <p className="mt-6 text-slate-600 max-w-lg">Answer a few quick questions in the chat and I'll curate 2–3 pre-vetted VA profiles for you.</p>
+                </div>
+              )}
+
+              {!leadSubmitted && profilesUnlocked && (
+                <h3 className="text-xl font-bold text-slate-900 mb-4">Curated VA Profiles</h3>
+              )}
+
+              {/* Profiles Grid */}
+              {!leadSubmitted && profilesUnlocked && (
+              <div className={`grid grid-cols-1 md:grid-cols-2 gap-4 ${profilesUnlocked ? '' : 'blur-sm select-none pointer-events-none'}`}>
+                {[0,1,2,3,4].map((i) => (
+                  <div key={i} className="bg-white rounded-xl border border-slate-200 shadow-sm p-4">
+                    <div className="flex items-center space-x-3 mb-3">
+                      <div className="w-10 h-10 rounded-full bg-gradient-to-r from-blue-500 to-purple-500 text-white flex items-center justify-center font-bold">{['AM','JR','KP','LC','VN'][i]}</div>
+                      <div>
+                        <div className="font-semibold text-slate-900">{['Alexa M.','Jared R.','Kyla P.','Liam C.','Vera N.'][i]}</div>
+                        <div className="text-slate-600 text-sm">{['Executive Assistant','Lead Gen Specialist','Project Coordinator','Customer Support','Creative VA'][i]}</div>
+                      </div>
+                    </div>
+                    <div className="text-slate-700 text-sm">
+                      <div className="mb-1"><span className="font-medium">Strengths:</span> {[
+                        'Inbox, Calendar, SOPs',
+                        'Prospecting, Outreach, Booking',
+                        'Timelines, Coordination, Docs',
+                        'Tickets, SLAs, CRM',
+                        'Video Editing, Canva, Thumbnails'
+                      ][i]}</div>
+                      <div className="text-slate-500 text-xs">Availability: Immediate • Timezone: PH</div>
+                    </div>
+                  </div>
+                ))}
+              </div>
+              )}
+
+              {/* Gating overlay */}
+              {!leadSubmitted && showLeadForm && !profilesUnlocked && (
+                <div className="absolute inset-0 bg-white/70 backdrop-blur-sm rounded-2xl flex items-center justify-center">
+                  <div className="bg-white rounded-2xl border border-slate-200 shadow-xl p-6 w-full max-w-md">
+                    <h4 className="text-lg font-bold text-slate-900 mb-1">Unlock your curated profiles</h4>
+                    <p className="text-slate-600 text-sm mb-4">Complete this quick form and we’ll send 2–3 best-fit candidates to your email.</p>
+
+                    <form
+                      onSubmit={async (e) => {
+                        e.preventDefault();
+                        const emailRegex = /^[^\s@]+@[^\s@]+\.[^\s@]+$/;
+                        const phoneDigits = leadPhone.replace(/\D/g, '');
+                        if (!leadName.trim()) return;
+                        if (!emailRegex.test(leadEmail)) return;
+                        if (phoneDigits.length < 7) return;
+                        // Save lead to Supabase, then show confirmation popup
+                        setProfilesUnlocked(false);
+                        setLeadSubmitted(true);
+                        setConfirmationOpen(true);
+                        console.log('Lead captured', { leadName, leadEmail, leadPhone });
+                        try {
+                          if (supabase) {
+                            // Extract qualification data from conversation
+                            const qualData = extractQualificationData(messages)
+                            console.log('Extracted qualification data:', qualData)
+                            
+                            // Update conversation row with lead info + qualification data
+                            if (conversationId) {
+                              await supabase.from('conversations').update({
+                                lead_name: leadName,
+                                lead_email: leadEmail,
+                                lead_phone: leadPhone,
+                                service: qualData.service,
+                                industry: qualData.industry,
+                                goal: qualData.goal,
+                                company: qualData.company,
+                                team_size: qualData.team_size,
+                                revenue_range: qualData.revenue_range,
+                                role_or_scope: qualData.role_or_scope,
+                                hours_per_week: qualData.hours_per_week,
+                                timezone: qualData.timezone,
+                                tools_stack: qualData.tools_stack,
+                                tech_stack: qualData.tech_stack,
+                                api_access: qualData.api_access,
+                                timeline: qualData.timeline
+                              }).eq('id', conversationId);
+                            }
+                            // Also insert/upsert into a leads table for CRM-like tracking
+                            await supabase.from('leads').upsert({
+                              email: leadEmail,
+                              name: leadName,
+                              phone: leadPhone,
+                              conversation_id: conversationId || null,
+                              created_at: new Date().toISOString()
+                            }, { onConflict: 'email' });
+
+                            // Fetch candidates and match
+                            const { data: candidates } = await supabase
+                              .from('candidates')
+                              .select('*')
+                              .eq('status', 'active')
+                              .eq('availability_status', 'available')
+                            
+                            if (candidates && candidates.length > 0) {
+                              // Match top 5 candidates using the algorithm
+                              const leadData: Lead = qualData
+                              const matched = matchCandidates(leadData, candidates as Candidate[], 5)
+                              console.log('Matched top 5 candidates:', matched)
+
+                              // Generate email content with HTML
+                              const baseUrl = window.location.origin
+                              const { subject, body, htmlBody } = generateMatchEmail(leadName, leadData, matched, baseUrl)
+                              console.log('Email to send:', { 
+                                subject, 
+                                to: leadEmail, 
+                                plainText: body.substring(0, 200) + '...',
+                                htmlPreview: 'HTML email generated with clickable profile links'
+                              })
+                              console.log('Full HTML Body:', htmlBody)
+
+                              // Send email via Resend
+                              try {
+                                const { sendMatchEmail } = await import('../api/sendEmail')
+                                const emailResult = await sendMatchEmail(leadEmail, subject, body, htmlBody)
+                                
+                                if (emailResult.success) {
+                                  console.log('✅ Email sent successfully to', leadEmail)
+                                } else {
+                                  console.error('❌ Email failed:', emailResult.error)
+                                  alert(`Email sending failed: ${emailResult.error}`)
+                                }
+                              } catch (emailError) {
+                                console.error('Email error:', emailError)
+                              }
+                            }
+                          }
+                        } catch (err) {
+                          console.warn('Lead save/matching failed', err);
+                        }
+                      }}
+                      className="space-y-3"
+                    >
+                      <input
+                        type="text"
+                        value={leadName}
+                        onChange={(e) => setLeadName(e.target.value)}
+                        placeholder="Full Name"
+                        className="w-full px-4 py-3 border border-slate-300 rounded-lg focus:outline-none focus:ring-2 focus:ring-blue-500"
+                        required
+                      />
+                      <input
+                        type="email"
+                        value={leadEmail}
+                        onChange={(e) => setLeadEmail(e.target.value)}
+                        placeholder="Email Address"
+                        className="w-full px-4 py-3 border border-slate-300 rounded-lg focus:outline-none focus:ring-2 focus:ring-blue-500"
+                        required
+                      />
+                      <input
+                        type="tel"
+                        value={leadPhone}
+                        onChange={(e) => setLeadPhone(e.target.value)}
+                        placeholder="Phone Number"
+                        className="w-full px-4 py-3 border border-slate-300 rounded-lg focus:outline-none focus:ring-2 focus:ring-blue-500"
+                        required
+                      />
+                      <button
+                        type="submit"
+                        className="w-full bg-gradient-to-r from-blue-600 to-purple-600 text-white font-bold py-3 rounded-lg hover:shadow-lg transition"
+                      >
+                        Continue to Calendar
+                      </button>
+                      {/* no prefilled email from chat */}
+                    </form>
+                  </div>
+                </div>
+              )}
+
+              {/* Confirmation popup after submit */}
+              {confirmationOpen && (
+                <div className="absolute inset-0 bg-white/80 backdrop-blur-sm rounded-2xl flex items-center justify-center">
+                  <div className="bg-white rounded-2xl border border-slate-200 shadow-xl p-6 w-full max-w-md text-center">
+                    <h4 className="text-lg font-bold text-slate-900 mb-2">Email sent!</h4>
+                    <p className="text-slate-700 mb-4">You can check the profiles there.</p>
+                    <button
+                      onClick={() => {
+                        setConfirmationOpen(false);
+                        setShowCalendarOnRight(true);
+                        const calMsg: Message = {
+                          id: (Date.now() + 6).toString(),
+                          text: 'If you want to book a strategy call, you can schedule a meeting on the calendar on the right.',
+                          sender: 'bot',
+                          timestamp: new Date()
+                        };
+                        setMessages(prev => [...prev, calMsg]);
+                      }}
+                      className="px-4 py-2 bg-blue-600 text-white rounded-lg hover:bg-blue-700"
+                    >Close</button>
+                  </div>
+                </div>
+              )}
+
+              {/* Calendar on the right panel after form submit */}
+              {showCalendarOnRight && !confirmationOpen && (
+                <div className="h-full flex flex-col">
+                  <h3 className="text-xl font-bold text-slate-900 mb-4">Book your strategy call</h3>
+                  <div style={{ width: '100%', height: '650px', overflow: 'auto' }}>
+                    <Cal namespace="45-strategy-call" calLink="stafflyai/45-strategy-call" style={{ width: '100%', height: '100%', overflow: 'scroll' }} config={{ layout: 'month_view' }} />
+                  </div>
+                </div>
+              )}
+            </div>
+          </div>
+        </div>
+      </motion.div>
+    </AnimatePresence>
+  );
+};
+
+export default FullScreenChatbot;
