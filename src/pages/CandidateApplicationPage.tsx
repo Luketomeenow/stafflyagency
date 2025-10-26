@@ -1,8 +1,15 @@
 import { useState } from 'react'
 import { motion } from 'framer-motion'
 import { Upload, CheckCircle, AlertCircle } from 'lucide-react'
+import { useNavigate } from 'react-router-dom'
+import { signupCandidate } from '../lib/candidateAuth'
 
 type FormData = {
+  // Account Information
+  email: string
+  password: string
+  confirmPassword: string
+  
   // Personal Information
   firstName: string
   lastName: string
@@ -58,8 +65,10 @@ const TECH_TOOLS_BY_INDUSTRY: Record<string, string[]> = {
 }
 
 const CandidateApplicationPage = () => {
+  const navigate = useNavigate()
   const [step, setStep] = useState(1)
   const [formData, setFormData] = useState<FormData>({
+    email: '', password: '', confirmPassword: '',
     firstName: '', lastName: '', city: '', phone: '', whatsapp: '', ageRange: '', gender: '',
     industryExperience: [], desiredIndustry: [], desiredRoles: [],
     resume: null, portfolioLinks: '',
@@ -70,6 +79,8 @@ const CandidateApplicationPage = () => {
   })
 
   const [submitted, setSubmitted] = useState(false)
+  const [error, setError] = useState('')
+  const [isSubmitting, setIsSubmitting] = useState(false)
 
   const updateField = (field: keyof FormData, value: any) => {
     setFormData(prev => ({ ...prev, [field]: value }))
@@ -92,14 +103,103 @@ const CandidateApplicationPage = () => {
 
   const handleSubmit = async (e: React.FormEvent) => {
     e.preventDefault()
-    // TODO: Send to Supabase or backend
-    console.log('Application submitted:', formData)
-    setSubmitted(true)
+    setError('')
+    setIsSubmitting(true)
+
+    // Validate passwords match
+    if (formData.password !== formData.confirmPassword) {
+      setError('Passwords do not match')
+      setIsSubmitting(false)
+      return
+    }
+
+    // Validate password strength
+    if (formData.password.length < 6) {
+      setError('Password must be at least 6 characters')
+      setIsSubmitting(false)
+      return
+    }
+
+    try {
+      // Create account with email and password
+      const result = await signupCandidate(
+        formData.email,
+        formData.password,
+        `${formData.firstName} ${formData.lastName}`,
+        formData.phone
+      )
+
+      if (result.error) {
+        setError(result.error)
+        setIsSubmitting(false)
+        return
+      }
+
+      // TODO: Save additional application data to candidate profile
+      console.log('Application submitted:', formData)
+      
+      // Redirect to candidate dashboard
+      navigate('/candidate/dashboard')
+    } catch (err: any) {
+      setError(err.message || 'An error occurred during signup')
+      setIsSubmitting(false)
+    }
   }
 
   const renderStep = () => {
     switch (step) {
       case 1:
+        return (
+          <div className="space-y-6">
+            <h2 className="text-2xl font-bold text-slate-900">Create Your Account</h2>
+            <p className="text-slate-600">Set up your account to apply for positions</p>
+            
+            {error && (
+              <div className="bg-red-50 border border-red-200 text-red-700 px-4 py-3 rounded-lg flex items-center">
+                <AlertCircle className="w-5 h-5 mr-2" />
+                {error}
+              </div>
+            )}
+            
+            <div className="space-y-4">
+              <input 
+                type="email" 
+                placeholder="Email Address *" 
+                value={formData.email} 
+                onChange={e => updateField('email', e.target.value)} 
+                className="input-field" 
+                required 
+              />
+              <input 
+                type="password" 
+                placeholder="Password (min. 6 characters) *" 
+                value={formData.password} 
+                onChange={e => updateField('password', e.target.value)} 
+                className="input-field" 
+                required 
+                minLength={6}
+              />
+              <input 
+                type="password" 
+                placeholder="Confirm Password *" 
+                value={formData.confirmPassword} 
+                onChange={e => updateField('confirmPassword', e.target.value)} 
+                className="input-field" 
+                required 
+              />
+            </div>
+            
+            <div className="bg-blue-50 border border-blue-200 text-blue-800 px-4 py-3 rounded-lg text-sm">
+              <p className="font-semibold mb-1">Password Requirements:</p>
+              <ul className="list-disc list-inside space-y-1">
+                <li>At least 6 characters long</li>
+                <li>Use a unique password you don't use elsewhere</li>
+              </ul>
+            </div>
+          </div>
+        )
+
+      case 2:
         return (
           <div className="space-y-6">
             <h2 className="text-2xl font-bold text-slate-900">Personal Information</h2>
@@ -128,7 +228,7 @@ const CandidateApplicationPage = () => {
           </div>
         )
 
-      case 2:
+      case 3:
         return (
           <div className="space-y-6">
             <h2 className="text-2xl font-bold text-slate-900">Background & Experience</h2>
@@ -173,7 +273,7 @@ const CandidateApplicationPage = () => {
           </div>
         )
 
-      case 3:
+      case 4:
         return (
           <div className="space-y-6">
             <h2 className="text-2xl font-bold text-slate-900">Resume & Portfolio</h2>
@@ -192,7 +292,7 @@ const CandidateApplicationPage = () => {
           </div>
         )
 
-      case 4:
+      case 5:
         return (
           <div className="space-y-6">
             <h2 className="text-2xl font-bold text-slate-900">Assessments & Quizzes</h2>
@@ -221,7 +321,7 @@ const CandidateApplicationPage = () => {
           </div>
         )
 
-      case 5:
+      case 6:
         return (
           <div className="space-y-6">
             <h2 className="text-2xl font-bold text-slate-900">Technical Setup</h2>
@@ -246,7 +346,7 @@ const CandidateApplicationPage = () => {
           </div>
         )
 
-      case 6:
+      case 7:
         const selectedIndustry = formData.industryExperience[0] || formData.desiredIndustry[0]
         const tools = selectedIndustry ? TECH_TOOLS_BY_INDUSTRY[selectedIndustry] || [] : []
         
@@ -305,7 +405,7 @@ const CandidateApplicationPage = () => {
           {/* Progress (minimal) */}
           <div className="p-6 border-b border-slate-200 bg-white">
             <div className="h-2 bg-slate-100 rounded-full overflow-hidden">
-              <div className="h-full bg-gradient-to-r from-blue-600 to-purple-600 rounded-full transition-all duration-300" style={{ width: `${(step / 6) * 100}%` }} />
+              <div className="h-full bg-gradient-to-r from-blue-600 to-purple-600 rounded-full transition-all duration-300" style={{ width: `${(step / 7) * 100}%` }} />
             </div>
           </div>
 
@@ -318,10 +418,12 @@ const CandidateApplicationPage = () => {
               {step > 1 && (
                 <button type="button" onClick={() => setStep(step - 1)} className="px-6 py-3 border border-slate-300 rounded-lg text-slate-700 font-medium hover:bg-slate-50">Previous</button>
               )}
-              {step < 6 ? (
+              {step < 7 ? (
                 <button type="button" onClick={() => setStep(step + 1)} className="ml-auto px-6 py-3 bg-blue-600 text-white rounded-lg font-medium hover:bg-blue-700">Next</button>
               ) : (
-                <button type="submit" className="ml-auto px-8 py-3 bg-gradient-to-r from-blue-600 to-purple-600 text-white rounded-lg font-bold hover:shadow-lg">Submit Application</button>
+                <button type="submit" disabled={isSubmitting} className="ml-auto px-8 py-3 bg-gradient-to-r from-blue-600 to-purple-600 text-white rounded-lg font-bold hover:shadow-lg disabled:opacity-50 disabled:cursor-not-allowed">
+                  {isSubmitting ? 'Creating Account...' : 'Submit Application'}
+                </button>
               )}
             </div>
           </form>
