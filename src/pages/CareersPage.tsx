@@ -201,7 +201,7 @@ const CareersPage = () => {
   ];
 
   return (
-    <div className="min-h-screen bg-white">
+    <div className="min-h-screen bg-gradient-to-br from-slate-50 via-white to-blue-50">
       <Header />
       
       {/* Hero Section - Job Postings Focus */}
