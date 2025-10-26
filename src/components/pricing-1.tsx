@@ -1,7 +1,8 @@
-import { useState } from "react"
+import { useState, useEffect } from "react"
 import { CheckIcon } from "@radix-ui/react-icons"
 import { Loader } from "lucide-react"
 import { motion } from "motion/react"
+import { getCalApi } from "@calcom/embed-react"
 
 import { cn } from "@/lib/utils"
 import { Button } from "@/components/ui/button"
@@ -72,10 +73,26 @@ export function Pricing() {
   const [isLoading, setIsLoading] = useState(false)
   const [id, setId] = useState<string | null>(null)
 
+  useEffect(() => {
+    (async function () {
+      const cal = await getCalApi({"namespace":"45-strategy-call"});
+      cal("ui", {"hideEventTypeDetails":false,"layout":"month_view"});
+    })();
+  }, []);
+
   const onSubscribeClick = async (priceId: string) => {
     setIsLoading(true)
     setId(priceId)
-    await new Promise((resolve) => setTimeout(resolve, 1000)) // Simulate a delay
+    
+    // Open Cal.com popup
+    const cal = await getCalApi({"namespace":"45-strategy-call"});
+    cal("modal", {
+      calLink: "stafflyai/45-strategy-call",
+      config: {
+        layout: "month_view"
+      }
+    });
+    
     setIsLoading(false)
   }
 
