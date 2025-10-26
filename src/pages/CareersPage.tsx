@@ -2,7 +2,7 @@ import { motion } from 'framer-motion';
 import { Link } from 'react-router-dom';
 import { Briefcase, MapPin, Clock, DollarSign, ArrowRight, Users, Zap, Heart, TrendingUp, Award, Globe, Sparkles } from 'lucide-react';
 import { Footer } from '../components/footer-1';
-import Header from '../components/header-1';
+import { Header } from '../components/header-1';
 
 const CareersPage = () => {
   const fadeInUp = {
