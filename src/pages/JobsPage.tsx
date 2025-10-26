@@ -1,6 +1,7 @@
 import { motion } from 'framer-motion';
 import { Search, MapPin, Briefcase, Star, ArrowRight } from 'lucide-react';
 import { Link } from 'react-router-dom';
+import { Footer } from '../components/footer-1';
 
 const JobsPage = () => {
   const fadeInUp = {
@@ -278,25 +279,9 @@ const JobsPage = () => {
           </div>
         </section>
 
-        {/* Footer with Legal Links */}
-        <footer className="py-12 px-4 sm:px-6 lg:px-8 bg-gray-50 border-t border-gray-200">
-          <div className="max-w-7xl mx-auto">
-            <div className="flex flex-col md:flex-row justify-between items-center space-y-4 md:space-y-0">
-              <div className="text-gray-600">
-                <p>&copy; 2025 Staffly Agency. All rights reserved.</p>
-              </div>
-              <div className="flex space-x-6 text-sm">
-                <Link to="/terms" className="text-gray-600 hover:text-blue-600 transition-colors">
-                  Terms of Service
-                </Link>
-                <Link to="/privacy" className="text-gray-600 hover:text-blue-600 transition-colors">
-                  Privacy Policy
-                </Link>
-              </div>
-            </div>
-          </div>
-        </footer>
       </div>
+
+      <Footer />
     </div>
   );
 };
