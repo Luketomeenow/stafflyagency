@@ -4,6 +4,7 @@ export interface CandidateSignupData {
   email: string
   password: string
   fullName: string
+  phone?: string
 }
 
 export interface CandidateLoginData {
@@ -14,41 +15,47 @@ export interface CandidateLoginData {
 /**
  * Sign up a new candidate
  */
-export async function signupCandidate(data: CandidateSignupData) {
+export async function signupCandidate(
+  email: string,
+  password: string,
+  fullName: string,
+  phone?: string
+) {
   if (!supabase) {
     throw new Error('Supabase client not configured')
   }
 
   const { data: authData, error } = await supabase.auth.signUp({
-    email: data.email,
-    password: data.password,
+    email,
+    password,
     options: {
       data: {
         user_type: 'candidate',
-        full_name: data.fullName,
+        full_name: fullName,
+        phone: phone || '',
       },
     },
   })
 
-  if (error) throw error
-  return authData
+  if (error) return { error: error.message }
+  return { data: authData, error: null }
 }
 
 /**
  * Log in a candidate
  */
-export async function loginCandidate(data: CandidateLoginData) {
+export async function loginCandidate(email: string, password: string) {
   if (!supabase) {
     throw new Error('Supabase client not configured')
   }
 
   const { data: authData, error } = await supabase.auth.signInWithPassword({
-    email: data.email,
-    password: data.password,
+    email,
+    password,
   })
 
-  if (error) throw error
-  return authData
+  if (error) return { error: error.message }
+  return { data: authData, error: null }
 }
 
 /**

@@ -2,7 +2,12 @@ import { useState } from 'react'
 import { motion } from 'framer-motion'
 import { Upload, CheckCircle, AlertCircle } from 'lucide-react'
 import { useNavigate } from 'react-router-dom'
-import { signupCandidate } from '../lib/candidateAuth'
+import { signupCandidate, getCandidateSession } from '../lib/candidateAuth'
+import { supabase } from '../lib/supabase'
+import { TemperamentQuiz } from '../components/TemperamentQuiz'
+import { RoleValidationQuiz } from '../components/RoleValidationQuiz'
+import { CommunicationStyleQuiz } from '../components/CommunicationStyleQuiz'
+import { BehavioralStressQuiz } from '../components/BehavioralStressQuiz'
 
 type FormData = {
   // Account Information
@@ -81,6 +86,10 @@ const CandidateApplicationPage = () => {
   const [submitted, setSubmitted] = useState(false)
   const [error, setError] = useState('')
   const [isSubmitting, setIsSubmitting] = useState(false)
+  const [isTemperamentQuizOpen, setIsTemperamentQuizOpen] = useState(false)
+  const [isRoleValidationQuizOpen, setIsRoleValidationQuizOpen] = useState(false)
+  const [isCommunicationStyleQuizOpen, setIsCommunicationStyleQuizOpen] = useState(false)
+  const [isBehavioralStressQuizOpen, setIsBehavioralStressQuizOpen] = useState(false)
 
   const updateField = (field: keyof FormData, value: any) => {
     setFormData(prev => ({ ...prev, [field]: value }))
@@ -135,11 +144,95 @@ const CandidateApplicationPage = () => {
         return
       }
 
-      // TODO: Save additional application data to candidate profile
-      console.log('Application submitted:', formData)
+      // Get the newly created user
+      const session = await getCandidateSession()
+      if (!session?.user) {
+        throw new Error('Failed to get user session')
+      }
+
+      // Get candidate profile
+      const { data: candidateData, error: candidateError } = await supabase
+        ?.from('candidates')
+        .select('id')
+        .eq('user_id', session.user.id)
+        .single()
+
+      if (candidateError || !candidateData) {
+        throw new Error('Failed to get candidate profile')
+      }
+
+      // Upload files to storage if they exist
+      let resumeUrl = null
+      let internetSpeedUrl = null
+      let workspacePhotoUrl = null
+
+      if (formData.resume) {
+        const resumePath = `${candidateData.id}/resume_${Date.now()}.pdf`
+        const { error: resumeError } = await supabase
+          ?.storage
+          .from('candidate-files')
+          .upload(resumePath, formData.resume)
+        
+        if (!resumeError) {
+          const { data: urlData } = supabase?.storage.from('candidate-files').getPublicUrl(resumePath)
+          resumeUrl = urlData?.publicUrl
+        }
+      }
+
+      if (formData.internetSpeed) {
+        const speedPath = `${candidateData.id}/internet_speed_${Date.now()}.png`
+        const { error: speedError } = await supabase
+          ?.storage
+          .from('candidate-files')
+          .upload(speedPath, formData.internetSpeed)
+        
+        if (!speedError) {
+          const { data: urlData } = supabase?.storage.from('candidate-files').getPublicUrl(speedPath)
+          internetSpeedUrl = urlData?.publicUrl
+        }
+      }
+
+      if (formData.workspacePhoto) {
+        const workspacePath = `${candidateData.id}/workspace_${Date.now()}.png`
+        const { error: workspaceError } = await supabase
+          ?.storage
+          .from('candidate-files')
+          .upload(workspacePath, formData.workspacePhoto)
+        
+        if (!workspaceError) {
+          const { data: urlData } = supabase?.storage.from('candidate-files').getPublicUrl(workspacePath)
+          workspacePhotoUrl = urlData?.publicUrl
+        }
+      }
+
+      // Update candidate profile with all application data
+      const { error: updateError } = await supabase
+        ?.from('candidates')
+        .update({
+          name: `${formData.firstName} ${formData.lastName}`,
+          email: formData.email,
+          phone: formData.phone,
+          // Store additional data in a metadata field or separate fields
+          industries: formData.industryExperience,
+          roles: formData.desiredRoles,
+          skills: [], // Will be populated from tech stack
+          tools: Object.keys(formData.techStack),
+          portfolio_links: formData.portfolioLinks ? { links: formData.portfolioLinks.split('\n') } : null,
+          // Store application metadata
+          onboarding_completed: true,
+          status: 'pending_approval', // Awaiting admin approval
+        })
+        .eq('id', candidateData.id)
+
+      if (updateError) {
+        console.error('Error updating candidate profile:', updateError)
+      }
+
+      // Log out the user so they need to verify email
+      await supabase?.auth.signOut()
       
-      // Redirect to candidate dashboard
-      navigate('/candidate/dashboard')
+      // Redirect to login page with success message
+      navigate('/candidate/login?registered=true')
     } catch (err: any) {
       setError(err.message || 'An error occurred during signup')
       setIsSubmitting(false)
@@ -298,25 +391,137 @@ const CandidateApplicationPage = () => {
             <h2 className="text-2xl font-bold text-slate-900">Assessments & Quizzes</h2>
             <p className="text-slate-600">Please complete the following assessments to help us match you with the right opportunities.</p>
             <div className="space-y-4">
-              {[
-                { name: 'Temperament Quiz', field: 'temperamentCompleted', desc: 'Measures your natural work style and preferences.' },
-                { name: 'Role Validation Assessment', field: 'roleValidationCompleted', desc: 'Audio-based validation of your experience level.' },
-                { name: 'Communication Style Test', field: 'communicationCompleted', desc: 'Determines your communication quadrant.' },
-                { name: 'Behavioral Stress Test', field: 'behavioralCompleted', desc: 'Measures adaptability and people skills.' }
-              ].map((assessment: any) => (
-                <div key={assessment.field} className="border border-slate-200 rounded-lg p-4">
-                  <div className="flex items-center justify-between">
-                    <div>
-                      <div className="font-semibold text-slate-900">{assessment.name}</div>
-                      <div className="text-sm text-slate-600">{assessment.desc}</div>
-                    </div>
-                    <button type="button" onClick={() => updateField(assessment.field as keyof FormData, !formData[assessment.field as keyof FormData])}
-                      className={`px-4 py-2 rounded-lg font-medium ${formData[assessment.field as keyof FormData] ? 'bg-green-600 text-white' : 'bg-slate-200 text-slate-700'}`}>
-                      {formData[assessment.field as keyof FormData] ? <CheckCircle className="w-5 h-5" /> : 'Start'}
-                    </button>
+              {/* Temperament Quiz */}
+              <div className="border border-slate-200 rounded-lg p-4 bg-gradient-to-r from-blue-50 to-purple-50">
+                <div className="flex items-center justify-between">
+                  <div>
+                    <div className="font-semibold text-slate-900">Temperament Quiz</div>
+                    <div className="text-sm text-slate-600">Measures your natural work style and preferences.</div>
                   </div>
+                  <button 
+                    type="button" 
+                    onClick={() => {
+                      if (!formData.temperamentCompleted) {
+                        setIsTemperamentQuizOpen(true)
+                      }
+                    }}
+                    disabled={formData.temperamentCompleted}
+                    className={`px-4 py-2 rounded-lg font-medium transition-all ${
+                      formData.temperamentCompleted 
+                        ? 'bg-green-600 text-white cursor-not-allowed' 
+                        : 'bg-blue-600 text-white hover:bg-blue-700 hover:shadow-lg'
+                    }`}
+                  >
+                    {formData.temperamentCompleted ? (
+                      <div className="flex items-center space-x-2">
+                        <CheckCircle className="w-5 h-5" />
+                        <span>Completed</span>
+                      </div>
+                    ) : (
+                      'Start Quiz'
+                    )}
+                  </button>
                 </div>
-              ))}
+              </div>
+
+              {/* Role Validation Assessment */}
+              <div className="border border-slate-200 rounded-lg p-4 bg-gradient-to-r from-purple-50 to-pink-50">
+                <div className="flex items-center justify-between">
+                  <div>
+                    <div className="font-semibold text-slate-900">Role Validation Assessment</div>
+                    <div className="text-sm text-slate-600">Audio-based validation of your experience level (4 questions).</div>
+                  </div>
+                  <button 
+                    type="button" 
+                    onClick={() => {
+                      if (!formData.roleValidationCompleted) {
+                        setIsRoleValidationQuizOpen(true)
+                      }
+                    }}
+                    disabled={formData.roleValidationCompleted}
+                    className={`px-4 py-2 rounded-lg font-medium transition-all ${
+                      formData.roleValidationCompleted 
+                        ? 'bg-green-600 text-white cursor-not-allowed' 
+                        : 'bg-purple-600 text-white hover:bg-purple-700 hover:shadow-lg'
+                    }`}
+                  >
+                    {formData.roleValidationCompleted ? (
+                      <div className="flex items-center space-x-2">
+                        <CheckCircle className="w-5 h-5" />
+                        <span>Completed</span>
+                      </div>
+                    ) : (
+                      'Start Assessment'
+                    )}
+                  </button>
+                </div>
+              </div>
+
+              {/* Communication Style Test */}
+              <div className="border border-slate-200 rounded-lg p-4 bg-gradient-to-r from-indigo-50 to-purple-50">
+                <div className="flex items-center justify-between">
+                  <div>
+                    <div className="font-semibold text-slate-900">Communication Style Test</div>
+                    <div className="text-sm text-slate-600">Determines your communication quadrant (10 questions).</div>
+                  </div>
+                  <button 
+                    type="button" 
+                    onClick={() => {
+                      if (!formData.communicationCompleted) {
+                        setIsCommunicationStyleQuizOpen(true)
+                      }
+                    }}
+                    disabled={formData.communicationCompleted}
+                    className={`px-4 py-2 rounded-lg font-medium transition-all ${
+                      formData.communicationCompleted 
+                        ? 'bg-green-600 text-white cursor-not-allowed' 
+                        : 'bg-indigo-600 text-white hover:bg-indigo-700 hover:shadow-lg'
+                    }`}
+                  >
+                    {formData.communicationCompleted ? (
+                      <div className="flex items-center space-x-2">
+                        <CheckCircle className="w-5 h-5" />
+                        <span>Completed</span>
+                      </div>
+                    ) : (
+                      'Start Test'
+                    )}
+                  </button>
+                </div>
+              </div>
+
+              {/* Behavioral Stress Test */}
+              <div className="border border-slate-200 rounded-lg p-4 bg-gradient-to-r from-orange-50 to-red-50">
+                <div className="flex items-center justify-between">
+                  <div>
+                    <div className="font-semibold text-slate-900">Behavioral Stress Test</div>
+                    <div className="text-sm text-slate-600">Measures adaptability and people skills (10 questions + audio).</div>
+                  </div>
+                  <button 
+                    type="button" 
+                    onClick={() => {
+                      if (!formData.behavioralCompleted) {
+                        setIsBehavioralStressQuizOpen(true)
+                      }
+                    }}
+                    disabled={formData.behavioralCompleted}
+                    className={`px-4 py-2 rounded-lg font-medium transition-all ${
+                      formData.behavioralCompleted 
+                        ? 'bg-green-600 text-white cursor-not-allowed' 
+                        : 'bg-orange-600 text-white hover:bg-orange-700 hover:shadow-lg'
+                    }`}
+                  >
+                    {formData.behavioralCompleted ? (
+                      <div className="flex items-center space-x-2">
+                        <CheckCircle className="w-5 h-5" />
+                        <span>Completed</span>
+                      </div>
+                    ) : (
+                      'Start Test'
+                    )}
+                  </button>
+                </div>
+              </div>
             </div>
           </div>
         )
@@ -429,6 +634,54 @@ const CandidateApplicationPage = () => {
           </form>
         </motion.div>
       </div>
+
+      {/* Temperament Quiz Popup */}
+      <TemperamentQuiz
+        isOpen={isTemperamentQuizOpen}
+        onClose={() => setIsTemperamentQuizOpen(false)}
+        onComplete={(completed) => {
+          if (completed) {
+            updateField('temperamentCompleted', true)
+          }
+          setIsTemperamentQuizOpen(false)
+        }}
+      />
+
+      {/* Role Validation Quiz Popup */}
+      <RoleValidationQuiz
+        isOpen={isRoleValidationQuizOpen}
+        onClose={() => setIsRoleValidationQuizOpen(false)}
+        onComplete={(completed) => {
+          if (completed) {
+            updateField('roleValidationCompleted', true)
+          }
+          setIsRoleValidationQuizOpen(false)
+        }}
+      />
+
+      {/* Communication Style Quiz Popup */}
+      <CommunicationStyleQuiz
+        isOpen={isCommunicationStyleQuizOpen}
+        onClose={() => setIsCommunicationStyleQuizOpen(false)}
+        onComplete={(completed) => {
+          if (completed) {
+            updateField('communicationCompleted', true)
+          }
+          setIsCommunicationStyleQuizOpen(false)
+        }}
+      />
+
+      {/* Behavioral Stress Quiz Popup */}
+      <BehavioralStressQuiz
+        isOpen={isBehavioralStressQuizOpen}
+        onClose={() => setIsBehavioralStressQuizOpen(false)}
+        onComplete={(completed) => {
+          if (completed) {
+            updateField('behavioralCompleted', true)
+          }
+          setIsBehavioralStressQuizOpen(false)
+        }}
+      />
 
       <style>{`
         .input-field {

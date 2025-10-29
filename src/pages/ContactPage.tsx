@@ -51,11 +51,40 @@ const ContactPage = () => {
             className="text-center mb-16"
           >
             <motion.div variants={fadeInUp}>
-              <h1 className="text-5xl lg:text-7xl font-bold text-gray-900 mb-6">
-                Get in{' '}
-                <span className="bg-gradient-to-r from-blue-600 to-purple-600 bg-clip-text text-transparent">
+              <h1 className="text-5xl lg:text-7xl font-bold mb-6 overflow-hidden">
+                <motion.span
+                  className="inline-block text-gray-900"
+                  initial={{ opacity: 0, y: 50 }}
+                  animate={{ opacity: 1, y: 0 }}
+                  transition={{ duration: 0.6, ease: "easeOut" }}
+                >
+                  Get in{' '}
+                </motion.span>
+                <motion.span
+                  className="inline-block bg-gradient-to-r from-blue-600 via-purple-600 to-pink-600 bg-clip-text text-transparent"
+                  initial={{ opacity: 0, y: 50, scale: 0.8 }}
+                  animate={{ 
+                    opacity: 1, 
+                    y: 0, 
+                    scale: 1,
+                    backgroundPosition: ['0% 50%', '100% 50%', '0% 50%']
+                  }}
+                  transition={{ 
+                    duration: 0.8, 
+                    delay: 0.3,
+                    ease: "easeOut",
+                    backgroundPosition: {
+                      duration: 3,
+                      repeat: Infinity,
+                      ease: "linear"
+                    }
+                  }}
+                  style={{
+                    backgroundSize: '200% 200%'
+                  }}
+                >
                   Touch
-                </span>
+                </motion.span>
               </h1>
               <p className="text-xl text-gray-600 max-w-3xl mx-auto leading-relaxed">
                 Ready to transform your business with world-class Filipino talent? 

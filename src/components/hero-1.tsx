@@ -50,8 +50,7 @@ export function Hero() {
                   type: "spring",
                 }}
               >
-                Hire A+ <span className="bg-gradient-to-r from-blue-600 to-purple-600 bg-clip-text text-transparent">Operators</span> <br />
-                — For 60% Less <br />
+                Build Beyond Boundaries with <span className="bg-gradient-to-r from-blue-600 to-purple-600 bg-clip-text text-transparent">AI-Powered Operators</span>.
               </motion.h1>
 
               <motion.p
@@ -66,38 +65,9 @@ export function Hero() {
                   type: "spring",
                 }}
               >
-                Get qualified A+ VA profiles by chatting with <span className="font-semibold text-slate-900">Staffly AI</span>.
+                We believe that your next chapter deserves a team as capable as your vision. <br />
+                <span className="font-semibold text-slate-900">Give Your Business an AI-Driven Advantage.</span>
               </motion.p>
-
-              <motion.div
-                animate={fadeInInView ? "animate" : "initial"}
-                variants={fadeUpVariants}
-                className="flex flex-col gap-4 lg:flex-row px-4 md:px-0"
-                initial={false}
-                transition={{
-                  duration: 0.6,
-                  delay: 0.3,
-                  ease: [0.21, 0.47, 0.32, 0.98],
-                  type: "spring",
-                }}
-              >
-                <a
-                  href="#chat"
-                  className={cn(
-                    // colors
-                    "bg-blue-600 text-white shadow hover:bg-blue-700",
-
-                    // layout
-                    "group focus-visible:ring-ring relative inline-flex h-12 md:h-10 w-full items-center justify-center gap-2 overflow-hidden rounded-md px-6 py-3 md:py-2 text-base md:text-base font-semibold tracking-tight whitespace-pre focus-visible:ring-1 focus-visible:outline-none disabled:pointer-events-none disabled:opacity-50 md:flex",
-
-                    // animation
-                    "hover:ring-primary transform-gpu ring-offset-current transition-all duration-300 ease-out hover:ring-2 hover:ring-offset-2"
-                  )}
-                >
-                  Start Scaling
-                  <ChevronRight className="size-4 md:size-4 translate-x-0 transition-all duration-300 ease-out group-hover:translate-x-1" />
-                </a>
-              </motion.div>
             </div>
           </div>
         </div>

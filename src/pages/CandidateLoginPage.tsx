@@ -1,138 +1,231 @@
-import React, { useState } from 'react'
-import { Link, useNavigate } from 'react-router-dom'
+import { useState, useEffect } from 'react'
 import { motion } from 'framer-motion'
+import { Mail, Lock, AlertCircle, CheckCircle, Loader2, ArrowRight } from 'lucide-react'
+import { useNavigate, useSearchParams, Link } from 'react-router-dom'
 import { loginCandidate } from '../lib/candidateAuth'
-import { Eye, EyeOff, LogIn } from 'lucide-react'
 
-const CandidateLoginPage = () => {
+export default function CandidateLoginPage() {
   const navigate = useNavigate()
+  const [searchParams] = useSearchParams()
   const [email, setEmail] = useState('')
   const [password, setPassword] = useState('')
-  const [showPassword, setShowPassword] = useState(false)
   const [error, setError] = useState('')
-  const [loading, setLoading] = useState(false)
+  const [isLoading, setIsLoading] = useState(false)
+  const [showRegisteredMessage, setShowRegisteredMessage] = useState(false)
+
+  useEffect(() => {
+    if (searchParams.get('registered') === 'true') {
+      setShowRegisteredMessage(true)
+    }
+  }, [searchParams])
 
   const handleSubmit = async (e: React.FormEvent) => {
     e.preventDefault()
     setError('')
-
-    if (!email || !password) {
-      setError('Email and password are required')
-      return
-    }
-
-    setLoading(true)
+    setIsLoading(true)
 
     try {
-      await loginCandidate({
-        email,
-        password,
-      })
-      
-      // Success - redirect to candidate dashboard
+      const result = await loginCandidate(email, password)
+
+      if (result.error) {
+        setError(result.error)
+        setIsLoading(false)
+        return
+      }
+
+      // Redirect to dashboard
       navigate('/candidate/dashboard')
     } catch (err: any) {
-      console.error('Login error:', err)
-      setError(err.message || 'Invalid email or password')
-    } finally {
-      setLoading(false)
+      setError(err.message || 'An error occurred during login')
+      setIsLoading(false)
     }
   }
 
   return (
-    <div className="min-h-screen bg-gradient-to-br from-blue-50 via-white to-purple-50 flex items-center justify-center p-4">
+    <div className="min-h-screen bg-gradient-to-br from-blue-50 via-white to-purple-50 flex items-center justify-center py-12 px-4">
       <motion.div
-        initial={{ opacity: 0, y: 30 }}
+        initial={{ opacity: 0, y: 20 }}
         animate={{ opacity: 1, y: 0 }}
-        transition={{ duration: 0.6 }}
-        className="max-w-md w-full"
+        transition={{ duration: 0.5 }}
+        className="w-full max-w-md"
       >
-        <div className="bg-white rounded-2xl shadow-xl p-8 border border-slate-200">
-          {/* Header */}
-          <div className="text-center mb-8">
-            <div className="inline-flex items-center justify-center w-16 h-16 bg-gradient-to-br from-blue-600 to-purple-600 rounded-2xl mb-4">
-              <LogIn className="w-8 h-8 text-white" />
-            </div>
-            <h1 className="text-3xl font-bold text-slate-900 mb-2">Welcome Back</h1>
-            <p className="text-slate-600">Log in to your candidate account</p>
-          </div>
+        {/* Logo */}
+        <div className="text-center mb-8">
+          <Link to="/" className="inline-block">
+            <img src="/staffly-logo.svg" alt="Staffly" className="h-12 mx-auto mb-4" />
+          </Link>
+          <h1 className="text-3xl font-bold text-slate-900 mb-2">Welcome Back</h1>
+          <p className="text-slate-600">Sign in to your candidate account</p>
+        </div>
 
-          {/* Error Message */}
-          {error && (
-            <div className="mb-6 p-4 bg-red-50 border border-red-200 rounded-lg text-red-700 text-sm">
-              {error}
+        {/* Success Message for New Registrations */}
+        {showRegisteredMessage && (
+          <motion.div
+            initial={{ opacity: 0, y: -10 }}
+            animate={{ opacity: 1, y: 0 }}
+            className="mb-6 bg-green-50 border border-green-200 rounded-xl p-4"
+          >
+            <div className="flex items-start space-x-3">
+              <CheckCircle className="w-5 h-5 text-green-600 flex-shrink-0 mt-0.5" />
+              <div>
+                <h3 className="font-semibold text-green-900 mb-1">Application Submitted Successfully!</h3>
+                <p className="text-sm text-green-800 mb-2">
+                  Thank you for applying to Staffly. Your application is under review.
+                </p>
+                <p className="text-sm text-green-700">
+                  <strong>Next Steps:</strong>
+                </p>
+                <ul className="text-sm text-green-700 list-disc list-inside mt-1 space-y-1">
+                  <li>Check your email for a verification link</li>
+                  <li>Our team will review your application within 2-3 business days</li>
+                  <li>You'll receive an email once your account is approved</li>
+                  <li>After approval, you can log in to access your dashboard</li>
+                </ul>
+              </div>
             </div>
+          </motion.div>
+        )}
+
+        {/* Login Form */}
+        <motion.div
+          initial={{ opacity: 0, scale: 0.95 }}
+          animate={{ opacity: 1, scale: 1 }}
+          transition={{ duration: 0.5, delay: 0.1 }}
+          className="bg-white rounded-2xl shadow-xl border border-slate-200 p-8"
+        >
+          {error && (
+            <motion.div
+              initial={{ opacity: 0, y: -10 }}
+              animate={{ opacity: 1, y: 0 }}
+              className="mb-6 bg-red-50 border border-red-200 text-red-700 px-4 py-3 rounded-lg flex items-start"
+            >
+              <AlertCircle className="w-5 h-5 mr-2 flex-shrink-0 mt-0.5" />
+              <div>
+                <p className="font-semibold">Login Failed</p>
+                <p className="text-sm mt-1">{error}</p>
+                {error.includes('Email not confirmed') && (
+                  <p className="text-sm mt-2">
+                    Please check your email and click the verification link to activate your account.
+                  </p>
+                )}
+                {error.includes('pending approval') && (
+                  <p className="text-sm mt-2">
+                    Your application is still under review. You'll receive an email once approved.
+                  </p>
+                )}
+              </div>
+            </motion.div>
           )}
 
-          {/* Form */}
-          <form onSubmit={handleSubmit} className="space-y-5">
+          <form onSubmit={handleSubmit} className="space-y-6">
+            {/* Email Field */}
             <div>
-              <label className="block text-sm font-semibold text-slate-700 mb-2">
+              <label htmlFor="email" className="block text-sm font-medium text-slate-700 mb-2">
                 Email Address
               </label>
-              <input
-                type="email"
-                value={email}
-                onChange={(e) => setEmail(e.target.value)}
-                className="w-full px-4 py-3 border border-slate-300 rounded-lg focus:outline-none focus:ring-2 focus:ring-blue-500 focus:border-transparent"
-                placeholder="you@example.com"
-                required
-              />
-            </div>
-
-            <div>
-              <label className="block text-sm font-semibold text-slate-700 mb-2">
-                Password
-              </label>
               <div className="relative">
+                <div className="absolute inset-y-0 left-0 pl-3 flex items-center pointer-events-none">
+                  <Mail className="h-5 w-5 text-slate-400" />
+                </div>
                 <input
-                  type={showPassword ? 'text' : 'password'}
-                  value={password}
-                  onChange={(e) => setPassword(e.target.value)}
-                  className="w-full px-4 py-3 border border-slate-300 rounded-lg focus:outline-none focus:ring-2 focus:ring-blue-500 focus:border-transparent pr-12"
-                  placeholder="••••••••"
+                  id="email"
+                  type="email"
+                  value={email}
+                  onChange={(e) => setEmail(e.target.value)}
                   required
+                  className="block w-full pl-10 pr-3 py-3 border border-slate-300 rounded-lg focus:ring-2 focus:ring-blue-500 focus:border-blue-500 transition-colors"
+                  placeholder="you@example.com"
                 />
-                <button
-                  type="button"
-                  onClick={() => setShowPassword(!showPassword)}
-                  className="absolute right-3 top-1/2 -translate-y-1/2 text-slate-400 hover:text-slate-600"
-                >
-                  {showPassword ? <EyeOff className="w-5 h-5" /> : <Eye className="w-5 h-5" />}
-                </button>
               </div>
             </div>
 
+            {/* Password Field */}
+            <div>
+              <label htmlFor="password" className="block text-sm font-medium text-slate-700 mb-2">
+                Password
+              </label>
+              <div className="relative">
+                <div className="absolute inset-y-0 left-0 pl-3 flex items-center pointer-events-none">
+                  <Lock className="h-5 w-5 text-slate-400" />
+                </div>
+                <input
+                  id="password"
+                  type="password"
+                  value={password}
+                  onChange={(e) => setPassword(e.target.value)}
+                  required
+                  className="block w-full pl-10 pr-3 py-3 border border-slate-300 rounded-lg focus:ring-2 focus:ring-blue-500 focus:border-blue-500 transition-colors"
+                  placeholder="Enter your password"
+                />
+              </div>
+            </div>
+
+            {/* Forgot Password Link */}
+            <div className="flex items-center justify-between">
+              <div className="flex items-center">
+                <input
+                  id="remember-me"
+                  name="remember-me"
+                  type="checkbox"
+                  className="h-4 w-4 text-blue-600 focus:ring-blue-500 border-slate-300 rounded"
+                />
+                <label htmlFor="remember-me" className="ml-2 block text-sm text-slate-700">
+                  Remember me
+                </label>
+              </div>
+              <div className="text-sm">
+                <a href="#" className="font-medium text-blue-600 hover:text-blue-500">
+                  Forgot password?
+                </a>
+              </div>
+            </div>
+
+            {/* Submit Button */}
             <button
               type="submit"
-              disabled={loading}
-              className="w-full py-3 bg-gradient-to-r from-blue-600 to-purple-600 text-white font-semibold rounded-lg hover:from-blue-700 hover:to-purple-700 transition-all duration-300 disabled:opacity-50 disabled:cursor-not-allowed"
+              disabled={isLoading}
+              className="w-full flex items-center justify-center px-6 py-3 bg-gradient-to-r from-blue-600 to-purple-600 text-white font-bold rounded-lg hover:shadow-lg transition-all duration-200 disabled:opacity-50 disabled:cursor-not-allowed"
             >
-              {loading ? 'Logging In...' : 'Log In'}
+              {isLoading ? (
+                <>
+                  <Loader2 className="w-5 h-5 mr-2 animate-spin" />
+                  Signing in...
+                </>
+              ) : (
+                <>
+                  Sign In
+                  <ArrowRight className="w-5 h-5 ml-2" />
+                </>
+              )}
             </button>
           </form>
 
-          {/* Signup Link */}
+          {/* Sign Up Link */}
           <div className="mt-6 text-center">
-            <p className="text-slate-600">
+            <p className="text-sm text-slate-600">
               Don't have an account?{' '}
-              <Link to="/candidate/signup" className="text-blue-600 hover:text-blue-800 font-semibold">
-                Sign Up
+              <Link to="/apply" className="font-semibold text-blue-600 hover:text-blue-500">
+                Apply Now
               </Link>
             </p>
           </div>
-        </div>
+        </motion.div>
 
-        {/* Back to Jobs */}
-        <div className="text-center mt-6">
-          <Link to="/jobs" className="text-slate-600 hover:text-slate-900 text-sm">
-            ← Back to Job Postings
-          </Link>
-        </div>
+        {/* Help Text */}
+        <motion.div
+          initial={{ opacity: 0 }}
+          animate={{ opacity: 1 }}
+          transition={{ duration: 0.5, delay: 0.2 }}
+          className="mt-6 text-center"
+        >
+          <p className="text-sm text-slate-600">
+            Need help?{' '}
+            <Link to="/contact" className="font-medium text-blue-600 hover:text-blue-500">
+              Contact Support
+            </Link>
+          </p>
+        </motion.div>
       </motion.div>
     </div>
   )
 }
-
-export default CandidateLoginPage
-
