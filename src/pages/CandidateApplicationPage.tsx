@@ -95,6 +95,36 @@ const CandidateApplicationPage = () => {
     setFormData(prev => ({ ...prev, [field]: value }))
   }
 
+  const isStepComplete = (stepNumber: number): boolean => {
+    switch (stepNumber) {
+      case 1: // Account Creation
+        return !!(formData.email && formData.password && formData.confirmPassword && formData.password === formData.confirmPassword && formData.password.length >= 6)
+      case 2: // Personal Information
+        return !!(formData.firstName && formData.lastName && formData.city && formData.phone && formData.whatsapp && formData.ageRange && formData.gender)
+      case 3: // Background & Experience
+        return !!(formData.industryExperience.length > 0 && formData.desiredIndustry.length > 0 && formData.desiredRoles.length > 0)
+      case 4: // Resume & Portfolio
+        return !!formData.resume
+      case 5: // Assessments (ALL 4 quizzes required)
+        return !!(formData.temperamentCompleted && formData.roleValidationCompleted && formData.communicationCompleted && formData.behavioralCompleted)
+      case 6: // Technical Setup
+        return !!(formData.internetSpeed && formData.workspacePhoto)
+      case 7: // Tech Stack
+        return Object.keys(formData.techStack).length > 0
+      default:
+        return false
+    }
+  }
+
+  const handleNextStep = () => {
+    if (!isStepComplete(step)) {
+      setError('Please complete all required fields before proceeding.')
+      return
+    }
+    setError('')
+    setStep(step + 1)
+  }
+
   const toggleMultiSelect = (field: 'industryExperience' | 'desiredIndustry' | 'desiredRoles', value: string) => {
     setFormData(prev => ({
       ...prev,
@@ -389,7 +419,19 @@ const CandidateApplicationPage = () => {
         return (
           <div className="space-y-6">
             <h2 className="text-2xl font-bold text-slate-900">Assessments & Quizzes</h2>
-            <p className="text-slate-600">Please complete the following assessments to help us match you with the right opportunities.</p>
+            <p className="text-slate-600">
+              Please complete <strong>ALL 4 assessments</strong> to help us match you with the right opportunities. 
+              All quizzes are required to proceed.
+            </p>
+            {!isStepComplete(5) && (
+              <div className="bg-yellow-50 border border-yellow-200 text-yellow-800 px-4 py-3 rounded-lg flex items-start">
+                <AlertCircle className="w-5 h-5 mr-2 flex-shrink-0 mt-0.5" />
+                <div>
+                  <p className="font-semibold">Required: Complete All 4 Quizzes</p>
+                  <p className="text-sm mt-1">You must complete all assessments before moving to the next step.</p>
+                </div>
+              </div>
+            )}
             <div className="space-y-4">
               {/* Temperament Quiz */}
               <div className="border border-slate-200 rounded-lg p-4 bg-gradient-to-r from-blue-50 to-purple-50">
@@ -621,12 +663,23 @@ const CandidateApplicationPage = () => {
             {/* Navigation */}
             <div className="flex justify-between mt-8 pt-6 border-t border-slate-200">
               {step > 1 && (
-                <button type="button" onClick={() => setStep(step - 1)} className="px-6 py-3 border border-slate-300 rounded-lg text-slate-700 font-medium hover:bg-slate-50">Previous</button>
+                <button type="button" onClick={() => { setStep(step - 1); setError(''); }} className="px-6 py-3 border border-slate-300 rounded-lg text-slate-700 font-medium hover:bg-slate-50">Previous</button>
               )}
               {step < 7 ? (
-                <button type="button" onClick={() => setStep(step + 1)} className="ml-auto px-6 py-3 bg-blue-600 text-white rounded-lg font-medium hover:bg-blue-700">Next</button>
+                <button 
+                  type="button" 
+                  onClick={handleNextStep} 
+                  className="ml-auto px-6 py-3 bg-blue-600 text-white rounded-lg font-medium hover:bg-blue-700 disabled:opacity-50 disabled:cursor-not-allowed transition-all"
+                  disabled={!isStepComplete(step)}
+                >
+                  Next
+                </button>
               ) : (
-                <button type="submit" disabled={isSubmitting} className="ml-auto px-8 py-3 bg-gradient-to-r from-blue-600 to-purple-600 text-white rounded-lg font-bold hover:shadow-lg disabled:opacity-50 disabled:cursor-not-allowed">
+                <button 
+                  type="submit" 
+                  disabled={isSubmitting || !isStepComplete(step)} 
+                  className="ml-auto px-8 py-3 bg-gradient-to-r from-blue-600 to-purple-600 text-white rounded-lg font-bold hover:shadow-lg disabled:opacity-50 disabled:cursor-not-allowed transition-all"
+                >
                   {isSubmitting ? 'Creating Account...' : 'Submit Application'}
                 </button>
               )}

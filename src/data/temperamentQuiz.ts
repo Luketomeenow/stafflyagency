@@ -1,414 +1,382 @@
-// ============================================
-// TEMPERAMENT QUIZ DATA
-// ============================================
+export interface TemperamentQuestion {
+  id: string;
+  scenario: string;
+  options: {
+    A: { text: string; score: number; type: 'Donkey' };
+    B: { text: string; score: number; type: 'Mule' };
+    C: { text: string; score: number; type: 'Horse' };
+    D: { text: string; score: number; type: 'Neutral' };
+  };
+}
+
+export type QuizQuestion = TemperamentQuestion;
 
 export type QuizOption = {
-  id: string
-  text: string
-  points: number // 0 = Neutral, 1 = Donkey, 2 = Mule, 3 = Horse
-  reasoning: string // The emotional reasoning behind the choice
-}
+  id: string;
+  text: string;
+  score: number;
+  type: 'Donkey' | 'Mule' | 'Horse' | 'Neutral';
+};
 
-export type QuizQuestion = {
-  id: string
-  scenario: string
-  options: QuizOption[]
-}
+export const temperamentQuestions: TemperamentQuestion[] = [
+  {
+    id: 'tq1',
+    scenario: 'Your client messages you at 9:30 AM with the following:\n\n"Can you help me with these today?\n– Update the CRM with yesterday\'s notes (some calls might be missing).\n– Draft a follow-up email to the client I spoke with this morning who wants a proposal tomorrow.\n– Schedule the Friday team meeting (check everyone\'s calendars).\n– Research 3 vendors for automation software (pricing options).\n– Create a quick report on last week\'s sales numbers and email it to me by end of day."\n\nNo priorities or deadlines are listed, and your client doesn\'t reply when you ask for clarification.',
+    options: {
+      A: { 
+        text: 'I\'d hold off until I get more direction because I\'d feel uneasy about doing the wrong thing. I\'d reply: "I got your list — can you tell me what to start with first when you\'re back?"', 
+        score: 1, 
+        type: 'Donkey' 
+      },
+      B: { 
+        text: 'I\'d feel a little nervous about choosing wrong, so I\'d start with something straightforward like scheduling or CRM, just so progress is being made. I\'d message: "I scheduled the meeting and updated CRM while waiting for clarity on the rest."', 
+        score: 2, 
+        type: 'Mule' 
+      },
+      C: { 
+        text: 'I\'d feel confident separating urgent tasks from routine ones. I\'d draft the follow-up and begin the sales report, since those seem most time-sensitive. I\'d message: "I worked on the follow-up and report first. Next, I\'ll move to scheduling and vendor research unless you prefer differently."', 
+        score: 3, 
+        type: 'Horse' 
+      },
+      D: { 
+        text: 'I\'d feel stuck and a bit overwhelmed by so many requests at once. I\'d reply: "I\'m not sure which is the priority, so I\'ll wait until you\'re available."', 
+        score: 0, 
+        type: 'Neutral' 
+      },
+    },
+  },
+  {
+    id: 'tq2',
+    scenario: 'You complete your assigned work by mid-afternoon, but your client hasn\'t checked in all day. You see open threads in email, Slack, and the project board. Some are minor (e.g., updating contact info), and some could be impactful (e.g., missing invoice for a big client).',
+    options: {
+      A: { 
+        text: 'I\'d log off and wait until the client assigns something new. Honestly, I\'d feel it\'s safer not to touch things they didn\'t tell me to do.', 
+        score: 1, 
+        type: 'Donkey' 
+      },
+      B: { 
+        text: 'I\'d feel a little anxious about leaving things undone, so I\'d continue with smaller admin items and message: "I updated the contact list while waiting for your guidance."', 
+        score: 2, 
+        type: 'Mule' 
+      },
+      C: { 
+        text: 'I\'d feel confident taking initiative and would call or voice note: "I wrapped up today\'s list and checked the invoice thread. I started prepping it so we don\'t miss anything — I\'ll finalize once you confirm."', 
+        score: 3, 
+        type: 'Horse' 
+      },
+      D: { 
+        text: 'I\'d feel unsure what counts as important, so I\'d reply: "I\'m done but don\'t know if I should keep going — do you want me to stop here?"', 
+        score: 0, 
+        type: 'Neutral' 
+      },
+    },
+  },
+  {
+    id: 'tq3',
+    scenario: 'Your client adds you to a new project management tool with no instructions except: "Start using this for tracking." The boards are messy, with overdue tasks and unclear ownership.',
+    options: {
+      A: { 
+        text: 'I\'d feel nervous about breaking something, so I\'d wait for my client to explain. "I saw the tool but I\'ll wait for you to show me how you want me to use it."', 
+        score: 1, 
+        type: 'Donkey' 
+      },
+      B: { 
+        text: 'I\'d feel curious but cautious. I\'d explore a little, then stop if I get stuck: "I started checking the tool, but I\'ll need your guidance before I can continue."', 
+        score: 2, 
+        type: 'Mule' 
+      },
+      C: { 
+        text: 'I\'d feel comfortable diving in and learning. I\'d research tutorials, test features, and message: "I organized the overdue tasks and drafted a tracking board. Let me know if you\'d like adjustments."', 
+        score: 3, 
+        type: 'Horse' 
+      },
+      D: { 
+        text: 'I\'d feel hesitant and ignore the tool until my client directly assigns me something inside it.', 
+        score: 0, 
+        type: 'Neutral' 
+      },
+    },
+  },
+  {
+    id: 'tq4',
+    scenario: 'At 4:00 PM, your client emails: "I need these three things done ASAP — receipts organized, a thank-you email to a partner, and a draft report for tomorrow\'s meeting." They don\'t say which comes first.',
+    options: {
+      A: { 
+        text: 'I\'d feel uncomfortable choosing wrong, so I\'d reply: "Got your list — which one should I prioritize?" and wait.', 
+        score: 1, 
+        type: 'Donkey' 
+      },
+      B: { 
+        text: 'I\'d feel better doing something concrete, so I\'d start with receipts and check in: "I began with receipts — should I do the email or report next?"', 
+        score: 2, 
+        type: 'Mule' 
+      },
+      C: { 
+        text: 'I\'d feel confident assuming time-sensitivity, so I\'d do the report and partner email first. I\'d reply: "I finished the report and email and will handle receipts next unless you\'d like a different order."', 
+        score: 3, 
+        type: 'Horse' 
+      },
+      D: { 
+        text: 'I\'d feel overwhelmed because they all sound urgent. I\'d reply: "Not sure where to begin — can you confirm the order?"', 
+        score: 0, 
+        type: 'Neutral' 
+      },
+    },
+  },
+  {
+    id: 'tq5',
+    scenario: 'A vendor calls saying they can\'t access your client\'s shared system. Your client is in a board meeting for three hours.',
+    options: {
+      A: { 
+        text: 'I\'d feel safer not to interfere, so I\'d forward the issue and wait until my client is free.', 
+        score: 1, 
+        type: 'Donkey' 
+      },
+      B: { 
+        text: 'I\'d feel like I should show initiative, but still cautious. I\'d ping my client mid-meeting: "Vendor can\'t access the system — should I hold this for you?"', 
+        score: 2, 
+        type: 'Mule' 
+      },
+      C: { 
+        text: 'I\'d feel confident handling it myself. I\'d troubleshoot with the vendor, test access, then update my client: "Vendor issue resolved — they\'re logged in now. Here\'s what I did."', 
+        score: 3, 
+        type: 'Horse' 
+      },
+      D: { 
+        text: 'I\'d feel stuck and tell the vendor: "You\'ll have to wait until my client is available."', 
+        score: 0, 
+        type: 'Neutral' 
+      },
+    },
+  },
+  {
+    id: 'tq6',
+    scenario: 'Your client hasn\'t replied for 24 hours. You have open tasks: a client presentation, booking travel, and updating a report. Some require decisions you don\'t have answers for.',
+    options: {
+      A: { 
+        text: 'I\'d feel nervous about making mistakes, so I\'d stop until my client replies.', 
+        score: 1, 
+        type: 'Donkey' 
+      },
+      B: { 
+        text: 'I\'d feel cautious but still want to help, so I\'d do low-risk items and message: "I worked on the report while waiting for your input on travel and presentation."', 
+        score: 2, 
+        type: 'Mule' 
+      },
+      C: { 
+        text: 'I\'d feel confident pushing forward. I\'d finish the report, draft slides, and leave options for travel. I\'d leave a voice note: "Here\'s what I completed, here\'s where I need your decision."', 
+        score: 3, 
+        type: 'Horse' 
+      },
+      D: { 
+        text: 'I\'d feel stuck and reply: "I don\'t know what to do without your feedback — should I hold off?"', 
+        score: 0, 
+        type: 'Neutral' 
+      },
+    },
+  },
+  {
+    id: 'tq7',
+    scenario: 'A customer emails your client directly with a question about a product. Your client is traveling and unreachable, but you know the answer.',
+    options: {
+      A: { 
+        text: 'I\'d feel worried about saying the wrong thing, so I\'d just forward the email to my client and leave it.', 
+        score: 1, 
+        type: 'Donkey' 
+      },
+      B: { 
+        text: 'I\'d feel cautious but helpful, so I\'d draft a reply and ask: "Here\'s a draft — should I send it?"', 
+        score: 2, 
+        type: 'Mule' 
+      },
+      C: { 
+        text: 'I\'d feel confident answering right away. I\'d reply to the customer, copy my client, and then message: "I responded so they weren\'t left waiting — details are in the thread."', 
+        score: 3, 
+        type: 'Horse' 
+      },
+      D: { 
+        text: 'I\'d feel uncertain about overstepping, so I\'d tell the customer: "You\'ll need to wait until my client returns."', 
+        score: 0, 
+        type: 'Neutral' 
+      },
+    },
+  },
+  {
+    id: 'tq8',
+    scenario: 'Your client says: "From now on, you own weekly reporting. I don\'t want to think about it anymore." They don\'t explain further.',
+    options: {
+      A: { 
+        text: 'I\'d feel safer waiting for reminders: "Do you want me to run the report this week?"', 
+        score: 1, 
+        type: 'Donkey' 
+      },
+      B: { 
+        text: 'I\'d feel cautious about getting it wrong, so I\'d prepare it weekly but still ask: "Here\'s this week\'s report — is it okay to send?"', 
+        score: 2, 
+        type: 'Mule' 
+      },
+      C: { 
+        text: 'I\'d feel confident owning it. I\'d set reminders, automate parts, and message: "Report is complete and already sent. I\'ll flag you only if I see something unusual."', 
+        score: 3, 
+        type: 'Horse' 
+      },
+      D: { 
+        text: 'I\'d feel unsure without clear instructions and just wait until my client brings it up again.', 
+        score: 0, 
+        type: 'Neutral' 
+      },
+    },
+  },
+  {
+    id: 'tq9',
+    scenario: 'You\'re balancing multiple deadlines when a new urgent task arrives from another department. Your client is unavailable.',
+    options: {
+      A: { 
+        text: 'I\'d feel anxious about messing up priorities, so I\'d pause everything until my client clarifies.', 
+        score: 1, 
+        type: 'Donkey' 
+      },
+      B: { 
+        text: 'I\'d feel cautious and keep my current focus, but flag: "Another urgent item came in — should I adjust?"', 
+        score: 2, 
+        type: 'Mule' 
+      },
+      C: { 
+        text: 'I\'d feel confident reshuffling priorities. I\'d do the urgent task first and update: "I adjusted the schedule so deadlines are still met — here\'s the new plan."', 
+        score: 3, 
+        type: 'Horse' 
+      },
+      D: { 
+        text: 'I\'d feel overwhelmed and ignore the urgent task until I finish what I was already working on.', 
+        score: 0, 
+        type: 'Neutral' 
+      },
+    },
+  },
+  {
+    id: 'tq10',
+    scenario: 'Your client says: "I need you to fully own this recurring process from now on." They don\'t give details on how to handle exceptions.',
+    options: {
+      A: { 
+        text: 'I\'d feel safer asking each time: "Do you want me to run this now?"', 
+        score: 1, 
+        type: 'Donkey' 
+      },
+      B: { 
+        text: 'I\'d feel cautious about final mistakes, so I\'d do it regularly but always send drafts for approval.', 
+        score: 2, 
+        type: 'Mule' 
+      },
+      C: { 
+        text: 'I\'d feel confident taking ownership. I\'d clarify expectations once, then message: "I\'ll handle this automatically each week and notify you only if something unusual comes up."', 
+        score: 3, 
+        type: 'Horse' 
+      },
+      D: { 
+        text: 'I\'d feel hesitant without details and just wait until they assign it again.', 
+        score: 0, 
+        type: 'Neutral' 
+      },
+    },
+  },
+];
 
-export const TEMPERAMENT_QUIZ: QuizQuestion[] = [
-  {
-    id: 'q1',
-    scenario: "It's 9:00 AM. Your founder is on a sales call. You have 3 unread Slack messages, 2 urgent emails, a client asking for a proposal revision, and a calendar invite conflict for this afternoon. What do you do first?",
-    options: [
-      {
-        id: 'a',
-        text: "Wait for the founder to finish their call and ask them what to prioritize.",
-        points: 1,
-        reasoning: "I don't want to make the wrong choice and upset anyone."
-      },
-      {
-        id: 'b',
-        text: "Quickly scan everything, flag the urgent items, and start resolving the calendar conflict while drafting a priority list.",
-        points: 3,
-        reasoning: "I can assess urgency and act without needing permission for obvious tasks."
-      },
-      {
-        id: 'c',
-        text: "Reply to the Slack messages first since they're probably time-sensitive, then check the emails.",
-        points: 2,
-        reasoning: "I'll handle what I can confidently, then ask about the rest."
-      },
-      {
-        id: 'd',
-        text: "Feel overwhelmed and start with whatever seems easiest to avoid making a mistake.",
-        points: 0,
-        reasoning: "There's too much happening at once and I'm not sure where to start."
-      }
-    ]
-  },
-  {
-    id: 'q2',
-    scenario: "A client emails saying they're 'disappointed' with the last deliverable but doesn't specify what's wrong. Your founder is unavailable for 3 hours. The client expects a response today. What do you do?",
-    options: [
-      {
-        id: 'a',
-        text: "Forward the email to the founder and wait for their guidance before responding.",
-        points: 1,
-        reasoning: "I don't want to say the wrong thing and make it worse."
-      },
-      {
-        id: 'b',
-        text: "Reply immediately: 'Thank you for your feedback. Can you help me understand which specific areas fell short so we can address them right away?'",
-        points: 3,
-        reasoning: "I can handle ambiguity, de-escalate, and gather information to solve this."
-      },
-      {
-        id: 'c',
-        text: "Draft a polite response asking for clarification, save it, and send it to the founder for approval before replying.",
-        points: 2,
-        reasoning: "I want to act, but I'd feel safer getting approval first."
-      },
-      {
-        id: 'd',
-        text: "Panic slightly and re-read the email multiple times, unsure how to respond without more context.",
-        points: 0,
-        reasoning: "I'm not confident handling upset clients without clear direction."
-      }
-    ]
-  },
-  {
-    id: 'q3',
-    scenario: "Your founder mentions in passing: 'We should really update the client onboarding process.' They don't give you a deadline or specific instructions. What do you do?",
-    options: [
-      {
-        id: 'a',
-        text: "Add it to a task list and wait for them to bring it up again with more details.",
-        points: 1,
-        reasoning: "I don't want to overstep or waste time on something that might not be urgent."
-      },
-      {
-        id: 'b',
-        text: "Immediately draft a proposed onboarding workflow, flag gaps, and send it to them with a note: 'Here's a starting point—let me know what you'd like adjusted.'",
-        points: 3,
-        reasoning: "I take initiative and create solutions without needing hand-holding."
-      },
-      {
-        id: 'c',
-        text: "Ask them: 'Should I prioritize this now? What would you like included in the update?'",
-        points: 2,
-        reasoning: "I want to act, but I need a bit more clarity before diving in."
-      },
-      {
-        id: 'd',
-        text: "Feel unsure about what 'update' means and avoid starting until they give clearer instructions.",
-        points: 0,
-        reasoning: "I need more structure and direction to feel confident taking action."
-      }
-    ]
-  },
-  {
-    id: 'q4',
-    scenario: "You're managing the founder's inbox. You see an email from a potential investor asking for a meeting 'this week if possible.' The founder's calendar is packed. What do you do?",
-    options: [
-      {
-        id: 'a',
-        text: "Forward the email to the founder and let them decide how to handle it.",
-        points: 1,
-        reasoning: "This feels too important for me to make a call on my own."
-      },
-      {
-        id: 'b',
-        text: "Check the founder's priorities, move a lower-priority meeting, and reply with 2-3 available time slots, CCing the founder.",
-        points: 3,
-        reasoning: "I understand what's revenue-critical and can make judgment calls."
-      },
-      {
-        id: 'c',
-        text: "Reply to the investor: 'Let me check availability and get back to you shortly,' then confirm with the founder before booking.",
-        points: 2,
-        reasoning: "I want to respond quickly but get approval before committing their time."
-      },
-      {
-        id: 'd',
-        text: "Feel stressed about making the wrong choice and delay responding until the founder is available.",
-        points: 0,
-        reasoning: "I'm not comfortable making decisions about their schedule without explicit permission."
-      }
-    ]
-  },
-  {
-    id: 'q5',
-    scenario: "A vendor sends an invoice that's 20% higher than expected. Your founder is traveling and hard to reach. The payment is due in 2 days. What do you do?",
-    options: [
-      {
-        id: 'a',
-        text: "Wait for the founder to return and let them handle it—I don't want to question the vendor incorrectly.",
-        points: 1,
-        reasoning: "This feels like a financial decision I shouldn't make alone."
-      },
-      {
-        id: 'b',
-        text: "Email the vendor immediately: 'Hi, I noticed the invoice is higher than our agreed rate of $X. Can you clarify the difference? Happy to process once confirmed.'",
-        points: 3,
-        reasoning: "I can spot discrepancies, ask the right questions, and protect the business."
-      },
-      {
-        id: 'c',
-        text: "Flag the invoice, send a quick message to the founder ('Invoice is higher than expected—should I pay or question it?'), and wait for their response.",
-        points: 2,
-        reasoning: "I want to act but prefer confirmation before engaging the vendor."
-      },
-      {
-        id: 'd',
-        text: "Feel uncertain about whether this is normal and avoid taking action until the founder clarifies.",
-        points: 0,
-        reasoning: "I'm not confident handling financial discrepancies without guidance."
-      }
-    ]
-  },
-  {
-    id: 'q6',
-    scenario: "Your founder says: 'I need a report on Q1 performance by end of week.' It's Wednesday. They didn't specify what metrics to include. What do you do?",
-    options: [
-      {
-        id: 'a',
-        text: "Ask them: 'What specific metrics would you like me to include in the report?'",
-        points: 1,
-        reasoning: "I don't want to guess and create the wrong thing."
-      },
-      {
-        id: 'b',
-        text: "Pull revenue, client acquisition, retention, and key project milestones, format it clearly, and send a draft: 'Here's a starting point—let me know what else you'd like added.'",
-        points: 3,
-        reasoning: "I know what matters in business and can create a solid first draft without hand-holding."
-      },
-      {
-        id: 'c',
-        text: "Draft a quick outline of what I think should be included and send it for approval before building the full report.",
-        points: 2,
-        reasoning: "I want to move forward but prefer validation before investing too much time."
-      },
-      {
-        id: 'd',
-        text: "Feel unsure about what 'performance' means and wait for them to provide more details.",
-        points: 0,
-        reasoning: "I need clearer instructions to feel confident starting."
-      }
-    ]
-  },
-  {
-    id: 'q7',
-    scenario: "A client texts your founder at 11:00 PM asking for an urgent update on their project. Your founder is asleep. You have access to the project status. What do you do?",
-    options: [
-      {
-        id: 'a',
-        text: "Leave it for the founder to handle in the morning—I don't want to overstep.",
-        points: 1,
-        reasoning: "I'm not comfortable responding to clients without explicit permission."
-      },
-      {
-        id: 'b',
-        text: "Reply immediately: 'Hi [Client], I have access to the project status. Here's where we're at: [brief update]. [Founder] will follow up with more details in the morning if needed.'",
-        points: 3,
-        reasoning: "I can handle client communication confidently and protect my founder's time."
-      },
-      {
-        id: 'c',
-        text: "Reply: 'Thanks for reaching out. Let me check on this and get back to you first thing in the morning,' then update the founder.",
-        points: 2,
-        reasoning: "I want to acknowledge the client but prefer the founder to provide the actual update."
-      },
-      {
-        id: 'd',
-        text: "Feel anxious about responding without permission and leave it unread until morning.",
-        points: 0,
-        reasoning: "I'm not confident handling client communication independently."
-      }
-    ]
-  },
-  {
-    id: 'q8',
-    scenario: "Your founder is about to join a pitch call but doesn't have the latest proposal deck. You realize it's still in draft form with missing sections. The call starts in 10 minutes. What do you do?",
-    options: [
-      {
-        id: 'a',
-        text: "Panic and tell the founder the deck isn't ready—they'll have to reschedule or wing it.",
-        points: 1,
-        reasoning: "I don't know how to fix this quickly and don't want to make it worse."
-      },
-      {
-        id: 'b',
-        text: "Quickly fill in the missing sections with placeholder content, polish the formatting, and send it with a note: 'Deck is ready. I filled in [X sections]—let me know if you need tweaks post-call.'",
-        points: 3,
-        reasoning: "I thrive under pressure and can make fast, smart decisions to save the situation."
-      },
-      {
-        id: 'c',
-        text: "Send the draft as-is and let the founder know which sections are incomplete so they can adjust on the fly.",
-        points: 2,
-        reasoning: "I want to help but don't feel confident making content decisions without approval."
-      },
-      {
-        id: 'd',
-        text: "Freeze and feel overwhelmed by the time pressure, unsure what to do.",
-        points: 0,
-        reasoning: "I struggle to think clearly under tight deadlines."
-      }
-    ]
-  },
-  {
-    id: 'q9',
-    scenario: "Your founder mentions they're frustrated with how disorganized their task management system is but doesn't ask you to fix it. What do you do?",
-    options: [
-      {
-        id: 'a',
-        text: "Acknowledge their frustration but wait for them to ask me to help before taking action.",
-        points: 1,
-        reasoning: "I don't want to overstep or waste time on something they might not want changed."
-      },
-      {
-        id: 'b',
-        text: "Audit their current system, research better tools, build a new workflow, and present it: 'I reorganized your task system—here's how it works. Let me know if you'd like adjustments.'",
-        points: 3,
-        reasoning: "I see problems and fix them proactively without needing to be asked."
-      },
-      {
-        id: 'c',
-        text: "Ask them: 'Would you like me to take a look at your task system and suggest improvements?'",
-        points: 2,
-        reasoning: "I want to help but prefer to get permission before diving in."
-      },
-      {
-        id: 'd',
-        text: "Feel unsure about whether they want me to act and avoid doing anything without clearer direction.",
-        points: 0,
-        reasoning: "I need explicit instructions before taking initiative."
-      }
-    ]
-  },
-  {
-    id: 'q10',
-    scenario: "A high-value lead fills out a contact form on the website at 6:00 PM (after business hours). Your founder is offline. The lead says they're evaluating 3 vendors and need a response by tomorrow morning. What do you do?",
-    options: [
-      {
-        id: 'a',
-        text: "Leave it for the founder to handle in the morning—I don't want to say the wrong thing to a high-value lead.",
-        points: 1,
-        reasoning: "This feels too important for me to respond without the founder's input."
-      },
-      {
-        id: 'b',
-        text: "Reply immediately: 'Hi [Lead], thanks for reaching out! I've flagged your inquiry as high-priority. [Founder] will reach out first thing tomorrow with a tailored proposal. In the meantime, here's a quick overview of how we can help: [brief pitch].'",
-        points: 3,
-        reasoning: "I understand urgency, can represent the business confidently, and won't let a lead go cold."
-      },
-      {
-        id: 'c',
-        text: "Reply: 'Thanks for your inquiry! I'll make sure [Founder] reaches out to you first thing in the morning,' and leave it at that.",
-        points: 2,
-        reasoning: "I want to acknowledge them quickly but prefer the founder to handle the pitch."
-      },
-      {
-        id: 'd',
-        text: "Feel nervous about responding to a high-value lead and wait for the founder to handle it.",
-        points: 0,
-        reasoning: "I'm not confident representing the business without explicit guidance."
-      }
-    ]
+export const calculateTemperamentScore = (answers: Record<string, 'A' | 'B' | 'C' | 'D'>) => {
+  let totalScore = 0;
+  const typeScores = {
+    Donkey: 0,
+    Mule: 0,
+    Horse: 0,
+    Neutral: 0,
+  };
+
+  temperamentQuestions.forEach((question) => {
+    const selectedOption = answers[question.id];
+    if (selectedOption) {
+      const option = question.options[selectedOption];
+      totalScore += option.score;
+      typeScores[option.type]++;
+    }
+  });
+
+  // Determine dominant temperament type
+  let dominantType: 'Donkey' | 'Mule' | 'Horse' | 'Neutral' = 'Neutral';
+  let maxCount = typeScores.Neutral;
+
+  if (typeScores.Horse > maxCount) {
+    dominantType = 'Horse';
+    maxCount = typeScores.Horse;
   }
-]
-
-// ============================================
-// SCORING LOGIC
-// ============================================
-
-export type TemperamentProfile = {
-  type: 'Donkey' | 'Mule' | 'Developing Horse' | 'Strong Horse'
-  score: number
-  maxScore: number
-  description: string
-  traits: string[]
-  developmentAreas?: string[]
-}
-
-export function calculateTemperamentProfile(totalScore: number): TemperamentProfile {
-  const maxScore = 30
-
-  if (totalScore >= 27) {
-    return {
-      type: 'Strong Horse',
-      score: totalScore,
-      maxScore,
-      description: 'Autonomous, proactive, thrives in chaos, and demonstrates leadership potential. This candidate can anticipate needs, make confident decisions, and handle ambiguity with ease.',
-      traits: [
-        'Proactive problem-solver',
-        'Confident decision-maker',
-        'Thrives under pressure',
-        'Anticipates needs',
-        'Strong communication skills',
-        'Leadership potential'
-      ]
-    }
-  } else if (totalScore >= 20) {
-    return {
-      type: 'Developing Horse',
-      score: totalScore,
-      maxScore,
-      description: 'Shows proactive tendencies but may hesitate in ambiguous situations. With proper guidance and experience, this candidate has strong potential to become a Strong Horse.',
-      traits: [
-        'Shows initiative',
-        'Good problem-solving skills',
-        'Reliable executor',
-        'Growing confidence',
-        'Needs occasional guidance'
-      ],
-      developmentAreas: [
-        'Building confidence in ambiguous situations',
-        'Reducing approval-seeking behavior',
-        'Strengthening autonomous decision-making'
-      ]
-    }
-  } else if (totalScore >= 11) {
-    return {
-      type: 'Mule',
-      score: totalScore,
-      maxScore,
-      description: 'Steady and reliable executor who makes cautious progress and seeks approval. This candidate is dependable but may require more direction and confidence-building.',
-      traits: [
-        'Reliable and steady',
-        'Follows instructions well',
-        'Detail-oriented',
-        'Cautious approach',
-        'Seeks validation'
-      ],
-      developmentAreas: [
-        'Building confidence to act independently',
-        'Reducing reliance on approval',
-        'Developing proactive problem-solving',
-        'Improving decision-making speed'
-      ]
-    }
-  } else {
-    return {
-      type: 'Donkey',
-      score: totalScore,
-      maxScore,
-      description: 'Reactive and heavily dependent on guidance. This candidate tends to avoid responsibility, wait for direction, and may be fearful of making mistakes. Significant development needed.',
-      traits: [
-        'Waits for direction',
-        'Avoids responsibility',
-        'Fearful of mistakes',
-        'Struggles with ambiguity',
-        'Needs constant guidance'
-      ],
-      developmentAreas: [
-        'Building basic confidence',
-        'Developing initiative',
-        'Overcoming fear of mistakes',
-        'Learning to handle pressure',
-        'Improving communication skills'
-      ]
-    }
+  if (typeScores.Mule > maxCount) {
+    dominantType = 'Mule';
+    maxCount = typeScores.Mule;
   }
-}
+  if (typeScores.Donkey > maxCount) {
+    dominantType = 'Donkey';
+    maxCount = typeScores.Donkey;
+  }
 
+  // Get profile description
+  let profile = {
+    type: dominantType,
+    score: totalScore,
+    maxScore: 30,
+    description: '',
+    traits: [] as string[],
+  };
+
+  switch (dominantType) {
+    case 'Horse':
+      profile.description = 'Proactive, confident, and takes initiative. You excel at independent decision-making and problem-solving.';
+      profile.traits = [
+        'Takes ownership of tasks',
+        'Confident in decision-making',
+        'Proactive problem solver',
+        'Comfortable with ambiguity',
+        'Strong initiative',
+      ];
+      break;
+    case 'Mule':
+      profile.description = 'Cautious but helpful. You balance initiative with seeking guidance, showing progress while maintaining communication.';
+      profile.traits = [
+        'Balances independence and guidance',
+        'Shows consistent progress',
+        'Communicates regularly',
+        'Thoughtful in approach',
+        'Seeks clarification when needed',
+      ];
+      break;
+    case 'Donkey':
+      profile.description = 'Task-oriented and follows direction closely. You prefer clear instructions and wait for guidance before acting.';
+      profile.traits = [
+        'Follows instructions carefully',
+        'Values clear direction',
+        'Risk-averse approach',
+        'Waits for confirmation',
+        'Prefers structured tasks',
+      ];
+      break;
+    case 'Neutral':
+      profile.description = 'Mixed responses or overwhelmed by scenarios. You may need additional support in developing decision-making confidence.';
+      profile.traits = [
+        'Uncertain in decision-making',
+        'May feel overwhelmed',
+        'Needs clearer structure',
+        'Developing confidence',
+        'Benefits from mentorship',
+      ];
+      break;
+  }
+
+  return {
+    rawScore: totalScore,
+    maxScore: 30,
+    percentage: (totalScore / 30) * 100,
+    profile,
+    typeBreakdown: typeScores,
+  };
+};
+
+// Alias exports for backward compatibility
+export const TEMPERAMENT_QUIZ = temperamentQuestions;
+export const calculateTemperamentProfile = calculateTemperamentScore;

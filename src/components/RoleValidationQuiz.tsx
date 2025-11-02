@@ -263,81 +263,81 @@ export function RoleValidationQuiz({ isOpen, onClose, onComplete }: RoleValidati
     setError(null)
 
     try {
-      // Get current user session
+      // Try to save to database if user is authenticated (for dashboard use)
+      // If not authenticated (during application), just mark as complete
       const session = await getCandidateSession()
-      if (!session?.user) {
-        throw new Error('No authenticated user found')
+      
+      if (session?.user) {
+        // User is authenticated - save to database
+        const { data: candidateData, error: candidateError } = await supabase
+          ?.from('candidates')
+          .select('id')
+          .eq('user_id', session.user.id)
+          .single()
+
+        if (!candidateError && candidateData) {
+          // Upload audio files to Supabase Storage and save quiz results
+          const uploadPromises = responses.map(async (response) => {
+            if (!response.audioBlob) return null
+
+            const question = ROLE_VALIDATION_QUESTIONS.find(q => q.id === response.questionId)
+            if (!question) return null
+
+            // Upload to Supabase Storage
+            const fileName = `${candidateData.id}/${question.id}_${Date.now()}.webm`
+            const { data: uploadData, error: uploadError } = await supabase
+              ?.storage
+              .from('audio-responses')
+              .upload(fileName, response.audioBlob, {
+                contentType: response.audioBlob.type,
+                upsert: false
+              })
+
+            if (uploadError) {
+              console.error('Upload error:', uploadError)
+              return null
+            }
+
+            // Get public URL
+            const { data: urlData } = supabase
+              ?.storage
+              .from('audio-responses')
+              .getPublicUrl(fileName)
+
+            // Save quiz result
+            await supabase
+              ?.from('quiz_results')
+              .insert({
+                candidate_id: candidateData.id,
+                user_id: session.user.id,
+                quiz_type: 'role_validation',
+                quiz_version: 'v1',
+                raw_score: 0, // Will be scored by admin
+                max_score: 20, // 5 points per criteria x 4 criteria
+                percentage: 0,
+                answers: {
+                  questionId: response.questionId,
+                  level: question.level,
+                  audioUrl: urlData?.publicUrl,
+                  duration: response.duration
+                },
+                profile_result: {
+                  level: question.level,
+                  title: question.title,
+                  audioUrl: urlData?.publicUrl,
+                  duration: response.duration,
+                  needsReview: true
+                },
+                status: 'completed',
+                time_taken_seconds: response.duration
+              })
+
+            return true
+          })
+
+          await Promise.all(uploadPromises)
+        }
       }
-
-      // Get candidate ID
-      const { data: candidateData, error: candidateError } = await supabase
-        ?.from('candidates')
-        .select('id')
-        .eq('user_id', session.user.id)
-        .single()
-
-      if (candidateError) throw candidateError
-      if (!candidateData) throw new Error('Candidate profile not found')
-
-      // Upload audio files to Supabase Storage and save quiz results
-      const uploadPromises = responses.map(async (response) => {
-        if (!response.audioBlob) return null
-
-        const question = ROLE_VALIDATION_QUESTIONS.find(q => q.id === response.questionId)
-        if (!question) return null
-
-        // Upload to Supabase Storage
-        const fileName = `${candidateData.id}/${question.id}_${Date.now()}.webm`
-        const { data: uploadData, error: uploadError } = await supabase
-          ?.storage
-          .from('audio-responses')
-          .upload(fileName, response.audioBlob, {
-            contentType: response.audioBlob.type,
-            upsert: false
-          })
-
-        if (uploadError) throw uploadError
-
-        // Get public URL
-        const { data: urlData } = supabase
-          ?.storage
-          .from('audio-responses')
-          .getPublicUrl(fileName)
-
-        // Save quiz result
-        const { error: insertError } = await supabase
-          ?.from('quiz_results')
-          .insert({
-            candidate_id: candidateData.id,
-            user_id: session.user.id,
-            quiz_type: 'role_validation',
-            quiz_version: 'v1',
-            raw_score: 0, // Will be scored by admin
-            max_score: 20, // 5 points per criteria x 4 criteria
-            percentage: 0,
-            answers: {
-              questionId: response.questionId,
-              level: question.level,
-              audioUrl: urlData?.publicUrl,
-              duration: response.duration
-            },
-            profile_result: {
-              level: question.level,
-              title: question.title,
-              audioUrl: urlData?.publicUrl,
-              duration: response.duration,
-              needsReview: true
-            },
-            status: 'completed',
-            time_taken_seconds: response.duration
-          })
-
-        if (insertError) throw insertError
-
-        return true
-      })
-
-      await Promise.all(uploadPromises)
 
       // Success!
       onComplete(true)
@@ -490,6 +490,12 @@ export function RoleValidationQuiz({ isOpen, onClose, onComplete }: RoleValidati
                           <Mic className="w-10 h-10" />
                         </button>
                         <p className="mt-4 text-slate-700 font-medium">Click to start recording</p>
+                        <div className="mt-3 space-y-1">
+                          <p className="text-sm text-slate-500">Maximum {AUDIO_CONSTRAINTS.maxDuration / 60} minutes</p>
+                          <p className="text-sm font-bold text-blue-600 bg-blue-50 px-3 py-1 rounded-full inline-block">
+                            ⏱️ Minimum {AUDIO_CONSTRAINTS.minDuration} seconds required
+                          </p>
+                        </div>
                       </>
                     )}
 
@@ -506,8 +512,18 @@ export function RoleValidationQuiz({ isOpen, onClose, onComplete }: RoleValidati
                         </div>
                         <p className="mt-4 text-2xl font-bold text-red-600">{formatTime(recordingTime)}</p>
                         <p className="text-slate-600">Recording... Click to stop</p>
+                        {recordingTime < AUDIO_CONSTRAINTS.minDuration && (
+                          <p className="text-sm text-blue-600 font-semibold mt-2 bg-blue-50 px-3 py-1 rounded-full">
+                            ⏱️ Keep recording ({AUDIO_CONSTRAINTS.minDuration - recordingTime}s remaining)
+                          </p>
+                        )}
+                        {recordingTime >= AUDIO_CONSTRAINTS.minDuration && recordingTime < AUDIO_CONSTRAINTS.warningDuration && (
+                          <p className="text-sm text-green-600 font-semibold mt-2 bg-green-50 px-3 py-1 rounded-full">
+                            ✓ Minimum reached - you can stop anytime
+                          </p>
+                        )}
                         {recordingTime >= AUDIO_CONSTRAINTS.warningDuration && (
-                          <p className="text-sm text-orange-600 font-semibold mt-2">
+                          <p className="text-sm text-orange-600 font-semibold mt-2 bg-orange-50 px-3 py-1 rounded-full">
                             ⚠️ Approaching time limit
                           </p>
                         )}
@@ -527,9 +543,20 @@ export function RoleValidationQuiz({ isOpen, onClose, onComplete }: RoleValidati
                         <p className="text-xl font-bold text-slate-900">
                           {recordingState === 'playing' ? formatTime(playbackTime) : formatTime(currentResponse.duration)}
                         </p>
-                        <p className="text-slate-600 mb-4">
+                        <p className="text-slate-600 mb-2">
                           {recordingState === 'playing' ? 'Playing...' : 'Recording complete'}
                         </p>
+                        {currentResponse.duration < AUDIO_CONSTRAINTS.minDuration && (
+                          <div className="mb-4 bg-red-50 border border-red-200 text-red-700 px-4 py-2 rounded-lg text-sm">
+                            <p className="font-semibold">⚠️ Recording too short</p>
+                            <p>Minimum {AUDIO_CONSTRAINTS.minDuration} seconds required. Please re-record.</p>
+                          </div>
+                        )}
+                        {currentResponse.duration >= AUDIO_CONSTRAINTS.minDuration && (
+                          <div className="mb-4 bg-green-50 border border-green-200 text-green-700 px-4 py-2 rounded-lg text-sm">
+                            <p className="font-semibold">✓ Recording meets requirements</p>
+                          </div>
+                        )}
                         <div className="flex space-x-3">
                           <button
                             onClick={deleteRecording}

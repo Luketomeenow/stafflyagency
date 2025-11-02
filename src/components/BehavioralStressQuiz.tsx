@@ -279,20 +279,6 @@ export function BehavioralStressQuiz({ isOpen, onClose, onComplete }: Behavioral
     setError(null)
 
     try {
-      const session = await getCandidateSession()
-      if (!session?.user) {
-        throw new Error('No authenticated user found')
-      }
-
-      const { data: candidateData, error: candidateError } = await supabase
-        ?.from('candidates')
-        .select('id')
-        .eq('user_id', session.user.id)
-        .single()
-
-      if (candidateError) throw candidateError
-      if (!candidateData) throw new Error('Candidate profile not found')
-
       // Calculate profile from multiple choice answers
       const mcAnswers: Record<string, 'A' | 'B' | 'C' | 'D'> = {}
       responses.forEach(r => {
@@ -300,62 +286,79 @@ export function BehavioralStressQuiz({ isOpen, onClose, onComplete }: Behavioral
       })
       const profile = calculateBehavioralProfile(mcAnswers)
 
-      // Upload audio files and save results
-      const uploadPromises = responses.map(async (response) => {
-        if (!response.audioBlob) return null
+      // Try to save to database if user is authenticated (for dashboard use)
+      // If not authenticated (during application), just mark as complete
+      const session = await getCandidateSession()
+      
+      if (session?.user) {
+        // User is authenticated - save to database
+        const { data: candidateData, error: candidateError } = await supabase
+          ?.from('candidates')
+          .select('id')
+          .eq('user_id', session.user.id)
+          .single()
 
-        const fileName = `${candidateData.id}/${response.questionId}_${Date.now()}.webm`
-        const { data: uploadData, error: uploadError } = await supabase
-          ?.storage
-          .from('audio-responses')
-          .upload(fileName, response.audioBlob, {
-            contentType: response.audioBlob.type,
-            upsert: false
+        if (!candidateError && candidateData) {
+          // Upload audio files and save results
+          const uploadPromises = responses.map(async (response) => {
+            if (!response.audioBlob) return null
+
+            const fileName = `${candidateData.id}/${response.questionId}_${Date.now()}.webm`
+            const { data: uploadData, error: uploadError } = await supabase
+              ?.storage
+              .from('audio-responses')
+              .upload(fileName, response.audioBlob, {
+                contentType: response.audioBlob.type,
+                upsert: false
+              })
+
+            if (uploadError) {
+              console.error('Upload error:', uploadError)
+              return null
+            }
+
+            const { data: urlData } = supabase
+              ?.storage
+              .from('audio-responses')
+              .getPublicUrl(fileName)
+
+            return {
+              questionId: response.questionId,
+              selectedOption: response.selectedOption,
+              audioUrl: urlData?.publicUrl,
+              duration: response.duration
+            }
           })
 
-        if (uploadError) throw uploadError
+          const audioResults = await Promise.all(uploadPromises)
 
-        const { data: urlData } = supabase
-          ?.storage
-          .from('audio-responses')
-          .getPublicUrl(fileName)
-
-        return {
-          questionId: response.questionId,
-          selectedOption: response.selectedOption,
-          audioUrl: urlData?.publicUrl,
-          duration: response.duration
+          // Save quiz result
+          await supabase
+            ?.from('quiz_results')
+            .insert({
+              candidate_id: candidateData.id,
+              user_id: session.user.id,
+              quiz_type: 'behavioral',
+              quiz_version: 'v1',
+              raw_score: profile.totalScore,
+              max_score: profile.maxScore,
+              percentage: (profile.totalScore / profile.maxScore) * 100,
+              answers: audioResults,
+              profile_result: {
+                riskLevel: profile.riskLevel,
+                categoryScores: profile.categoryScores,
+                overallReadiness: profile.overallReadiness,
+                strengths: profile.strengths,
+                developmentAreas: profile.developmentAreas,
+                redFlags: profile.redFlags
+              },
+              status: 'completed',
+              time_taken_seconds: 0
+            })
         }
-      })
+      }
 
-      const audioResults = await Promise.all(uploadPromises)
-
-      // Save quiz result
-      const { error: insertError } = await supabase
-        ?.from('quiz_results')
-        .insert({
-          candidate_id: candidateData.id,
-          user_id: session.user.id,
-          quiz_type: 'behavioral',
-          quiz_version: 'v1',
-          raw_score: profile.totalScore,
-          max_score: profile.maxScore,
-          percentage: (profile.totalScore / profile.maxScore) * 100,
-          answers: audioResults,
-          profile_result: {
-            riskLevel: profile.riskLevel,
-            categoryScores: profile.categoryScores,
-            overallReadiness: profile.overallReadiness,
-            strengths: profile.strengths,
-            developmentAreas: profile.developmentAreas,
-            redFlags: profile.redFlags
-          },
-          status: 'completed',
-          time_taken_seconds: 0
-        })
-
-      if (insertError) throw insertError
-
+      // Mark as complete (works for both authenticated and non-authenticated users)
       onComplete(true)
       onClose()
     } catch (err: any) {
