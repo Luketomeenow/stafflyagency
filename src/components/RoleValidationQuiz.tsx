@@ -100,28 +100,42 @@ export function RoleValidationQuiz({ isOpen, onClose, onComplete }: RoleValidati
         }
       }
 
-      mediaRecorder.onstop = () => {
+      mediaRecorder.onstop = async () => {
         const audioBlob = new Blob(audioChunksRef.current, { type: mimeType })
         const audioUrl = URL.createObjectURL(audioBlob)
         
-        // Use the ref value which has the actual duration
-        const finalDuration = recordingDurationRef.current
+        // Calculate actual duration from the audio blob
+        const audio = new Audio(audioUrl)
         
-        // Save response with the captured duration
+        // Wait for audio metadata to load to get actual duration
+        await new Promise<void>((resolve) => {
+          audio.addEventListener('loadedmetadata', () => {
+            resolve()
+          })
+          audio.addEventListener('error', () => {
+            resolve() // Fallback if error
+          })
+        })
+        
+        // Get actual duration from audio file (more reliable than timer)
+        const actualDuration = Math.floor(audio.duration) || recordingDurationRef.current
+        
+        console.log('Recording stopped:', {
+          questionId: currentQuestion.id,
+          actualDurationFromBlob: actualDuration,
+          timerDuration: recordingDurationRef.current,
+          displayedTime: recordingTime,
+          minRequired: AUDIO_CONSTRAINTS.minDuration,
+          meetsRequirement: actualDuration >= AUDIO_CONSTRAINTS.minDuration
+        })
+        
+        // Save response with the actual duration
         const newResponse: QuestionResponse = {
           questionId: currentQuestion.id,
           audioBlob,
-          duration: finalDuration,
+          duration: actualDuration,
           audioUrl
         }
-
-        console.log('Recording stopped:', {
-          questionId: currentQuestion.id,
-          duration: finalDuration,
-          displayedTime: recordingTime,
-          minRequired: AUDIO_CONSTRAINTS.minDuration,
-          meetsRequirement: finalDuration >= AUDIO_CONSTRAINTS.minDuration
-        })
 
         setResponses(prev => {
           const filtered = prev.filter(r => r.questionId !== currentQuestion.id)

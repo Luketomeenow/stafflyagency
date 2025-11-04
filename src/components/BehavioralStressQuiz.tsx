@@ -102,19 +102,33 @@ export function BehavioralStressQuiz({ isOpen, onClose, onComplete }: Behavioral
         }
       }
 
-      mediaRecorder.onstop = () => {
+      mediaRecorder.onstop = async () => {
         const audioBlob = new Blob(audioChunksRef.current, { type: mimeType })
         const audioUrl = URL.createObjectURL(audioBlob)
         
-        // Use the ref value which has the actual duration
-        const finalDuration = recordingDurationRef.current
+        // Calculate actual duration from the audio blob
+        const audio = new Audio(audioUrl)
+        
+        // Wait for audio metadata to load to get actual duration
+        await new Promise<void>((resolve) => {
+          audio.addEventListener('loadedmetadata', () => {
+            resolve()
+          })
+          audio.addEventListener('error', () => {
+            resolve() // Fallback if error
+          })
+        })
+        
+        // Get actual duration from audio file (more reliable than timer)
+        const actualDuration = Math.floor(audio.duration) || recordingDurationRef.current
         
         console.log('Behavioral recording stopped:', {
           questionId: currentQuestion.id,
-          duration: finalDuration,
+          actualDurationFromBlob: actualDuration,
+          timerDuration: recordingDurationRef.current,
           displayedTime: recordingTime,
           minRequired: 30,
-          meetsRequirement: finalDuration >= 30
+          meetsRequirement: actualDuration >= 30
         })
         
         // Update current response with audio
@@ -124,7 +138,7 @@ export function BehavioralStressQuiz({ isOpen, onClose, onComplete }: Behavioral
             questionId: currentQuestion.id,
             selectedOption: selectedOption!,
             audioBlob,
-            duration: finalDuration,
+            duration: actualDuration,
             audioUrl
           }]
         })
