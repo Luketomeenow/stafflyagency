@@ -68,16 +68,16 @@ export function StickyHeader({
     >
       <nav className="relative mx-auto flex max-w-2xl items-center justify-between">
         <a href="/" className="cursor-pointer hover:opacity-80 transition-opacity">
-          <motion.img
+        <motion.img
             className="h-10 w-auto"
             src="/staffly-logo.svg"
-            alt="Staffly"
-            animate={{
-              y: scrollY >= 120 ? -50 : 0,
-              opacity: scrollY >= 120 ? 0 : 1,
-            }}
-            transition={{ duration: 0.15 }}
-          />
+          alt="Staffly"
+          animate={{
+            y: scrollY >= 120 ? -50 : 0,
+            opacity: scrollY >= 120 ? 0 : 1,
+          }}
+          transition={{ duration: 0.15 }}
+        />
         </a>
 
         <ul className="sticky top-4 right-4 left-4 z-[60] hidden items-center justify-center gap-x-5 md:flex">

@@ -34,7 +34,7 @@ export function Hero() {
         className="min-h-[70vh]"
       >
         <div className="relative h-full overflow-hidden pt-8 pb-12">
-          <div className="z-10 container flex flex-col">
+        <div className="z-10 container flex flex-col">
           <div className="mt-8 grid grid-cols-1">
             <div className="flex flex-col items-center gap-6 pb-8 text-center">
               <motion.h1
@@ -75,21 +75,21 @@ export function Hero() {
       </HoleBackground>
 
       {/* Chatbot Section - Outside Background */}
-      <motion.div
+          <motion.div
         id="chat"
-        animate={fadeInInView ? "animate" : "initial"}
-        variants={fadeUpVariants}
-        initial={false}
-        transition={{
+            animate={fadeInInView ? "animate" : "initial"}
+            variants={fadeUpVariants}
+            initial={false}
+            transition={{
           duration: 0.6,
-          delay: 0.4,
-          ease: [0.21, 0.47, 0.32, 0.98],
-          type: "spring",
-        }}
+              delay: 0.4,
+              ease: [0.21, 0.47, 0.32, 0.98],
+              type: "spring",
+            }}
         className="relative -mt-20 z-20 max-w-6xl mx-auto px-4"
       >
         <FullScreenChatbot />
-      </motion.div>
+          </motion.div>
     </section>
   )
 }

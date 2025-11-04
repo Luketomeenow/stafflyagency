@@ -501,8 +501,8 @@ const CandidateApplicationPage = () => {
 
               {/* Communication Style Test */}
               <div className="border border-slate-200 rounded-lg p-4 bg-gradient-to-r from-indigo-50 to-purple-50">
-                <div className="flex items-center justify-between">
-                  <div>
+                  <div className="flex items-center justify-between">
+                    <div>
                     <div className="font-semibold text-slate-900">Communication Style Test</div>
                     <div className="text-sm text-slate-600">Determines your communication quadrant (10 questions).</div>
                   </div>
@@ -524,11 +524,11 @@ const CandidateApplicationPage = () => {
                       <div className="flex items-center space-x-2">
                         <CheckCircle className="w-5 h-5" />
                         <span>Completed</span>
-                      </div>
+                    </div>
                     ) : (
                       'Start Test'
                     )}
-                  </button>
+                    </button>
                 </div>
               </div>
 

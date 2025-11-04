@@ -44,6 +44,7 @@ export function BehavioralStressQuiz({ isOpen, onClose, onComplete }: Behavioral
   const audioRef = useRef<HTMLAudioElement | null>(null)
   const recordingTimerRef = useRef<NodeJS.Timeout | null>(null)
   const playbackTimerRef = useRef<NodeJS.Timeout | null>(null)
+  const recordingDurationRef = useRef<number>(0) // Track actual recording duration
 
   const currentQuestion = BEHAVIORAL_STRESS_QUESTIONS[currentQuestionIndex]
   const currentResponse = responses.find(r => r.questionId === currentQuestion.id)
@@ -105,6 +106,17 @@ export function BehavioralStressQuiz({ isOpen, onClose, onComplete }: Behavioral
         const audioBlob = new Blob(audioChunksRef.current, { type: mimeType })
         const audioUrl = URL.createObjectURL(audioBlob)
         
+        // Use the ref value which has the actual duration
+        const finalDuration = recordingDurationRef.current
+        
+        console.log('Behavioral recording stopped:', {
+          questionId: currentQuestion.id,
+          duration: finalDuration,
+          displayedTime: recordingTime,
+          minRequired: 30,
+          meetsRequirement: finalDuration >= 30
+        })
+        
         // Update current response with audio
         setResponses(prev => {
           const filtered = prev.filter(r => r.questionId !== currentQuestion.id)
@@ -112,7 +124,7 @@ export function BehavioralStressQuiz({ isOpen, onClose, onComplete }: Behavioral
             questionId: currentQuestion.id,
             selectedOption: selectedOption!,
             audioBlob,
-            duration: recordingTime,
+            duration: finalDuration,
             audioUrl
           }]
         })
@@ -124,10 +136,12 @@ export function BehavioralStressQuiz({ isOpen, onClose, onComplete }: Behavioral
       mediaRecorder.start()
       setRecordingState('recording')
       setRecordingTime(0)
+      recordingDurationRef.current = 0 // Reset duration ref
 
       recordingTimerRef.current = setInterval(() => {
         setRecordingTime(prev => {
           const newTime = prev + 1
+          recordingDurationRef.current = newTime // Update ref with actual time
           if (newTime >= 150) { // 2:30 max
             stopRecording()
             return 150
@@ -207,6 +221,7 @@ export function BehavioralStressQuiz({ isOpen, onClose, onComplete }: Behavioral
     setRecordingState('idle')
     setRecordingTime(0)
     setPlaybackTime(0)
+    recordingDurationRef.current = 0 // Reset duration ref
     
     if (recordingTimerRef.current) clearInterval(recordingTimerRef.current)
     if (playbackTimerRef.current) clearInterval(playbackTimerRef.current)

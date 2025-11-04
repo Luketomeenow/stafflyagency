@@ -58,7 +58,7 @@ const ContactPage = () => {
                   animate={{ opacity: 1, y: 0 }}
                   transition={{ duration: 0.6, ease: "easeOut" }}
                 >
-                  Get in{' '}
+                Get in{' '}
                 </motion.span>
                 <motion.span
                   className="inline-block bg-gradient-to-r from-blue-600 via-purple-600 to-pink-600 bg-clip-text text-transparent"

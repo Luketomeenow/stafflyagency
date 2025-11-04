@@ -42,6 +42,7 @@ export function RoleValidationQuiz({ isOpen, onClose, onComplete }: RoleValidati
   const audioRef = useRef<HTMLAudioElement | null>(null)
   const recordingTimerRef = useRef<NodeJS.Timeout | null>(null)
   const playbackTimerRef = useRef<NodeJS.Timeout | null>(null)
+  const recordingDurationRef = useRef<number>(0) // Track actual recording duration
 
   const currentQuestion = ROLE_VALIDATION_QUESTIONS[currentQuestionIndex]
   const currentResponse = responses.find(r => r.questionId === currentQuestion.id)
@@ -103,13 +104,24 @@ export function RoleValidationQuiz({ isOpen, onClose, onComplete }: RoleValidati
         const audioBlob = new Blob(audioChunksRef.current, { type: mimeType })
         const audioUrl = URL.createObjectURL(audioBlob)
         
-        // Save response
+        // Use the ref value which has the actual duration
+        const finalDuration = recordingDurationRef.current
+        
+        // Save response with the captured duration
         const newResponse: QuestionResponse = {
           questionId: currentQuestion.id,
           audioBlob,
-          duration: recordingTime,
+          duration: finalDuration,
           audioUrl
         }
+
+        console.log('Recording stopped:', {
+          questionId: currentQuestion.id,
+          duration: finalDuration,
+          displayedTime: recordingTime,
+          minRequired: AUDIO_CONSTRAINTS.minDuration,
+          meetsRequirement: finalDuration >= AUDIO_CONSTRAINTS.minDuration
+        })
 
         setResponses(prev => {
           const filtered = prev.filter(r => r.questionId !== currentQuestion.id)
@@ -125,11 +137,13 @@ export function RoleValidationQuiz({ isOpen, onClose, onComplete }: RoleValidati
       mediaRecorder.start()
       setRecordingState('recording')
       setRecordingTime(0)
+      recordingDurationRef.current = 0 // Reset duration ref
 
       // Start timer
       recordingTimerRef.current = setInterval(() => {
         setRecordingTime(prev => {
           const newTime = prev + 1
+          recordingDurationRef.current = newTime // Update ref with actual time
           
           // Auto-stop at max duration
           if (newTime >= AUDIO_CONSTRAINTS.maxDuration) {
@@ -212,6 +226,7 @@ export function RoleValidationQuiz({ isOpen, onClose, onComplete }: RoleValidati
     setRecordingState('idle')
     setRecordingTime(0)
     setPlaybackTime(0)
+    recordingDurationRef.current = 0 // Reset duration ref
     
     if (recordingTimerRef.current) clearInterval(recordingTimerRef.current)
     if (playbackTimerRef.current) clearInterval(playbackTimerRef.current)

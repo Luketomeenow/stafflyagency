@@ -421,7 +421,7 @@ const AdminDashboardPage: React.FC = () => {
       rejected: 'bg-red-100 text-red-800',
       active: 'bg-blue-100 text-blue-800'
     }
-    return (
+  return (
       <span className={`px-2 py-1 rounded-full text-xs font-semibold ${styles[status] || 'bg-slate-100 text-slate-800'}`}>
         {status.replace('_', ' ').toUpperCase()}
       </span>
@@ -430,25 +430,25 @@ const AdminDashboardPage: React.FC = () => {
 
   return (
     <div className="min-h-screen bg-slate-50">
-      {/* Header */}
+        {/* Header */}
       <div className="bg-white border-b border-slate-200 sticky top-0 z-10">
         <div className="max-w-7xl mx-auto px-6 py-4">
-          <div className="flex items-center justify-between">
+        <div className="flex items-center justify-between">
             <div>
-              <h1 className="text-2xl font-bold text-slate-900">Admin Dashboard</h1>
+          <h1 className="text-2xl font-bold text-slate-900">Admin Dashboard</h1>
               <p className="text-sm text-slate-500 mt-1">Manage leads and candidate applications</p>
             </div>
-            <button
-              onClick={() => {
-                localStorage.removeItem('adminAuthed')
-                navigate('/admin/login')
-              }}
-              className="px-4 py-2 text-sm bg-slate-200 hover:bg-slate-300 rounded-lg transition"
-            >
-              Logout
-            </button>
-          </div>
-          
+          <button
+            onClick={() => {
+              localStorage.removeItem('adminAuthed')
+              navigate('/admin/login')
+            }}
+            className="px-4 py-2 text-sm bg-slate-200 hover:bg-slate-300 rounded-lg transition"
+          >
+            Logout
+          </button>
+        </div>
+
           {/* Tabs */}
           <div className="flex space-x-1 mt-4 border-b border-slate-200">
             <button
@@ -682,8 +682,8 @@ const AdminDashboardPage: React.FC = () => {
         {/* LEADS TAB */}
         {!loading && activeTab === 'leads' && (
           <div className="space-y-6">
-            {/* Filters */}
-            <div className="bg-white border border-slate-200 rounded-xl p-4">
+        {/* Filters */}
+        <div className="bg-white border border-slate-200 rounded-xl p-4">
               <div className="flex items-center justify-between mb-3">
                 <div className="text-sm font-semibold text-slate-700 flex items-center space-x-2">
                   <Filter className="w-4 h-4" />
@@ -711,68 +711,68 @@ const AdminDashboardPage: React.FC = () => {
                     />
                   </div>
                 </div>
-                <div>
-                  <label className="text-xs text-slate-500 mb-1 block">Service Type</label>
-                  <select
-                    value={serviceFilter}
-                    onChange={(e) => setServiceFilter(e.target.value)}
-                    className="w-full px-3 py-2 text-sm border border-slate-300 rounded-lg focus:outline-none focus:ring-2 focus:ring-blue-500"
-                  >
-                    <option value="all">All Services</option>
-                    <option value="operator">Operators</option>
-                    <option value="website">Websites</option>
-                    <option value="web app">Web Apps</option>
-                    <option value="ai">AI / Automation</option>
-                  </select>
-                </div>
-                <div>
-                  <label className="text-xs text-slate-500 mb-1 block">Industry</label>
-                  <select
-                    value={industryFilter}
-                    onChange={(e) => setIndustryFilter(e.target.value)}
-                    className="w-full px-3 py-2 text-sm border border-slate-300 rounded-lg focus:outline-none focus:ring-2 focus:ring-blue-500"
-                  >
-                    <option value="all">All Industries</option>
-                    <option value="real estate">Real Estate</option>
-                    <option value="agency">Agency / Marketing</option>
-                    <option value="coaching">Coaching / Consulting</option>
-                    <option value="e-commerce">E-commerce</option>
-                  </select>
-                </div>
-                <div>
-                  <label className="text-xs text-slate-500 mb-1 block">Timeline</label>
-                  <select
-                    value={timelineFilter}
-                    onChange={(e) => setTimelineFilter(e.target.value)}
-                    className="w-full px-3 py-2 text-sm border border-slate-300 rounded-lg focus:outline-none focus:ring-2 focus:ring-blue-500"
-                  >
-                    <option value="all">All Timelines</option>
-                    <option value="now">Now / Immediately</option>
-                    <option value="2-4 weeks">2-4 Weeks</option>
-                    <option value="later">Later</option>
-                  </select>
-                </div>
-              </div>
+            <div>
+              <label className="text-xs text-slate-500 mb-1 block">Service Type</label>
+              <select
+                value={serviceFilter}
+                onChange={(e) => setServiceFilter(e.target.value)}
+                className="w-full px-3 py-2 text-sm border border-slate-300 rounded-lg focus:outline-none focus:ring-2 focus:ring-blue-500"
+              >
+                <option value="all">All Services</option>
+                <option value="operator">Operators</option>
+                <option value="website">Websites</option>
+                <option value="web app">Web Apps</option>
+                <option value="ai">AI / Automation</option>
+              </select>
             </div>
+            <div>
+              <label className="text-xs text-slate-500 mb-1 block">Industry</label>
+              <select
+                value={industryFilter}
+                onChange={(e) => setIndustryFilter(e.target.value)}
+                className="w-full px-3 py-2 text-sm border border-slate-300 rounded-lg focus:outline-none focus:ring-2 focus:ring-blue-500"
+              >
+                <option value="all">All Industries</option>
+                <option value="real estate">Real Estate</option>
+                <option value="agency">Agency / Marketing</option>
+                <option value="coaching">Coaching / Consulting</option>
+                <option value="e-commerce">E-commerce</option>
+              </select>
+            </div>
+            <div>
+              <label className="text-xs text-slate-500 mb-1 block">Timeline</label>
+              <select
+                value={timelineFilter}
+                onChange={(e) => setTimelineFilter(e.target.value)}
+                className="w-full px-3 py-2 text-sm border border-slate-300 rounded-lg focus:outline-none focus:ring-2 focus:ring-blue-500"
+              >
+                <option value="all">All Timelines</option>
+                <option value="now">Now / Immediately</option>
+                <option value="2-4 weeks">2-4 Weeks</option>
+                <option value="later">Later</option>
+              </select>
+            </div>
+          </div>
+        </div>
 
             {/* Leads Table */}
             <div className="bg-white border border-slate-200 rounded-xl p-6">
               <h2 className="font-semibold text-slate-900 mb-4">All Leads ({filteredLeads.length})</h2>
               <div className="overflow-x-auto">
-                <table className="w-full text-sm">
+              <table className="w-full text-sm">
                   <thead className="bg-slate-50">
-                    <tr className="text-left text-slate-600 border-b border-slate-200">
+                  <tr className="text-left text-slate-600 border-b border-slate-200">
                       <th className="py-3 px-4 font-semibold">Name</th>
                       <th className="py-3 px-4 font-semibold">Email</th>
                       <th className="py-3 px-4 font-semibold">Phone</th>
                       <th className="py-3 px-4 font-semibold">Created</th>
                       <th className="py-3 px-4 font-semibold">Actions</th>
-                    </tr>
-                  </thead>
-                  <tbody>
-                    {filteredLeads.map(l => (
-                      <tr
-                        key={l.email}
+                  </tr>
+                </thead>
+                <tbody>
+                  {filteredLeads.map(l => (
+                    <tr
+                      key={l.email}
                         className="border-t border-slate-100 hover:bg-slate-50"
                       >
                         <td className="py-3 px-4">{l.name || '-'}</td>
@@ -781,22 +781,22 @@ const AdminDashboardPage: React.FC = () => {
                         <td className="py-3 px-4">{new Date(l.created_at).toLocaleDateString()}</td>
                         <td className="py-3 px-4">
                           <button
-                            onClick={() => openLead(l)}
+                      onClick={() => openLead(l)}
                             className="flex items-center space-x-1 text-blue-600 hover:text-blue-700 font-medium"
                           >
                             <Eye className="w-4 h-4" />
                             <span>View</span>
                           </button>
                         </td>
-                      </tr>
-                    ))}
-                  </tbody>
-                </table>
-                {filteredLeads.length === 0 && (
+                    </tr>
+                  ))}
+                </tbody>
+              </table>
+              {filteredLeads.length === 0 && (
                   <div className="text-center py-12 text-slate-500">No leads found</div>
-                )}
-              </div>
+              )}
             </div>
+          </div>
           </div>
         )}
 
@@ -804,8 +804,8 @@ const AdminDashboardPage: React.FC = () => {
         {!loading && activeTab === 'candidates' && (
           <div className="space-y-6">
             {/* Filters */}
-            <div className="bg-white border border-slate-200 rounded-xl p-4">
-              <div className="flex items-center justify-between mb-3">
+          <div className="bg-white border border-slate-200 rounded-xl p-4">
+            <div className="flex items-center justify-between mb-3">
                 <div className="text-sm font-semibold text-slate-700 flex items-center space-x-2">
                   <Filter className="w-4 h-4" />
                   <span>Filters</span>
@@ -823,14 +823,14 @@ const AdminDashboardPage: React.FC = () => {
                   <label className="text-xs text-slate-500 mb-1 block">Search</label>
                   <div className="relative">
                     <Search className="w-4 h-4 absolute left-3 top-1/2 transform -translate-y-1/2 text-slate-400" />
-                    <input
-                      type="text"
+              <input
+                type="text"
                       placeholder="Search candidates..."
                       value={candidateSearch}
                       onChange={(e) => setCandidateSearch(e.target.value)}
                       className="w-full pl-10 pr-3 py-2 text-sm border border-slate-300 rounded-lg focus:outline-none focus:ring-2 focus:ring-blue-500"
-                    />
-                  </div>
+              />
+            </div>
                 </div>
                 <div>
                   <label className="text-xs text-slate-500 mb-1 block">Status</label>
@@ -853,9 +853,9 @@ const AdminDashboardPage: React.FC = () => {
             <div className="bg-white border border-slate-200 rounded-xl p-6">
               <h2 className="font-semibold text-slate-900 mb-4">All Candidates ({filteredCandidates.length})</h2>
               <div className="overflow-x-auto">
-                <table className="w-full text-sm">
+              <table className="w-full text-sm">
                   <thead className="bg-slate-50">
-                    <tr className="text-left text-slate-600 border-b border-slate-200">
+                  <tr className="text-left text-slate-600 border-b border-slate-200">
                       <th className="py-3 px-4 font-semibold">Name</th>
                       <th className="py-3 px-4 font-semibold">Email</th>
                       <th className="py-3 px-4 font-semibold">Phone</th>
@@ -863,9 +863,9 @@ const AdminDashboardPage: React.FC = () => {
                       <th className="py-3 px-4 font-semibold">Status</th>
                       <th className="py-3 px-4 font-semibold">Created</th>
                       <th className="py-3 px-4 font-semibold">Actions</th>
-                    </tr>
-                  </thead>
-                  <tbody>
+                  </tr>
+                </thead>
+                <tbody>
                     {filteredCandidates.map(c => (
                       <tr
                         key={c.id}
@@ -886,16 +886,16 @@ const AdminDashboardPage: React.FC = () => {
                             <span>View</span>
                           </button>
                         </td>
-                      </tr>
-                    ))}
-                  </tbody>
-                </table>
+                    </tr>
+                  ))}
+                </tbody>
+              </table>
                 {filteredCandidates.length === 0 && (
                   <div className="text-center py-12 text-slate-500">No candidates found</div>
-                )}
-              </div>
+              )}
             </div>
           </div>
+        </div>
         )}
 
         {loading && <div className="text-center py-12 text-slate-500">Loading…</div>}
@@ -915,68 +915,68 @@ const AdminDashboardPage: React.FC = () => {
               </div>
               <div className="p-6 overflow-y-auto flex-1">
                 <div className="grid grid-cols-1 md:grid-cols-3 gap-6">
-                  <div className="md:col-span-1 space-y-3">
+                <div className="md:col-span-1 space-y-3">
+                  <div>
+                    <div className="text-xs text-slate-500">Name</div>
+                    <div className="font-medium text-slate-900">{leadDetail.name || '-'}</div>
+                  </div>
+                  <div>
+                    <div className="text-xs text-slate-500">Email</div>
+                    <div className="font-medium text-slate-900">{leadDetail.email}</div>
+                  </div>
+                  <div>
+                    <div className="text-xs text-slate-500">Phone</div>
+                    <div className="font-medium text-slate-900">{leadDetail.phone || '-'}</div>
+                  </div>
+                  <div className="grid grid-cols-2 gap-3">
                     <div>
-                      <div className="text-xs text-slate-500">Name</div>
-                      <div className="font-medium text-slate-900">{leadDetail.name || '-'}</div>
+                      <div className="text-xs text-slate-500">Conversation</div>
+                      <div className="font-medium text-slate-900">{leadDetail.conversation_id?.slice(0,8) || '-'}</div>
                     </div>
                     <div>
-                      <div className="text-xs text-slate-500">Email</div>
-                      <div className="font-medium text-slate-900">{leadDetail.email}</div>
-                    </div>
-                    <div>
-                      <div className="text-xs text-slate-500">Phone</div>
-                      <div className="font-medium text-slate-900">{leadDetail.phone || '-'}</div>
-                    </div>
-                    <div className="grid grid-cols-2 gap-3">
-                      <div>
-                        <div className="text-xs text-slate-500">Conversation</div>
-                        <div className="font-medium text-slate-900">{leadDetail.conversation_id?.slice(0,8) || '-'}</div>
-                      </div>
-                      <div>
-                        <div className="text-xs text-slate-500">Created</div>
+                      <div className="text-xs text-slate-500">Created</div>
                         <div className="font-medium text-slate-900">{new Date(leadDetail.created_at).toLocaleDateString()}</div>
-                      </div>
                     </div>
                   </div>
-                  <div className="md:col-span-2">
-                    <div className="text-sm text-slate-700 font-medium mb-3">Business Qualification</div>
-                    <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-3 mb-4">
-                      <div className="bg-slate-50 border border-slate-200 rounded-lg p-3">
-                        <div className="text-xs text-slate-500">Service</div>
-                        <div className="font-medium text-slate-900 capitalize">{leadConversation?.service || '-'}</div>
-                      </div>
-                      <div className="bg-slate-50 border border-slate-200 rounded-lg p-3">
-                        <div className="text-xs text-slate-500">Industry</div>
-                        <div className="font-medium text-slate-900 capitalize">{leadConversation?.industry || '-'}</div>
-                      </div>
-                      <div className="bg-slate-50 border border-slate-200 rounded-lg p-3">
-                        <div className="text-xs text-slate-500">Company</div>
-                        <div className="font-medium text-slate-900">{leadConversation?.company || '-'}</div>
-                      </div>
-                      <div className="bg-slate-50 border border-slate-200 rounded-lg p-3">
-                        <div className="text-xs text-slate-500">Team Size</div>
-                        <div className="font-medium text-slate-900">{leadConversation?.team_size || '-'}</div>
-                      </div>
-                      <div className="bg-slate-50 border border-slate-200 rounded-lg p-3">
-                        <div className="text-xs text-slate-500">Revenue Range</div>
-                        <div className="font-medium text-slate-900">{leadConversation?.revenue_range || '-'}</div>
-                      </div>
-                      <div className="bg-slate-50 border border-slate-200 rounded-lg p-3">
-                        <div className="text-xs text-slate-500">Timeline</div>
-                        <div className="font-medium text-slate-900 capitalize">{leadConversation?.timeline || '-'}</div>
-                      </div>
+                </div>
+                <div className="md:col-span-2">
+                  <div className="text-sm text-slate-700 font-medium mb-3">Business Qualification</div>
+                  <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-3 mb-4">
+                    <div className="bg-slate-50 border border-slate-200 rounded-lg p-3">
+                      <div className="text-xs text-slate-500">Service</div>
+                      <div className="font-medium text-slate-900 capitalize">{leadConversation?.service || '-'}</div>
                     </div>
+                    <div className="bg-slate-50 border border-slate-200 rounded-lg p-3">
+                      <div className="text-xs text-slate-500">Industry</div>
+                      <div className="font-medium text-slate-900 capitalize">{leadConversation?.industry || '-'}</div>
+                    </div>
+                    <div className="bg-slate-50 border border-slate-200 rounded-lg p-3">
+                      <div className="text-xs text-slate-500">Company</div>
+                      <div className="font-medium text-slate-900">{leadConversation?.company || '-'}</div>
+                    </div>
+                    <div className="bg-slate-50 border border-slate-200 rounded-lg p-3">
+                      <div className="text-xs text-slate-500">Team Size</div>
+                      <div className="font-medium text-slate-900">{leadConversation?.team_size || '-'}</div>
+                    </div>
+                    <div className="bg-slate-50 border border-slate-200 rounded-lg p-3">
+                      <div className="text-xs text-slate-500">Revenue Range</div>
+                      <div className="font-medium text-slate-900">{leadConversation?.revenue_range || '-'}</div>
+                    </div>
+                    <div className="bg-slate-50 border border-slate-200 rounded-lg p-3">
+                      <div className="text-xs text-slate-500">Timeline</div>
+                      <div className="font-medium text-slate-900 capitalize">{leadConversation?.timeline || '-'}</div>
+                    </div>
+                  </div>
 
                     <div className="text-sm text-slate-700 font-medium mb-2">Recent Messages</div>
-                    <div className="h-60 overflow-y-auto border border-slate-200 rounded-lg">
-                      <div className="divide-y divide-slate-100">
-                        {(leadMessages || []).slice(-50).map(m => (
-                          <div key={m.id} className="px-3 py-2 text-sm">
-                            <span className={`inline-block px-2 py-0.5 rounded text-xs mr-2 ${m.role === 'user' ? 'bg-blue-100 text-blue-700' : 'bg-slate-100 text-slate-700'}`}>{m.role}</span>
-                            <span className="text-slate-800 whitespace-pre-wrap">{m.content}</span>
-                          </div>
-                        ))}
+                  <div className="h-60 overflow-y-auto border border-slate-200 rounded-lg">
+                    <div className="divide-y divide-slate-100">
+                      {(leadMessages || []).slice(-50).map(m => (
+                        <div key={m.id} className="px-3 py-2 text-sm">
+                          <span className={`inline-block px-2 py-0.5 rounded text-xs mr-2 ${m.role === 'user' ? 'bg-blue-100 text-blue-700' : 'bg-slate-100 text-slate-700'}`}>{m.role}</span>
+                          <span className="text-slate-800 whitespace-pre-wrap">{m.content}</span>
+                        </div>
+                      ))}
                       </div>
                     </div>
                   </div>
