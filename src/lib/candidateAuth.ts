@@ -25,6 +25,9 @@ export async function signupCandidate(
     throw new Error('Supabase client not configured')
   }
 
+  // Get the current window location for redirect URL
+  const redirectUrl = `${window.location.origin}/candidate/login`
+
   const { data: authData, error } = await supabase.auth.signUp({
     email,
     password,
@@ -34,6 +37,7 @@ export async function signupCandidate(
         full_name: fullName,
         phone: phone || '',
       },
+      emailRedirectTo: redirectUrl,
     },
   })
 

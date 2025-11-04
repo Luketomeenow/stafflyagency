@@ -145,6 +145,8 @@ const CandidateApplicationPage = () => {
     setError('')
     setIsSubmitting(true)
 
+    console.log('🚀 Starting application submission...')
+
     // Validate passwords match
     if (formData.password !== formData.confirmPassword) {
       setError('Passwords do not match')
@@ -160,6 +162,7 @@ const CandidateApplicationPage = () => {
     }
 
     try {
+      console.log('📝 Creating candidate account...')
       // Create account with email and password
       const result = await signupCandidate(
         formData.email,
@@ -169,18 +172,25 @@ const CandidateApplicationPage = () => {
       )
 
       if (result.error) {
+        console.error('❌ Signup error:', result.error)
         setError(result.error)
         setIsSubmitting(false)
         return
       }
 
+      console.log('✅ Account created successfully')
+
       // Get the newly created user
+      console.log('🔍 Getting user session...')
       const session = await getCandidateSession()
       if (!session?.user) {
         throw new Error('Failed to get user session')
       }
 
+      console.log('✅ User session retrieved:', session.user.id)
+
       // Get candidate profile
+      console.log('🔍 Getting candidate profile...')
       const { data: candidateData, error: candidateError } = await supabase
         ?.from('candidates')
         .select('id')
@@ -188,8 +198,11 @@ const CandidateApplicationPage = () => {
         .single()
 
       if (candidateError || !candidateData) {
+        console.error('❌ Candidate profile error:', candidateError)
         throw new Error('Failed to get candidate profile')
       }
+
+      console.log('✅ Candidate profile found:', candidateData.id)
 
       // Upload files to storage if they exist
       let resumeUrl = null
@@ -236,6 +249,7 @@ const CandidateApplicationPage = () => {
       }
 
       // Update candidate profile with all application data
+      console.log('💾 Updating candidate profile...')
       const { error: updateError } = await supabase
         ?.from('candidates')
         .update({
@@ -255,15 +269,22 @@ const CandidateApplicationPage = () => {
         .eq('id', candidateData.id)
 
       if (updateError) {
-        console.error('Error updating candidate profile:', updateError)
+        console.error('❌ Error updating candidate profile:', updateError)
+      } else {
+        console.log('✅ Profile updated successfully')
       }
 
       // Log out the user so they need to verify email
+      console.log('🚪 Logging out user...')
       await supabase?.auth.signOut()
+      console.log('✅ User logged out')
       
       // Redirect to login page with success message
+      console.log('🎯 Redirecting to login page...')
       navigate('/candidate/login?registered=true')
+      console.log('✅ Application submission complete!')
     } catch (err: any) {
+      console.error('❌ Application submission error:', err)
       setError(err.message || 'An error occurred during signup')
       setIsSubmitting(false)
     }

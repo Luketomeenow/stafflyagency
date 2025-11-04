@@ -129,6 +129,7 @@ const AdminDashboardPage: React.FC = () => {
   const [industryFilter, setIndustryFilter] = useState<string>('all')
   const [timelineFilter, setTimelineFilter] = useState<string>('all')
   const [candidateStatusFilter, setCandidateStatusFilter] = useState<string>('all')
+  const [isRefreshing, setIsRefreshing] = useState(false)
 
   useEffect(() => {
     const authed = localStorage.getItem('adminAuthed') === 'true'
@@ -137,68 +138,91 @@ const AdminDashboardPage: React.FC = () => {
     }
   }, [navigate])
 
-  useEffect(() => {
-    const load = async () => {
-      try {
-        setLoadError(null)
-        if (!supabase) {
-          console.log('Supabase client not initialized')
-          setLoadError('Database connection not available')
-          return
-        }
-        
-        // Load leads data
-        const { data: convs, error: convsError } = await supabase.from('conversations').select('*').order('created_at', { ascending: false })
-        if (convsError) {
-          console.error('Error loading conversations:', convsError)
-          setLoadError(`Error loading conversations: ${convsError.message}`)
-        }
-        
-        const { data: leadsData, error: leadsError } = await supabase.from('leads').select('*').order('created_at', { ascending: false })
-        if (leadsError) {
-          console.error('Error loading leads:', leadsError)
-          setLoadError(`Error loading leads: ${leadsError.message}`)
-        }
-        
-        const { count, error: countError } = await supabase.from('conversation_messages').select('*', { count: 'exact', head: true })
-        if (countError) {
-          console.error('Error loading message count:', countError)
-        }
-        
-        // Load candidates data
-        const { data: candidatesData, error: candidatesError } = await supabase.from('candidates').select('*').order('created_at', { ascending: false })
-        if (candidatesError) {
-          console.error('Error loading candidates:', candidatesError)
-          setLoadError(`Error loading candidates: ${candidatesError.message}`)
-        }
-        
-        const { data: quizData, error: quizError } = await supabase.from('quiz_results').select('*').order('created_at', { ascending: false })
-        if (quizError) {
-          console.error('Error loading quiz results:', quizError)
-        }
-        
-        console.log('Loaded data:', {
-          conversations: convs?.length || 0,
-          leads: leadsData?.length || 0,
-          messages: count || 0,
-          candidates: candidatesData?.length || 0,
-          quizzes: quizData?.length || 0
-        })
-        
-        setConversations(convs || [])
-        setLeads(leadsData || [])
-        setMessagesCount(count || 0)
-        setCandidates(candidatesData || [])
-        setQuizResults(quizData || [])
-      } catch (err) {
-        console.error('Error loading admin data:', err)
-        setLoadError(err instanceof Error ? err.message : 'Unknown error loading data')
-      } finally {
-        setLoading(false)
+  // Function to load all data
+  const loadData = async (showLoadingState = true) => {
+    try {
+      if (showLoadingState) {
+        setIsRefreshing(true)
       }
+      setLoadError(null)
+      if (!supabase) {
+        console.log('Supabase client not initialized')
+        setLoadError('Database connection not available')
+        return
+      }
+      
+      // Load leads data
+      const { data: convs, error: convsError } = await supabase.from('conversations').select('*').order('created_at', { ascending: false })
+      if (convsError) {
+        console.error('Error loading conversations:', convsError)
+        setLoadError(`Error loading conversations: ${convsError.message}`)
+      }
+      
+      const { data: leadsData, error: leadsError } = await supabase.from('leads').select('*').order('created_at', { ascending: false })
+      if (leadsError) {
+        console.error('Error loading leads:', leadsError)
+        setLoadError(`Error loading leads: ${leadsError.message}`)
+      }
+      
+      const { count, error: countError } = await supabase.from('conversation_messages').select('*', { count: 'exact', head: true })
+      if (countError) {
+        console.error('Error loading message count:', countError)
+      }
+      
+      // Load candidates data
+      const { data: candidatesData, error: candidatesError } = await supabase.from('candidates').select('*').order('created_at', { ascending: false })
+      if (candidatesError) {
+        console.error('Error loading candidates:', candidatesError)
+        setLoadError(`Error loading candidates: ${candidatesError.message}`)
+      }
+      
+      const { data: quizData, error: quizError } = await supabase.from('quiz_results').select('*').order('created_at', { ascending: false })
+      if (quizError) {
+        console.error('Error loading quiz results:', quizError)
+      }
+      
+      console.log('Loaded data:', {
+        conversations: convs?.length || 0,
+        leads: leadsData?.length || 0,
+        messages: count || 0,
+        candidates: candidatesData?.length || 0,
+        quizzes: quizData?.length || 0
+      })
+      
+      setConversations(convs || [])
+      setLeads(leadsData || [])
+      setMessagesCount(count || 0)
+      setCandidates(candidatesData || [])
+      setQuizResults(quizData || [])
+    } catch (err) {
+      console.error('Error loading admin data:', err)
+      setLoadError(err instanceof Error ? err.message : 'Unknown error loading data')
+    } finally {
+      if (showLoadingState) {
+        setIsRefreshing(false)
+      }
+      setLoading(false)
     }
-    load()
+  }
+
+  // Initial load
+  useEffect(() => {
+    loadData()
   }, [])
+
+  // Auto-refresh every 30 seconds
+  useEffect(() => {
+    const interval = setInterval(() => {
+      loadData(false) // Silent refresh without loading indicator
+    }, 30000) // 30 seconds
+
+    return () => clearInterval(interval)
+  }, [])
+
+  // Manual refresh handler
+  const handleRefresh = () => {
+    loadData(true)
+  }
 
   // Analytics calculations
   const analytics = useMemo(() => {
@@ -240,6 +264,11 @@ const AdminDashboardPage: React.FC = () => {
     const sevenDaysAgo = new Date()
     sevenDaysAgo.setDate(sevenDaysAgo.getDate() - 7)
     const recentCandidates = candidates.filter(c => new Date(c.created_at) > sevenDaysAgo).length
+    
+    // New candidates in the last hour
+    const oneHourAgo = new Date()
+    oneHourAgo.setHours(oneHourAgo.getHours() - 1)
+    const newCandidatesLastHour = candidates.filter(c => new Date(c.created_at) > oneHourAgo).length
     const recentLeads = leads.filter(l => new Date(l.created_at) > sevenDaysAgo).length
     
     return {
@@ -256,6 +285,7 @@ const AdminDashboardPage: React.FC = () => {
       approvedCandidates,
       rejectedCandidates,
       recentCandidates,
+      newCandidatesLastHour,
       
       // Quizzes
       temperamentCompleted,
@@ -436,8 +466,26 @@ const AdminDashboardPage: React.FC = () => {
         <div className="flex items-center justify-between">
             <div>
           <h1 className="text-2xl font-bold text-slate-900">Admin Dashboard</h1>
-              <p className="text-sm text-slate-500 mt-1">Manage leads and candidate applications</p>
+              <p className="text-sm text-slate-500 mt-1">Manage leads and candidate applications • Auto-refreshes every 30s</p>
             </div>
+            <div className="flex items-center space-x-3">
+              <button
+                onClick={handleRefresh}
+                disabled={isRefreshing}
+                className={`px-4 py-2 text-sm bg-blue-600 text-white hover:bg-blue-700 rounded-lg transition flex items-center space-x-2 ${
+                  isRefreshing ? 'opacity-50 cursor-not-allowed' : ''
+                }`}
+              >
+                <svg 
+                  className={`w-4 h-4 ${isRefreshing ? 'animate-spin' : ''}`} 
+                  fill="none" 
+                  stroke="currentColor" 
+                  viewBox="0 0 24 24"
+                >
+                  <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M4 4v5h.582m15.356 2A8.001 8.001 0 004.582 9m0 0H9m11 11v-5h-.581m0 0a8.003 8.003 0 01-15.357-2m15.357 2H15" />
+                </svg>
+                <span>{isRefreshing ? 'Refreshing...' : 'Refresh'}</span>
+              </button>
           <button
             onClick={() => {
               localStorage.removeItem('adminAuthed')
@@ -447,6 +495,7 @@ const AdminDashboardPage: React.FC = () => {
           >
             Logout
           </button>
+            </div>
         </div>
 
           {/* Tabs */}
@@ -479,7 +528,7 @@ const AdminDashboardPage: React.FC = () => {
             </button>
             <button
               onClick={() => setActiveTab('candidates')}
-              className={`px-4 py-2 text-sm font-medium transition-colors ${
+              className={`px-4 py-2 text-sm font-medium transition-colors relative ${
                 activeTab === 'candidates'
                   ? 'text-blue-600 border-b-2 border-blue-600'
                   : 'text-slate-600 hover:text-slate-900'
@@ -488,6 +537,11 @@ const AdminDashboardPage: React.FC = () => {
               <div className="flex items-center space-x-2">
                 <Users className="w-4 h-4" />
                 <span>Candidates ({analytics.totalCandidates})</span>
+                {analytics.newCandidatesLastHour > 0 && (
+                  <span className="ml-2 px-2 py-0.5 text-xs font-bold bg-green-500 text-white rounded-full animate-pulse">
+                    +{analytics.newCandidatesLastHour} New
+                  </span>
+                )}
               </div>
             </button>
           </div>
