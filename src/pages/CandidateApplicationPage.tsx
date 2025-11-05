@@ -189,20 +189,39 @@ const CandidateApplicationPage = () => {
 
       console.log('✅ User session retrieved:', session.user.id)
 
-      // Get candidate profile
-      console.log('🔍 Getting candidate profile...')
-      const { data: candidateData, error: candidateError } = await supabase
-        ?.from('candidates')
-        .select('id')
-        .eq('user_id', session.user.id)
-        .single()
-
-      if (candidateError || !candidateData) {
-        console.error('❌ Candidate profile error:', candidateError)
-        throw new Error('Failed to get candidate profile')
+      // Wait for trigger to create candidate profile (with retry logic)
+      console.log('🔍 Waiting for candidate profile to be created...')
+      let candidateData = null
+      let retries = 0
+      const maxRetries = 10
+      
+      while (!candidateData && retries < maxRetries) {
+        await new Promise(resolve => setTimeout(resolve, 500)) // Wait 500ms
+        
+        const { data, error } = await supabase
+          ?.from('candidates')
+          .select('id')
+          .eq('user_id', session.user.id)
+          .single()
+        
+        if (data) {
+          candidateData = data
+          console.log('✅ Candidate profile found:', candidateData.id)
+        } else if (error && error.code !== 'PGRST116') { // PGRST116 = not found
+          console.error('❌ Candidate profile error:', error)
+          throw new Error(`Failed to get candidate profile: ${error.message}`)
+        }
+        
+        retries++
+        if (!candidateData) {
+          console.log(`⏳ Retry ${retries}/${maxRetries}...`)
+        }
       }
 
-      console.log('✅ Candidate profile found:', candidateData.id)
+      if (!candidateData) {
+        console.error('❌ Candidate profile not created after', maxRetries, 'retries')
+        throw new Error('Failed to create candidate profile. Please contact support.')
+      }
 
       // Upload files to storage if they exist
       let resumeUrl = null
@@ -210,68 +229,115 @@ const CandidateApplicationPage = () => {
       let workspacePhotoUrl = null
 
       if (formData.resume) {
+        console.log('📤 Uploading resume...')
         const resumePath = `${candidateData.id}/resume_${Date.now()}.pdf`
         const { error: resumeError } = await supabase
           ?.storage
           .from('candidate-files')
           .upload(resumePath, formData.resume)
         
-        if (!resumeError) {
+        if (resumeError) {
+          console.error('❌ Resume upload error:', resumeError)
+        } else {
           const { data: urlData } = supabase?.storage.from('candidate-files').getPublicUrl(resumePath)
           resumeUrl = urlData?.publicUrl
+          console.log('✅ Resume uploaded:', resumeUrl)
         }
       }
 
       if (formData.internetSpeed) {
+        console.log('📤 Uploading internet speed test...')
         const speedPath = `${candidateData.id}/internet_speed_${Date.now()}.png`
         const { error: speedError } = await supabase
           ?.storage
           .from('candidate-files')
           .upload(speedPath, formData.internetSpeed)
         
-        if (!speedError) {
+        if (speedError) {
+          console.error('❌ Speed test upload error:', speedError)
+        } else {
           const { data: urlData } = supabase?.storage.from('candidate-files').getPublicUrl(speedPath)
           internetSpeedUrl = urlData?.publicUrl
+          console.log('✅ Speed test uploaded:', internetSpeedUrl)
         }
       }
 
       if (formData.workspacePhoto) {
+        console.log('📤 Uploading workspace photo...')
         const workspacePath = `${candidateData.id}/workspace_${Date.now()}.png`
         const { error: workspaceError } = await supabase
           ?.storage
           .from('candidate-files')
           .upload(workspacePath, formData.workspacePhoto)
         
-        if (!workspaceError) {
+        if (workspaceError) {
+          console.error('❌ Workspace photo upload error:', workspaceError)
+        } else {
           const { data: urlData } = supabase?.storage.from('candidate-files').getPublicUrl(workspacePath)
           workspacePhotoUrl = urlData?.publicUrl
+          console.log('✅ Workspace photo uploaded:', workspacePhotoUrl)
         }
       }
 
-      // Update candidate profile with all application data
-      console.log('💾 Updating candidate profile...')
-      const { error: updateError } = await supabase
-        ?.from('candidates')
-        .update({
-          name: `${formData.firstName} ${formData.lastName}`,
-          email: formData.email,
-          phone: formData.phone,
-          // Store additional data in a metadata field or separate fields
-          industries: formData.industryExperience,
-          roles: formData.desiredRoles,
-          skills: [], // Will be populated from tech stack
-          tools: Object.keys(formData.techStack),
-          portfolio_links: formData.portfolioLinks ? { links: formData.portfolioLinks.split('\n') } : null,
-          // Store application metadata
-          onboarding_completed: true,
-          status: 'pending_approval', // Awaiting admin approval
+      // Prepare comprehensive profile data
+      const profileUpdateData: any = {
+        name: `${formData.firstName} ${formData.lastName}`,
+        email: formData.email,
+        phone: formData.phone,
+        // Store additional personal data
+        industries: formData.industryExperience,
+        roles: formData.desiredRoles,
+        tools: Object.keys(formData.techStack),
+        // Store application metadata
+        onboarding_completed: true,
+        status: 'pending_approval', // Awaiting admin approval
+        updated_at: new Date().toISOString(),
+      }
+
+      // Add portfolio links if provided
+      if (formData.portfolioLinks && formData.portfolioLinks.trim()) {
+        profileUpdateData.portfolio_links = {
+          links: formData.portfolioLinks.split('\n').filter(link => link.trim())
+        }
+      }
+
+      // Add file URLs if uploaded
+      if (resumeUrl || internetSpeedUrl || workspacePhotoUrl) {
+        profileUpdateData.internal_notes = JSON.stringify({
+          resume_url: resumeUrl,
+          internet_speed_url: internetSpeedUrl,
+          workspace_photo_url: workspacePhotoUrl,
+          application_data: {
+            city: formData.city,
+            whatsapp: formData.whatsapp,
+            age_range: formData.ageRange,
+            gender: formData.gender,
+            desired_industry: formData.desiredIndustry,
+            tech_stack: formData.techStack,
+            quiz_completed: {
+              temperament: formData.temperamentCompleted,
+              role_validation: formData.roleValidationCompleted,
+              communication: formData.communicationCompleted,
+              behavioral: formData.behavioralCompleted,
+            }
+          }
         })
+      }
+
+      // Update candidate profile with all application data
+      console.log('💾 Updating candidate profile with data:', profileUpdateData)
+      const { data: updatedProfile, error: updateError } = await supabase
+        ?.from('candidates')
+        .update(profileUpdateData)
         .eq('id', candidateData.id)
+        .select()
+        .single()
 
       if (updateError) {
         console.error('❌ Error updating candidate profile:', updateError)
+        throw new Error(`Failed to save application data: ${updateError.message}`)
       } else {
-        console.log('✅ Profile updated successfully')
+        console.log('✅ Profile updated successfully:', updatedProfile)
       }
 
       // Log out the user so they need to verify email
