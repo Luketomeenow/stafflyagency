@@ -63,24 +63,40 @@ export default function CandidateLoginPage() {
           <motion.div
             initial={{ opacity: 0, y: -10 }}
             animate={{ opacity: 1, y: 0 }}
-            className="mb-6 bg-green-50 border border-green-200 rounded-xl p-4"
+            className="mb-6 bg-blue-50 border-2 border-blue-300 rounded-xl p-6 shadow-lg"
           >
             <div className="flex items-start space-x-3">
-              <CheckCircle className="w-5 h-5 text-green-600 flex-shrink-0 mt-0.5" />
-              <div>
-                <h3 className="font-semibold text-green-900 mb-1">Application Submitted Successfully!</h3>
-                <p className="text-sm text-green-800 mb-2">
-                  Thank you for applying to Staffly. Your application is under review.
+              <CheckCircle className="w-6 h-6 text-blue-600 flex-shrink-0 mt-0.5" />
+              <div className="flex-1">
+                <h3 className="text-lg font-bold text-blue-900 mb-2">🎉 Application Submitted Successfully!</h3>
+                <p className="text-sm text-blue-800 mb-3">
+                  Thank you for applying to <strong>StafflyhQ</strong>! Your application has been received.
                 </p>
-                <p className="text-sm text-green-700">
-                  <strong>Next Steps:</strong>
+                
+                <div className="bg-yellow-50 border border-yellow-300 rounded-lg p-3 mb-3">
+                  <p className="text-sm font-semibold text-yellow-900 mb-1">
+                    ⚠️ Important: Verify Your Email First
+                  </p>
+                  <p className="text-sm text-yellow-800">
+                    Before you can log in, you must verify your email address. Check your inbox for a verification link from StafflyhQ.
+                  </p>
+                </div>
+                
+                <p className="text-sm text-blue-700 font-semibold mb-2">
+                  📋 Next Steps:
                 </p>
-                <ul className="text-sm text-green-700 list-disc list-inside mt-1 space-y-1">
-                  <li>Check your email for a verification link</li>
-                  <li>Our team will review your application within 2-3 business days</li>
-                  <li>You'll receive an email once your account is approved</li>
-                  <li>After approval, you can log in to access your dashboard</li>
-                </ul>
+                <ol className="text-sm text-blue-700 list-decimal list-inside space-y-1.5 ml-2">
+                  <li><strong>Check your email inbox</strong> (and spam folder)</li>
+                  <li><strong>Click the verification link</strong> in the email from StafflyhQ</li>
+                  <li><strong>Return to this page</strong> and log in with your credentials</li>
+                  <li><strong>Access your dashboard</strong> to view your application status</li>
+                </ol>
+                
+                <div className="mt-3 pt-3 border-t border-blue-200">
+                  <p className="text-xs text-blue-600">
+                    💡 <strong>Tip:</strong> Our team will review your application within 2-3 business days. You'll receive an email notification once approved.
+                  </p>
+                </div>
               </div>
             </div>
           </motion.div>

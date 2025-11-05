@@ -347,12 +347,19 @@ const CandidateApplicationPage = () => {
       
       // Redirect to login page with success message
       console.log('🎯 Redirecting to login page...')
-      navigate('/candidate/login?registered=true')
+      
+      // Use window.location for guaranteed redirect
+      setTimeout(() => {
+        window.location.href = '/candidate/login?registered=true'
+      }, 500)
+      
       console.log('✅ Application submission complete!')
     } catch (err: any) {
       console.error('❌ Application submission error:', err)
       setError(err.message || 'An error occurred during signup')
       setIsSubmitting(false)
+    } finally {
+      // Don't reset isSubmitting here - let the redirect happen
     }
   }
 
