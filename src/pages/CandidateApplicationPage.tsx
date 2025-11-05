@@ -86,6 +86,7 @@ const CandidateApplicationPage = () => {
   const [submitted, setSubmitted] = useState(false)
   const [error, setError] = useState('')
   const [isSubmitting, setIsSubmitting] = useState(false)
+  const [showSuccessModal, setShowSuccessModal] = useState(false)
   const [isTemperamentQuizOpen, setIsTemperamentQuizOpen] = useState(false)
   const [isRoleValidationQuizOpen, setIsRoleValidationQuizOpen] = useState(false)
   const [isCommunicationStyleQuizOpen, setIsCommunicationStyleQuizOpen] = useState(false)
@@ -345,21 +346,15 @@ const CandidateApplicationPage = () => {
       await supabase?.auth.signOut()
       console.log('✅ User logged out')
       
-      // Redirect to login page with success message
-      console.log('🎯 Redirecting to login page...')
-      
-      // Use window.location for guaranteed redirect
-      setTimeout(() => {
-        window.location.href = '/candidate/login?registered=true'
-      }, 500)
-      
-      console.log('✅ Application submission complete!')
+      // Show success modal instead of immediate redirect
+      console.log('✅ Application submission complete! Showing success modal...')
+      setIsSubmitting(false)
+      setShowSuccessModal(true)
+      setSubmitted(true)
     } catch (err: any) {
       console.error('❌ Application submission error:', err)
       setError(err.message || 'An error occurred during signup')
       setIsSubmitting(false)
-    } finally {
-      // Don't reset isSubmitting here - let the redirect happen
     }
   }
 
@@ -829,6 +824,107 @@ const CandidateApplicationPage = () => {
           setIsBehavioralStressQuizOpen(false)
         }}
       />
+
+      {/* Success Modal */}
+      {showSuccessModal && (
+        <div className="fixed inset-0 z-50 flex items-center justify-center p-4 bg-black/50 backdrop-blur-sm">
+          <motion.div
+            initial={{ opacity: 0, scale: 0.9, y: 20 }}
+            animate={{ opacity: 1, scale: 1, y: 0 }}
+            className="bg-white rounded-2xl shadow-2xl max-w-md w-full p-8 relative"
+          >
+            {/* Success Icon */}
+            <div className="flex justify-center mb-6">
+              <div className="w-20 h-20 rounded-full bg-gradient-to-br from-green-400 to-emerald-600 flex items-center justify-center">
+                <CheckCircle className="w-12 h-12 text-white" />
+              </div>
+            </div>
+
+            {/* Title */}
+            <h2 className="text-3xl font-bold text-center text-slate-900 mb-3">
+              🎉 Application Submitted!
+            </h2>
+
+            {/* Message */}
+            <p className="text-center text-slate-600 mb-6 leading-relaxed">
+              Thank you for applying to <strong className="text-blue-600">StafflyhQ</strong>! 
+              Your application has been successfully submitted.
+            </p>
+
+            {/* Email Verification Box */}
+            <div className="bg-blue-50 border-2 border-blue-200 rounded-xl p-4 mb-6">
+              <div className="flex items-start space-x-3">
+                <div className="flex-shrink-0 mt-0.5">
+                  <svg className="w-5 h-5 text-blue-600" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                    <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M3 8l7.89 5.26a2 2 0 002.22 0L21 8M5 19h14a2 2 0 002-2V7a2 2 0 00-2-2H5a2 2 0 00-2 2v10a2 2 0 002 2z" />
+                  </svg>
+                </div>
+                <div className="flex-1">
+                  <p className="text-sm font-semibold text-blue-900 mb-1">
+                    📧 Check Your Email
+                  </p>
+                  <p className="text-sm text-blue-800">
+                    We've sent a verification link to <strong>{formData.email}</strong>. 
+                    Click the link to verify your email address.
+                  </p>
+                </div>
+              </div>
+            </div>
+
+            {/* Next Steps */}
+            <div className="bg-slate-50 rounded-xl p-4 mb-6">
+              <p className="text-sm font-semibold text-slate-900 mb-3">📋 Next Steps:</p>
+              <ol className="text-sm text-slate-700 space-y-2">
+                <li className="flex items-start">
+                  <span className="font-bold text-blue-600 mr-2">1.</span>
+                  <span>Check your email inbox (and spam folder)</span>
+                </li>
+                <li className="flex items-start">
+                  <span className="font-bold text-blue-600 mr-2">2.</span>
+                  <span>Click the verification link from StafflyhQ</span>
+                </li>
+                <li className="flex items-start">
+                  <span className="font-bold text-blue-600 mr-2">3.</span>
+                  <span>Log in with your credentials</span>
+                </li>
+                <li className="flex items-start">
+                  <span className="font-bold text-blue-600 mr-2">4.</span>
+                  <span>Access your candidate dashboard</span>
+                </li>
+              </ol>
+            </div>
+
+            {/* Review Timeline */}
+            <div className="bg-yellow-50 border border-yellow-200 rounded-lg p-3 mb-6">
+              <p className="text-xs text-yellow-900">
+                💡 <strong>Review Timeline:</strong> Our team will review your application within 2-3 business days. 
+                You'll receive an email notification once your account is approved.
+              </p>
+            </div>
+
+            {/* CTA Button */}
+            <button
+              onClick={() => {
+                window.location.href = '/candidate/login'
+              }}
+              className="w-full py-3 px-6 bg-gradient-to-r from-blue-600 to-purple-600 text-white font-bold rounded-lg hover:shadow-lg transition-all duration-200 flex items-center justify-center space-x-2"
+            >
+              <span>Go to Login Page</span>
+              <svg className="w-5 h-5" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M13 7l5 5m0 0l-5 5m5-5H6" />
+              </svg>
+            </button>
+
+            {/* Help Text */}
+            <p className="text-center text-xs text-slate-500 mt-4">
+              Need help? Contact us at{' '}
+              <a href="mailto:support@stafflyhq.ai" className="text-blue-600 hover:underline">
+                support@stafflyhq.ai
+              </a>
+            </p>
+          </motion.div>
+        </div>
+      )}
 
       <style>{`
         .input-field {
