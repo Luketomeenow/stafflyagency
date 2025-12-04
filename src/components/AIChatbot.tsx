@@ -104,20 +104,42 @@ const AIChatbot: React.FC = () => {
     setIsTyping(true);
 
     try {
-      const apiKey = import.meta.env.VITE_OPENAI_API_KEY;
-      if (!apiKey || apiKey === 'your_openai_api_key_here') {
-        throw new Error('OpenAI API key not configured. Please check your .env file.');
+      // Use Supabase Edge Function to avoid CORS issues
+      const supabaseUrl = import.meta.env.VITE_SUPABASE_URL as string
+      const supabaseAnonKey = import.meta.env.VITE_SUPABASE_ANON_KEY as string
+      
+      if (!supabaseUrl || !supabaseAnonKey) {
+        throw new Error('Supabase configuration missing. Please check your .env file.');
       }
 
-      const result = await sendChatMessage({
-        message: userMessage.text,
-        apiKey: apiKey,
-        model: import.meta.env.VITE_OPENAI_MODEL || 'gpt-3.5-turbo'
+      // Call Supabase Edge Function
+      const functionUrl = supabaseUrl.replace('.supabase.co', '.functions.supabase.co') + '/chat'
+      
+      const response = await fetch(functionUrl, {
+        method: 'POST',
+        headers: {
+          'Content-Type': 'application/json',
+          'Authorization': `Bearer ${supabaseAnonKey}`
+        },
+        body: JSON.stringify({
+          message: userMessage.text,
+          conversationHistory: messages.map(m => ({
+            role: m.sender === 'user' ? 'user' : 'assistant',
+            content: m.text
+          }))
+        })
       });
+
+      if (!response.ok) {
+        const errorData = await response.json().catch(() => ({}))
+        throw new Error(errorData.error || 'Failed to get response from chatbot');
+      }
+
+      const data = await response.json();
       
       // Simulate typing delay for better UX
       setTimeout(() => {
-        const cleanText = stripEmojis(result.response);
+        const cleanText = stripEmojis(data.response || 'I apologize, but I couldn\'t generate a response.');
         const botMessage: Message = {
           id: (Date.now() + 1).toString(),
           text: cleanText,

@@ -415,33 +415,41 @@ const FullScreenChatbot: React.FC<FullScreenChatbotProps> = ({ autoOpen = false 
         }))
       ];
 
-      // Use direct OpenAI API in production, proxy in development
-      const apiUrl = import.meta.env.DEV 
-        ? '/api/openai/v1/chat/completions'
-        : 'https://api.openai.com/v1/chat/completions';
-        
-      const response = await fetch(apiUrl, {
+      // Use Supabase Edge Function to avoid CORS issues
+      const supabaseUrl = import.meta.env.VITE_SUPABASE_URL as string
+      const supabaseAnonKey = import.meta.env.VITE_SUPABASE_ANON_KEY as string
+      
+      if (!supabaseUrl || !supabaseAnonKey) {
+        throw new Error('Supabase configuration missing')
+      }
+
+      // Call Supabase Edge Function
+      const functionUrl = supabaseUrl.replace('.supabase.co', '.functions.supabase.co') + '/chat'
+      
+      const response = await fetch(functionUrl, {
         method: 'POST',
         headers: {
           'Content-Type': 'application/json',
-          'Authorization': `Bearer ${apiKey}`
+          'Authorization': `Bearer ${supabaseAnonKey}`
         },
         body: JSON.stringify({
-          model: model,
-          messages: openAiMessages,
-          max_tokens: 300,
-          temperature: 0.7
+          message: userMessage.text,
+          conversationHistory: [...messages].map(m => ({
+            role: m.sender === 'user' ? 'user' : 'assistant',
+            content: m.text
+          }))
         })
       });
 
       if (!response.ok) {
-        throw new Error(`API request failed: ${response.status}`);
+        const errorData = await response.json().catch(() => ({}))
+        throw new Error(errorData.error || `API request failed: ${response.status}`);
       }
 
       const data = await response.json();
       const botMessage: Message = {
         id: (Date.now() + 1).toString(),
-        text: stripEmojis(data.choices[0].message.content),
+        text: stripEmojis(data.response || 'I apologize, but I couldn\'t generate a response.'),
         sender: 'bot',
         timestamp: new Date()
       };
