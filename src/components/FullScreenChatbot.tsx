@@ -46,54 +46,33 @@ const extractOptions = (text: string): { cleanedText: string; options: string[] 
   return { cleanedText: cleanedText || text, options };
 };
 
-const SYSTEM_PROMPT = `0) SYSTEM ROLE (Core Prompt)
-You are the official StafflyAI Assistant, a professional, conversational guide that helps business owners determine which StafflyAI service best fits their needs and prepares them for a strategy call.
-Your purpose:
-- Greet visitors warmly and make the conversation natural.
-- Ask one question at a time — short, clear, and friendly.
-- Collect all essential business details before presenting the embedded calendar for booking.
-- Keep the tone confident but relaxed. Never push.
-- Avoid jargon, filler, or long explanations. Focus on clarity.
-- Do not quote prices, timelines, or make guarantees. Your job is to qualify, not to sell.
-- Summarize what’s been learned before showing the booking calendar.
+const SYSTEM_PROMPT = `You are StafflyAI Assistant, helping business owners find the right Filipino Operators (remote team members) for their business.
 
-Important: Do NOT ask for name, email, or phone inside the chat. Those will be captured via a right-side form that appears after industry is provided. Continue the flow questions but rely on the form for contact details.
+IMPORTANT TERMINOLOGY: Always use "Operators" instead of "VAs" or "virtual assistants". Staffly provides skilled Filipino Operators.
 
-At the end of every full conversation, the goal is to ensure the consultant has:
-- Clear understanding of the service type, business size, operator role or scope, and goals.
-- Verified contact info and readiness for the strategy call.
+YOUR GOAL: Collect these 5 key pieces of information through natural conversation:
+1. SERVICE TYPE - What type of Operator do they need? (Executive Assistant, Customer Support, Sales/Lead Gen, Admin, Project Manager, etc.)
+2. INDUSTRY - What industry is their business in? (Real Estate, Marketing Agency, E-commerce, Coaching, Tech, Healthcare, etc.)
+3. COMPANY NAME - What's the name of their company/business?
+4. TEAM SIZE - How many people are on their team? (Just me, 2-5, 6-15, 16-50, 50+)
+5. REVENUE RANGE - What's their approximate monthly/annual revenue? (Under $10k, $10k-$50k, $50k-$200k, $200k+)
 
-1) VOICE & STYLE
-- Tone: professional, calm, confident, friendly.
-- Keep replies short (1–3 sentences max).
-- Always sound helpful, not salesy.
-- When collecting data, explain why (e.g., “This helps our consultant prepare for your call.”).
+CONVERSATION FLOW:
+1. Start by asking what type of Operator they're looking for
+2. Ask about their industry
+3. Ask for their company name
+4. Ask about team size
+5. Ask about revenue range
+6. Once you have ALL 5 pieces of info, summarize and say: "That's everything I need - please fill out the form on the right to see your matched Operator profiles!"
 
-2) DATA MODEL (Memory Fields)
-{
-  service, goal, role_or_scope, hours_per_week, timezone, tools_stack, industry, team_size,
-  revenue_range, tech_stack, api_access, timeline, name_first, name_last, email, phone, company, notes
-}
-Validation:
-- Email must include "@".
-- Phone must contain at least 10 digits.
-- Revenue range required for all service paths.
-- Team size required for the Operator path.
-- Calendar only appears after required data is valid.
-
-3) QUALIFICATION FLOWS
-Follow the question order and options for: A) Operators, B) Websites, C) Web Apps, D) AI Adoption/Automation (as provided).
-After required details are captured and validated, say the calendar handoff line and show the calendar.
-
-4) MICRO-PROOF & REASSURANCE
-Use sparingly and only after relevant responses.
-
-5) CALENDAR HANDOFF
-Once all required info is collected and validated, say: "That's everything I need - you can now view your profile candidates after filling up the form on the right side."
-If hesitant, offer to forward details to a consultant.
-
-6) FALLBACKS & SAFETY
-Stay on-topic, never collect sensitive data, keep a friendly, concise tone.
+RULES:
+- Ask ONE question at a time
+- Keep responses short (1-3 sentences)
+- Be friendly and professional
+- Do NOT ask for name, email, or phone - those come from the form
+- Do NOT mention pricing or timelines
+- Use "Operators" NOT "VAs" or "virtual assistants"
+- After collecting all info, always end with the summary and form prompt
 `
 
 interface FullScreenChatbotProps {
@@ -105,7 +84,7 @@ const FullScreenChatbot: React.FC<FullScreenChatbotProps> = ({ autoOpen = false 
   const [messages, setMessages] = useState<Message[]>([
     {
       id: '1',
-      text: "Hey there! I’m your Staffly Guide. I help founders and business owners match with the right Filipino VAs so you can free up time and focus on growth. Can I ask you a few quick questions so I can recommend the right VA for your business?",
+      text: "Hey there! I'm your Staffly Guide. I help founders and business owners match with the right Filipino Operators so you can free up time and focus on growth. What type of Operator are you looking for?",
       sender: 'bot',
       timestamp: new Date()
     }
@@ -149,10 +128,12 @@ const FullScreenChatbot: React.FC<FullScreenChatbotProps> = ({ autoOpen = false 
   const [searchingCandidates, setSearchingCandidates] = useState(false);
 
   // Extract business qualification data from conversation messages
+  // Focus on: Service, Industry, Company Name, Team Size, Revenue Range
   const extractQualificationData = (messages: Message[]) => {
     const normalize = (s: string) => s.toLowerCase().replace(/\s+/g, ' ').trim()
     const userMsgs = messages.filter(m => m.sender === 'user').map(m => normalize(m.text))
-    const allMsgs = messages.map(m => normalize(m.text))
+    const originalUserMsgs = messages.filter(m => m.sender === 'user').map(m => m.text.trim())
+    const botMsgs = messages.filter(m => m.sender === 'bot').map(m => normalize(m.text))
 
     const firstMatch = (options: string[]) => {
       for (const msg of userMsgs) {
@@ -163,110 +144,174 @@ const FullScreenChatbot: React.FC<FullScreenChatbotProps> = ({ autoOpen = false 
       return null
     }
 
-    // Service type
-    const service = firstMatch(['operators', 'operator', 'websites', 'website', 'web apps', 'web app', 'ai adoption', 'automation', 'ai expert']) || null
+    // 1. SERVICE TYPE - What type of Operator they need
+    const serviceKeywords = [
+      'executive assistant', 'ea', 'admin', 'administrative', 
+      'customer support', 'customer service', 'support',
+      'sales', 'lead gen', 'lead generation', 'sdr', 'appointment setter',
+      'project manager', 'pm', 'project management',
+      'bookkeeper', 'bookkeeping', 'accounting',
+      'social media', 'marketing', 'content',
+      'data entry', 'research', 'virtual assistant', 'va', 'operator'
+    ]
+    let service: string | null = null
+    for (const msg of userMsgs) {
+      for (const keyword of serviceKeywords) {
+        if (msg.includes(keyword)) {
+          // Capitalize first letter of each word
+          service = keyword.split(' ').map(w => w.charAt(0).toUpperCase() + w.slice(1)).join(' ')
+          break
+        }
+      }
+      if (service) break
+    }
 
-    // Industry
-    const industry = firstMatch([
-      'real estate', 'agency', 'marketing', 'coaching', 'consulting', 
-      'e-commerce', 'ecommerce', 'it', 'technology', 'legal', 
-      'healthcare', 'finance', 'accounting', 'hospitality', 'education', 'construction'
-    ]) || null
+    // 2. INDUSTRY - What industry their business is in
+    const industryKeywords = [
+      'real estate', 'realty', 'realtor',
+      'agency', 'marketing agency', 'digital agency',
+      'e-commerce', 'ecommerce', 'online store', 'shopify',
+      'coaching', 'coach', 'consulting', 'consultant',
+      'technology', 'tech', 'saas', 'software', 'it',
+      'healthcare', 'medical', 'health',
+      'finance', 'financial', 'accounting', 'fintech',
+      'legal', 'law', 'attorney',
+      'education', 'edtech', 'training',
+      'hospitality', 'restaurant', 'hotel',
+      'construction', 'contractor',
+      'insurance', 'retail', 'manufacturing'
+    ]
+    let industry: string | null = null
+    for (const msg of userMsgs) {
+      for (const keyword of industryKeywords) {
+        if (msg.includes(keyword)) {
+          industry = keyword.split(' ').map(w => w.charAt(0).toUpperCase() + w.slice(1)).join(' ')
+          break
+        }
+      }
+      if (industry) break
+    }
 
-    // Company name - look for patterns like "at [company]" or "for [company]"
+    // 3. COMPANY NAME - Look for company name in responses
+    // Check if bot asked about company and user's next response is the name
     let company: string | null = null
-    for (const msg of userMsgs) {
-      const match = msg.match(/(?:at|for|with|called)\s+([a-z0-9\s&\-\.]+?)(?:\.|,|$|\s+and\s|\s+in\s)/i)
-      if (match && match[1].length > 2 && match[1].length < 50) {
-        company = match[1].trim()
-        break
+    for (let i = 0; i < messages.length; i++) {
+      const msg = messages[i]
+      if (msg.sender === 'bot' && normalize(msg.text).includes('company')) {
+        // Next user message might be company name
+        if (i + 1 < messages.length && messages[i + 1].sender === 'user') {
+          const response = messages[i + 1].text.trim()
+          // If response is short (likely just a name), use it
+          if (response.length > 1 && response.length < 100 && !response.includes('?')) {
+            // Clean up common prefixes
+            company = response
+              .replace(/^(it's|its|we're|we are|called|named|my company is|the company is)\s*/i, '')
+              .replace(/^(i work at|i work for|i'm with|i am with)\s*/i, '')
+              .trim()
+            break
+          }
+        }
+      }
+    }
+    // Fallback: look for patterns in all messages
+    if (!company) {
+      for (const msg of originalUserMsgs) {
+        const patterns = [
+          /(?:called|named|it's|its)\s+([A-Za-z0-9\s&\-\.]+?)(?:\.|,|$)/i,
+          /(?:work at|work for|with|from)\s+([A-Za-z0-9\s&\-\.]+?)(?:\.|,|$)/i,
+          /^([A-Z][A-Za-z0-9\s&\-\.]{2,30})$/  // Simple capitalized name
+        ]
+        for (const pattern of patterns) {
+          const match = msg.match(pattern)
+          if (match && match[1] && match[1].length > 1 && match[1].length < 50) {
+            company = match[1].trim()
+            break
+          }
+        }
+        if (company) break
       }
     }
 
-    // Team size - extract number or bucket
+    // 4. TEAM SIZE - How many people on their team
     let team_size: string | null = null
+    const teamSizePatterns = [
+      /(\d+)\s*(?:employees?|staff|people|team members?|person)/i,
+      /(?:team of|have|around|about)\s*(\d+)/i,
+      /^(\d+)$/  // Just a number
+    ]
     for (const msg of userMsgs) {
-      const numMatch = msg.match(/(\d+)\s*(employees?|staff|people|team|members?)/)
-      if (numMatch) {
-        team_size = numMatch[1]
-        break
+      // Check for keyword matches first
+      const sizeKeywords = ['just me', 'solo', '1', '2-5', '2–5', '6-15', '6–15', '16-50', '50+', '51+', 'small', 'medium', 'large']
+      for (const keyword of sizeKeywords) {
+        if (msg.includes(keyword)) {
+          team_size = keyword
+          break
+        }
       }
-    }
-    if (!team_size) {
-      team_size = firstMatch(['just me', '2-5', '2–5', '4-10', '6-15', '6–15', '11-25', '26-50', '15+', '51+'])
+      if (team_size) break
+      // Then check patterns
+      for (const pattern of teamSizePatterns) {
+        const match = msg.match(pattern)
+        if (match) {
+          team_size = match[1]
+          break
+        }
+      }
+      if (team_size) break
     }
 
-    // Revenue range
+    // 5. REVENUE RANGE - Monthly/annual revenue
     let revenue_range: string | null = null
+    const revenuePatterns = [
+      /\$?(\d+(?:,\d{3})*(?:\.\d+)?)\s*([km])?/i,
+      /(under|less than|about|around|over|more than)\s*\$?(\d+(?:,\d{3})*)\s*([km])?/i
+    ]
+    const revenueKeywords = [
+      'under $10k', 'under 10k', 'less than 10k',
+      '$10k-$50k', '10k-50k', '$10k to $50k',
+      '$50k-$200k', '50k-200k', '$50k to $200k',
+      '$200k+', '200k+', 'over $200k', 'over 200k',
+      '$500k', '$1m', '$1 million', 'million'
+    ]
     for (const msg of userMsgs) {
-      const rangeMatch = msg.match(/(?:under\s+)?\$?(\d+(?:\.\d+)?)\s*([km])?\s*(?:-|–|to)\s*\$?(\d+(?:\.\d+)?)\s*([km])?/)
-      if (rangeMatch) {
-        revenue_range = msg.match(/[\$\d\sk\-–m]+/)?.[0] || null
-        break
+      for (const keyword of revenueKeywords) {
+        if (msg.includes(keyword.toLowerCase())) {
+          revenue_range = keyword
+          break
+        }
       }
-      if (msg.includes('10k') || msg.includes('50k') || msg.includes('100k') || msg.includes('200k')) {
-        revenue_range = msg.match(/[\$\d\sk\-–m]+/)?.[0] || null
-        break
+      if (revenue_range) break
+      // Check for number patterns
+      for (const pattern of revenuePatterns) {
+        const match = msg.match(pattern)
+        if (match) {
+          revenue_range = match[0]
+          break
+        }
       }
-    }
-    if (!revenue_range) {
-      revenue_range = firstMatch(['under $10k', '$10k-$50k', '$10k–$50k', '$50k-$200k', '$51-100k', '$101-200k', '$200k+'])
+      if (revenue_range) break
     }
 
-    // Role/scope for operators
-    const role_or_scope = firstMatch([
-      'support', 'customer support', 'appointment setter', 'data entry', 'research assistant',
-      'administrative assistant', 'admin', 'transaction coordinator', 'bookkeeper', 'scheduler',
-      'executive assistant', 'ea', 'sdr', 'account executive', 'project manager', 'operations analyst', 'recruiter',
-      'chief of staff', 'cos', 'operations lead', 'department coordinator', 'business analyst', 'technical systems manager'
-    ]) || null
+    // Additional fields for compatibility
+    const role_or_scope = service
+    const timeline = firstMatch(['now', 'immediately', 'asap', '2-4 weeks', 'later', 'not sure']) || null
 
-    // Hours per week
-    const hours_per_week = firstMatch(['10', '20', '30', '40', 'part-time', 'full-time', 'not sure']) || null
-
-    // Timezone
-    const timezone = firstMatch(['pst', 'est', 'cst', 'mst', 'utc', 'gmt', 'ph', 'philippines', 'pacific', 'eastern', 'central', 'mountain']) || null
-
-    // Tools/tech stack - collect mentions of tools
-    const toolKeywords = ['salesforce', 'hubspot', 'crm', 'asana', 'trello', 'slack', 'notion', 'google workspace', 'microsoft', 'office', 'excel', 'calendly', 'zoom', 'shopify', 'woocommerce']
-    const tools: string[] = []
-    for (const msg of allMsgs) {
-      toolKeywords.forEach(tool => {
-        if (msg.includes(tool) && !tools.includes(tool)) tools.push(tool)
-      })
-    }
-    const tools_stack = tools.length > 0 ? tools.join(', ') : null
-    const tech_stack = tools_stack // same for now
-
-    // API access
-    const api_access = firstMatch(['yes', 'no', 'not sure']) || null
-
-    // Timeline
-    const timeline = firstMatch(['now', 'immediately', '2-4 weeks', '2–4 weeks', 'later', 'not sure']) || null
-
-    // Goal - try to find what they want to achieve
-    let goal: string | null = null
-    for (const msg of userMsgs) {
-      if (msg.includes('want to') || msg.includes('need to') || msg.includes('looking to') || msg.includes('goal')) {
-        goal = msg.substring(0, 150)
-        break
-      }
-    }
+    console.log('📊 Extracted qualification data:', { service, industry, company, team_size, revenue_range })
 
     return {
       service,
       industry,
-      goal,
       company,
       team_size,
       revenue_range,
       role_or_scope,
-      hours_per_week,
-      timezone,
-      tools_stack,
-      tech_stack,
-      api_access,
-      timeline
+      timeline,
+      goal: null,
+      hours_per_week: null,
+      timezone: null,
+      tools_stack: null,
+      tech_stack: null,
+      api_access: null
     }
   }
 
@@ -369,14 +414,6 @@ const FullScreenChatbot: React.FC<FullScreenChatbotProps> = ({ autoOpen = false 
 
       if (supabase && currentConversationId) {
         try { await supabase.from('conversation_messages').insert({ conversation_id: currentConversationId, role: 'user', content: userMessage.text }) } catch {}
-      }
-      // Industry detection removed; form shows after bot summary
-      const apiKey = import.meta.env.VITE_OPENAI_API_KEY;
-      const model = import.meta.env.VITE_OPENAI_MODEL || 'gpt-3.5-turbo';
-
-      if (!apiKey) {
-        console.error('OpenAI API key not configured');
-        throw new Error('OpenAI API key not configured');
       }
 
       // Build full conversation history so the model follows the flow
@@ -633,7 +670,7 @@ const FullScreenChatbot: React.FC<FullScreenChatbotProps> = ({ autoOpen = false 
             </div>
             <div>
               <h2 className="text-lg md:text-2xl font-bold text-slate-900">Staffly AI Assistant</h2>
-              <p className="text-xs md:text-base text-slate-600 hidden sm:block">Your virtual assistant specialist</p>
+              <p className="text-xs md:text-base text-slate-600 hidden sm:block">Your Operator specialist</p>
             </div>
           </div>
           
@@ -757,7 +794,7 @@ const FullScreenChatbot: React.FC<FullScreenChatbotProps> = ({ autoOpen = false 
             </div>
           </div>
 
-          {/* Right Side - Intro / Searching / Gated VA Profiles */}
+          {/* Right Side - Intro / Searching / Gated Operator Profiles */}
           <div className="hidden md:block md:w-1/2 p-6">
             <div className="h-full bg-slate-50 rounded-2xl border border-slate-200 p-6 overflow-y-auto relative">
               {/* Searching for candidates animation */}
@@ -786,12 +823,12 @@ const FullScreenChatbot: React.FC<FullScreenChatbotProps> = ({ autoOpen = false 
                 <div className="h-full flex flex-col items-center justify-center text-center">
                   <div className="text-5xl font-black text-slate-900 mb-4">Hire A+ <span className="bg-gradient-to-r from-blue-600 to-purple-600 bg-clip-text text-transparent">Operators</span></div>
                   <div className="text-2xl text-slate-700">— For 60% Less</div>
-                  <p className="mt-6 text-slate-600 max-w-lg">Answer a few quick questions in the chat and I'll curate 2–3 pre-vetted VA profiles for you.</p>
+                  <p className="mt-6 text-slate-600 max-w-lg">Answer a few quick questions in the chat and I'll curate 2–3 pre-vetted Operator profiles for you.</p>
                 </div>
               )}
 
               {!leadSubmitted && profilesUnlocked && (
-                <h3 className="text-xl font-bold text-slate-900 mb-4">Curated VA Profiles</h3>
+                <h3 className="text-xl font-bold text-slate-900 mb-4">Curated Operator Profiles</h3>
               )}
 
               {/* Profiles Grid */}
@@ -803,7 +840,7 @@ const FullScreenChatbot: React.FC<FullScreenChatbotProps> = ({ autoOpen = false 
                       <div className="w-10 h-10 rounded-full bg-gradient-to-r from-blue-500 to-purple-500 text-white flex items-center justify-center font-bold">{['AM','JR','KP','LC','VN'][i]}</div>
                       <div>
                         <div className="font-semibold text-slate-900">{['Alexa M.','Jared R.','Kyla P.','Liam C.','Vera N.'][i]}</div>
-                        <div className="text-slate-600 text-sm">{['Executive Assistant','Lead Gen Specialist','Project Coordinator','Customer Support','Creative VA'][i]}</div>
+                        <div className="text-slate-600 text-sm">{['Executive Assistant','Lead Gen Specialist','Project Coordinator','Customer Support','Creative Operator'][i]}</div>
                       </div>
                     </div>
                     <div className="text-slate-700 text-sm">

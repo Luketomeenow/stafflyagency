@@ -2,15 +2,19 @@ import { serve } from 'https://deno.land/std@0.168.0/http/server.ts'
 
 const RESEND_API_KEY = Deno.env.get('RESEND_API_KEY')
 
+const corsHeaders = {
+  'Access-Control-Allow-Origin': '*',
+  'Access-Control-Allow-Methods': 'POST, OPTIONS',
+  'Access-Control-Allow-Headers': 'authorization, x-client-info, apikey, content-type',
+  'Access-Control-Max-Age': '86400',
+}
+
 serve(async (req) => {
   // Handle CORS preflight
   if (req.method === 'OPTIONS') {
-    return new Response('ok', {
-      headers: {
-        'Access-Control-Allow-Origin': '*',
-        'Access-Control-Allow-Methods': 'POST, OPTIONS',
-        'Access-Control-Allow-Headers': 'Content-Type, Authorization',
-      },
+    return new Response(null, {
+      status: 200,
+      headers: corsHeaders,
     })
   }
 
@@ -26,7 +30,7 @@ serve(async (req) => {
         JSON.stringify({ error: 'Missing required fields: to, subject, html' }),
         {
           status: 400,
-          headers: { 'Content-Type': 'application/json' },
+          headers: { ...corsHeaders, 'Content-Type': 'application/json' },
         }
       )
     }
@@ -37,7 +41,7 @@ serve(async (req) => {
         JSON.stringify({ error: 'Email service not configured' }),
         {
           status: 500,
-          headers: { 'Content-Type': 'application/json' },
+          headers: { ...corsHeaders, 'Content-Type': 'application/json' },
         }
       )
     }
@@ -69,10 +73,7 @@ serve(async (req) => {
         }),
         {
           status: resendResponse.status,
-          headers: { 
-            'Content-Type': 'application/json',
-            'Access-Control-Allow-Origin': '*',
-          },
+          headers: { ...corsHeaders, 'Content-Type': 'application/json' },
         }
       )
     }
@@ -87,10 +88,7 @@ serve(async (req) => {
       }),
       {
         status: 200,
-        headers: { 
-          'Content-Type': 'application/json',
-          'Access-Control-Allow-Origin': '*',
-        },
+        headers: { ...corsHeaders, 'Content-Type': 'application/json' },
       }
     )
 
@@ -103,10 +101,7 @@ serve(async (req) => {
       }),
       {
         status: 500,
-        headers: { 
-          'Content-Type': 'application/json',
-          'Access-Control-Allow-Origin': '*',
-        },
+        headers: { ...corsHeaders, 'Content-Type': 'application/json' },
       }
     )
   }

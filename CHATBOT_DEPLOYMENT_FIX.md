@@ -459,3 +459,4 @@ supabase functions deploy chat
 
 **Deploy now and your chatbot will work flawlessly!** 🤖✨
 
+

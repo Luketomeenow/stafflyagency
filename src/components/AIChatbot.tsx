@@ -47,7 +47,7 @@ const AIChatbot: React.FC = () => {
   const [messages, setMessages] = useState<Message[]>([
     {
       id: '1',
-      text: "Hi! I'm Staffly AI. I can help you find the perfect virtual assistant for your business needs. What type of help are you looking for?",
+      text: "Hi! I'm Staffly AI. I help business owners find the right Filipino Operators for their team. What type of Operator are you looking for?",
       sender: 'bot',
       timestamp: new Date()
     }
